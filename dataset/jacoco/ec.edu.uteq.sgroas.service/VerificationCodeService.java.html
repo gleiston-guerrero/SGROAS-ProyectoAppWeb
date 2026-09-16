@@ -36,82 +36,80 @@ public class VerificationCodeService {
     private final SecureRandom aleatorio = new SecureRandom();
 
     /**
-     * Genera un codigo nuevo de seis digitos, invalida los anteriores del mismo tipo y lo devuelve en claro.
-     * Guarda solo el resumen cifrado y concede diez minutos de vigencia para su uso.
-     * @param email correo del usuario al que pertenece el codigo por generar
-     * @param tipo proposito del codigo, activacion de cuenta o restablecimiento de contrasena
-     * @return codigo de seis digitos en claro listo para enviarse por correo
+     * Generates a new 6-digit single-use code for the given email and type, deleting any previous code, and stores only its SHA-256 hash.
+     * @param email recipient email address.
+     * @param type code purpose (verification or password reset).
+     * @return the plain 6-digit code to deliver to the user.
      */
     @Transactional
-    public String generate(String email, Type tipo) {
-<span class="fc" id="L47">        repository.deleteByEmailAndTipo(email, tipo.name());</span>
+    public String generate(String email, Type type) {
+<span class="fc" id="L46">        repository.deleteByEmailAndType(email, type.name());</span>
 
-<span class="fc" id="L49">        String codigo = String.format(&quot;%06d&quot;, aleatorio.nextInt(1_000_000));</span>
-<span class="fc" id="L50">        repository.save(VerificationCode.builder()</span>
-<span class="fc" id="L51">                .email(email)</span>
-<span class="fc" id="L52">                .codigoHash(sha256(codigo))</span>
-<span class="fc" id="L53">                .tipo(tipo.name())</span>
-<span class="fc" id="L54">                .expiraEn(Instant.now().plus(VALIDEZ))</span>
-<span class="fc" id="L55">                .intentos(0)</span>
-<span class="fc" id="L56">                .usado(false)</span>
-<span class="fc" id="L57">                .creadoEn(Instant.now())</span>
-<span class="fc" id="L58">                .build());</span>
-<span class="fc" id="L59">        return codigo;</span>
+<span class="fc" id="L48">        String codigo = String.format(&quot;%06d&quot;, aleatorio.nextInt(1_000_000));</span>
+<span class="fc" id="L49">        repository.save(VerificationCode.builder()</span>
+<span class="fc" id="L50">                .email(email)</span>
+<span class="fc" id="L51">                .codeHash(sha256(codigo))</span>
+<span class="fc" id="L52">                .type(type.name())</span>
+<span class="fc" id="L53">                .expiresAt(Instant.now().plus(VALIDEZ))</span>
+<span class="fc" id="L54">                .attempts(0)</span>
+<span class="fc" id="L55">                .used(false)</span>
+<span class="fc" id="L56">                .createdAt(Instant.now())</span>
+<span class="fc" id="L57">                .build());</span>
+<span class="fc" id="L58">        return codigo;</span>
     }
 
     /**
-     * Indica si ya transcurrio la espera minima de sesenta segundos para pedir otro codigo.
-     * @param email correo del usuario que desea saber si puede solicitar un reenvio
-     * @param tipo proposito del codigo, activacion de cuenta o restablecimiento de contrasena
-     * @return verdadero cuando puede generarse otro codigo, falso cuando aun debe esperar
+     * Checks whether a new code may be resent for the given email and type respecting the resend cooldown.
+     * @param email recipient email address.
+     * @param type code purpose.
+     * @return true if resending is allowed, false otherwise.
      */
-    public boolean canResend(String email, Type tipo) {
-<span class="fc" id="L69">        return repository.findFirstByEmailAndTipoOrderByCreadoEnDesc(email, tipo.name())</span>
-<span class="fc" id="L70">                .map(c -&gt; c.getCreadoEn().isBefore(Instant.now().minus(ESPERA_REENVIO)))</span>
-<span class="fc" id="L71">                .orElse(true);</span>
+    public boolean canResend(String email, Type type) {
+<span class="fc" id="L68">        return repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(email, type.name())</span>
+<span class="fc" id="L69">                .map(c -&gt; c.getCreatedAt().isBefore(Instant.now().minus(ESPERA_REENVIO)))</span>
+<span class="fc" id="L70">                .orElse(true);</span>
     }
 
     /**
-     * Valida el codigo recibido contra el ultimo emitido y lo marca como usado si coincide.
-     * Cuenta cada intento fallido y bloquea el codigo tras cinco errores o al vencer su vigencia.
-     * @param email correo del usuario propietario del codigo por validar
-     * @param tipo proposito del codigo, activacion de cuenta o restablecimiento de contrasena
-     * @param codigo codigo de seis digitos ingresado por el usuario para su comprobacion
-     * @throws IllegalArgumentException cuando no existe codigo, ya fue usado, expiro, supero los intentos o no coincide
+     * Validates a code for the given email and type: checks usage, expiration, attempt limit and hash match, marking it as used on success.
+     * @param email recipient email address.
+     * @param type code purpose.
+     * @param codigo plain 6-digit code entered by the user.
+     * @throws IllegalArgumentException if the code is invalid, expired or exhausted.
      */
     @Transactional
-    public void validate(String email, Type tipo, String codigo) {
-<span class="fc" id="L84">        VerificationCode registro = repository</span>
-<span class="fc" id="L85">                .findFirstByEmailAndTipoOrderByCreadoEnDesc(email, tipo.name())</span>
-<span class="fc" id="L86">                .orElseThrow(() -&gt; new IllegalArgumentException(CODIGO_INVALIDO));</span>
+    public void validate(String email, Type type, String codigo) {
+<span class="fc" id="L82">        VerificationCode registro = repository</span>
+<span class="fc" id="L83">                .findFirstByEmailAndTypeOrderByCreatedAtDesc(email, type.name())</span>
+<span class="fc" id="L84">                .orElseThrow(() -&gt; new IllegalArgumentException(CODIGO_INVALIDO));</span>
 
-<span class="fc bfc" id="L88" title="All 4 branches covered.">        if (registro.isUsado() || registro.getExpiraEn().isBefore(Instant.now())) {</span>
-<span class="fc" id="L89">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
+<span class="fc bfc" id="L86" title="All 4 branches covered.">        if (registro.isUsed() || registro.getExpiresAt().isBefore(Instant.now())) {</span>
+<span class="fc" id="L87">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
         }
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (registro.getIntentos() &gt;= MAX_INTENTOS) {</span>
-<span class="fc" id="L92">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">        if (registro.getAttempts() &gt;= MAX_INTENTOS) {</span>
+<span class="fc" id="L90">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
         }
-<span class="fc bfc" id="L94" title="All 2 branches covered.">        if (!registro.getCodigoHash().equals(sha256(codigo))) {</span>
-<span class="fc" id="L95">            registro.setIntentos(registro.getIntentos() + 1);</span>
-<span class="fc" id="L96">            repository.save(registro);</span>
-<span class="fc" id="L97">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
+<span class="fc bfc" id="L92" title="All 2 branches covered.">        if (!registro.getCodeHash().equals(sha256(codigo))) {</span>
+<span class="fc" id="L93">            registro.setAttempts(registro.getAttempts() + 1);</span>
+<span class="fc" id="L94">            repository.save(registro);</span>
+<span class="fc" id="L95">            throw new IllegalArgumentException(CODIGO_INVALIDO);</span>
         }
-<span class="fc" id="L99">        registro.setUsado(true);</span>
-<span class="fc" id="L100">        repository.save(registro);</span>
-<span class="fc" id="L101">    }</span>
+<span class="fc" id="L97">        registro.setUsed(true);</span>
+<span class="fc" id="L98">        repository.save(registro);</span>
+<span class="fc" id="L99">    }</span>
 
     private String sha256(String texto) {
         try {
-<span class="fc" id="L105">            MessageDigest digest = MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
-<span class="fc" id="L106">            byte[] hash = digest.digest(texto.getBytes(StandardCharsets.UTF_8));</span>
-<span class="fc" id="L107">            StringBuilder hex = new StringBuilder(hash.length * 2);</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">            for (byte b : hash) {</span>
-<span class="fc" id="L109">                hex.append(Character.forDigit((b &gt;&gt; 4) &amp; 0xF, 16));</span>
-<span class="fc" id="L110">                hex.append(Character.forDigit(b &amp; 0xF, 16));</span>
+<span class="fc" id="L103">            MessageDigest digest = MessageDigest.getInstance(&quot;SHA-256&quot;);</span>
+<span class="fc" id="L104">            byte[] hash = digest.digest(texto.getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L105">            StringBuilder hex = new StringBuilder(hash.length * 2);</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">            for (byte b : hash) {</span>
+<span class="fc" id="L107">                hex.append(Character.forDigit((b &gt;&gt; 4) &amp; 0xF, 16));</span>
+<span class="fc" id="L108">                hex.append(Character.forDigit(b &amp; 0xF, 16));</span>
             }
-<span class="fc" id="L112">            return hex.toString();</span>
-<span class="nc" id="L113">        } catch (NoSuchAlgorithmException e) {</span>
-<span class="nc" id="L114">            throw new IllegalStateException(&quot;SHA-256 no disponible&quot;, e);</span>
+<span class="fc" id="L110">            return hex.toString();</span>
+<span class="nc" id="L111">        } catch (NoSuchAlgorithmException e) {</span>
+<span class="nc" id="L112">            throw new IllegalStateException(&quot;SHA-256 no disponible&quot;, e);</span>
         }
     }
 }

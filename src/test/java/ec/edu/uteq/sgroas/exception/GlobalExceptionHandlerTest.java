@@ -91,4 +91,28 @@ class GlobalExceptionHandlerTest {
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), detail.getStatus());
         assertTrue(detail.getDetail().contains("Falla inesperada"));
     }
+
+    @Test
+    void emailSinVerificarDebeRetornarForbidden() {
+        when(request.getRequestURI()).thenReturn("/api/auth/login");
+
+        ProblemDetail detail = handler.handleUnverifiedEmail(
+                new UnverifiedEmailException("Correo no verificado"), request);
+
+        assertEquals(HttpStatus.FORBIDDEN.value(), detail.getStatus());
+        assertEquals("Correo sin verificar", detail.getTitle());
+        assertEquals("Correo no verificado", detail.getDetail());
+    }
+
+    @Test
+    void accesoDenegadoDebeRetornarForbidden() {
+        when(request.getRequestURI()).thenReturn("/api/abd/unidades");
+
+        ProblemDetail detail = handler.handleAccessDenied(
+                new org.springframework.security.access.AccessDeniedException("Denegado"), request);
+
+        assertEquals(HttpStatus.FORBIDDEN.value(), detail.getStatus());
+        assertEquals("Acceso denegado", detail.getTitle());
+        assertEquals("No tiene permisos para realizar esta operacion", detail.getDetail());
+    }
 }

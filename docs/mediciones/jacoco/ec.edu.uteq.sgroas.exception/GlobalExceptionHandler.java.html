@@ -92,13 +92,13 @@ import java.util.Map;
             UnverifiedEmailException ex,
             HttpServletRequest request
     ) {
-<span class="nc" id="L95">        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);</span>
-<span class="nc" id="L96">        detail.setType(URI.create(&quot;https://sgroas.uteq.edu.ec/errors/email-not-verified&quot;));</span>
-<span class="nc" id="L97">        detail.setTitle(&quot;Correo sin verificar&quot;);</span>
-<span class="nc" id="L98">        detail.setDetail(ex.getMessage());</span>
-<span class="nc" id="L99">        detail.setInstance(URI.create(request.getRequestURI()));</span>
+<span class="fc" id="L95">        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);</span>
+<span class="fc" id="L96">        detail.setType(URI.create(&quot;https://sgroas.uteq.edu.ec/errors/email-not-verified&quot;));</span>
+<span class="fc" id="L97">        detail.setTitle(&quot;Correo sin verificar&quot;);</span>
+<span class="fc" id="L98">        detail.setDetail(ex.getMessage());</span>
+<span class="fc" id="L99">        detail.setInstance(URI.create(request.getRequestURI()));</span>
 
-<span class="nc" id="L101">        return detail;</span>
+<span class="fc" id="L101">        return detail;</span>
     }
 
     /**
@@ -112,13 +112,13 @@ import java.util.Map;
             org.springframework.security.access.AccessDeniedException ex,
             HttpServletRequest request
     ) {
-<span class="nc" id="L115">        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);</span>
-<span class="nc" id="L116">        detail.setType(URI.create(&quot;https://sgroas.uteq.edu.ec/errors/forbidden&quot;));</span>
-<span class="nc" id="L117">        detail.setTitle(&quot;Acceso denegado&quot;);</span>
-<span class="nc" id="L118">        detail.setDetail(&quot;No tiene permisos para realizar esta operacion&quot;);</span>
-<span class="nc" id="L119">        detail.setInstance(URI.create(request.getRequestURI()));</span>
+<span class="fc" id="L115">        ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);</span>
+<span class="fc" id="L116">        detail.setType(URI.create(&quot;https://sgroas.uteq.edu.ec/errors/forbidden&quot;));</span>
+<span class="fc" id="L117">        detail.setTitle(&quot;Acceso denegado&quot;);</span>
+<span class="fc" id="L118">        detail.setDetail(&quot;No tiene permisos para realizar esta operacion&quot;);</span>
+<span class="fc" id="L119">        detail.setInstance(URI.create(request.getRequestURI()));</span>
 
-<span class="nc" id="L121">        return detail;</span>
+<span class="fc" id="L121">        return detail;</span>
     }
 
     /**

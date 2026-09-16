@@ -124,13 +124,13 @@ recomendación mínima para SUS \cite{kortum2013}.
 \label{sec:cobertura}
 
 \textbf{Métrica:} contadores de JaCoCo (instrucciones, ramas y líneas) sobre la
-ejecución de \texttt{./mvnw verify} con 222 pruebas JUnit 5.
+ejecución de \texttt{./mvnw verify} con 293 pruebas JUnit 5.
 
 \textbf{Datos crudos:} \texttt{docs/mediciones/jacoco/jacoco.csv} y reporte HTML
-(commit \texttt{dea7940}, run CI \texttt{34024539023}).
+(versionado en \texttt{dataset/jacoco}).
 
-\textbf{Resultado (núcleo, sin paquete \texttt{abd}):} instrucciones 87.5\,\%,
-ramas 87.9\,\% y líneas 95.5\,\%, con 0 fallos. Se supera el umbral del proyecto
+\textbf{Resultado (reporte completo):} instrucciones 95.49\,\%,
+ramas 88.38\,\% y líneas 95.94\,\%, con 0 fallos. Se supera el umbral del proyecto
 (líneas $\ge$ 0.70 y ramas $\ge$ 0.50 para la entrega final). La discusión sobre la relación entre cobertura y detección de fallos se
 fundamenta en \cite{inozemtseva2014,gopinath2014,gligoric2013,ivankovic2019}.
 
@@ -176,7 +176,7 @@ C.1 Rendimiento & p95 $<$ 200\,ms (cache caliente) & 173.13\,ms & Sí \\
 C.1 Rendimiento & error rate $<$ 1\,\% & 0\,\% & Sí \\
 C.2 Seguridad & SQL dinámico / A01--A09 & 0 violaciones & Sí \\
 C.3 Usabilidad & SUS $\ge$ 70 & 68.5 & Marginal \\
-C.4 Cobertura & líneas $\ge$ 70\,\% & 95.5\,\% & Sí \\
+C.4 Cobertura & líneas $\ge$ 70\,\% & 95.94\,\% & Sí \\
 C.5 Calidad web & Perf/Acc/BP/SEO $\ge$ 80/90/90/90 & 95/91/92/90 & Sí \\
 \bottomrule
 \end{tabular}

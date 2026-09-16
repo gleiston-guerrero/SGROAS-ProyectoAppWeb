@@ -3,34 +3,34 @@
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-/**
- * Respuesta con los datos completos de un incidente.
- * @param id identificador unico del incidente
- * @param asignacionId identificador de la asignacion relacionada
- * @param reportadoPor persona que reporto el incidente
- * @param tipo tipo de incidente
- * @param descripcion detalle del incidente
- * @param fechaIncidente fecha y hora en que ocurrio
- * @param ubicacion lugar del incidente
- * @param gravedad nivel de gravedad del incidente
- * @param estado estado del incidente
- * @param activo indica si el incidente esta activo
- * @param creadoEn fecha de creacion del registro
- * @param actualizadoEn fecha de la ultima actualizacion
- */
+    /**
+     * Incident data returned by the API after querying or mutating incidents.
+     * @param id incident unique identifier.
+     * @param assignmentId assignment associated with the incident.
+     * @param reportedBy person or system that reported the incident.
+     * @param type incident type code.
+     * @param description free-text description of the incident.
+     * @param incidentDate date and time when the incident happened.
+     * @param location place where the incident occurred.
+     * @param severity incident severity code.
+     * @param status incident status code.
+     * @param active whether the incident is currently active.
+     * @param createdAt registration timestamp.
+     * @param updatedAt last update timestamp.
+     */
 <span class="fc" id="L21">public record IncidentResponse(</span>
         Long id,
-        Long asignacionId,
-        String reportadoPor,
-        String tipo,
-        String descripcion,
-        LocalDateTime fechaIncidente,
-        String ubicacion,
-        String gravedad,
-        String estado,
-        Boolean activo,
-        Instant creadoEn,
-        Instant actualizadoEn
+        Long assignmentId,
+        String reportedBy,
+        String type,
+        String description,
+        LocalDateTime incidentDate,
+        String location,
+        String severity,
+        String status,
+        Boolean active,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

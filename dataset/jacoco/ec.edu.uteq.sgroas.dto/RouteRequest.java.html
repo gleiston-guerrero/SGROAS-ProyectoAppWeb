@@ -2,44 +2,44 @@
 
 import jakarta.validation.constraints.*;
 
-/**
- * Peticion para crear o actualizar una ruta.
- * @param codigo codigo unico de la ruta
- * @param nombre nombre de la ruta
- * @param origen lugar de partida de la ruta
- * @param destino lugar de llegada de la ruta
- * @param distanciaKm distancia de la ruta en kilometros
- * @param duracionEstimadaMin duracion estimada del viaje en minutos
- * @param estado estado de la ruta
- */
+    /**
+     * Route data required to create or update a route record.
+     * @param code unique route code.
+     * @param name route display name.
+     * @param origin departure point.
+     * @param destination arrival point.
+     * @param distanceKm route distance in kilometers.
+     * @param durationMin estimated travel time in minutes.
+     * @param status route status code.
+     */
 <span class="fc" id="L15">public record RouteRequest(</span>
 
         @NotBlank(message = &quot;El codigo es obligatorio&quot;)
         @Size(max = 20, message = &quot;El codigo no puede superar los 20 caracteres&quot;)
-        String codigo,
+        String code,
 
         @NotBlank(message = &quot;El nombre es obligatorio&quot;)
         @Size(max = 100, message = &quot;El nombre no puede superar los 100 caracteres&quot;)
-        String nombre,
+        String name,
 
         @NotBlank(message = &quot;El origen es obligatorio&quot;)
         @Size(max = 150, message = &quot;El origen no puede superar los 150 caracteres&quot;)
-        String origen,
+        String origin,
 
         @NotBlank(message = &quot;El destino es obligatorio&quot;)
         @Size(max = 150, message = &quot;El destino no puede superar los 150 caracteres&quot;)
-        String destino,
+        String destination,
 
         @NotNull(message = &quot;La distancia es obligatoria&quot;)
         @Min(value = 0, message = &quot;La distancia debe ser positiva&quot;)
-        Double distanciaKm,
+        Double distanceKm,
 
         @NotNull(message = &quot;La duracion estimada es obligatoria&quot;)
         @Min(value = 1, message = &quot;La duracion minima es 1 minuto&quot;)
-        Integer duracionEstimadaMin,
+        Integer durationMin,
 
         @NotBlank(message = &quot;El estado es obligatorio&quot;)
-        String estado
+        String status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

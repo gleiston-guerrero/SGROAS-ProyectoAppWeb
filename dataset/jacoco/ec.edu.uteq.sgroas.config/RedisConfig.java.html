@@ -8,7 +8,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
-<span class="nc" id="L11">public class RedisConfig {</span>
+<span class="fc" id="L11">public class RedisConfig {</span>
 
     @Value(&quot;${spring.data.redis.host}&quot;)
     private String redisHost;
@@ -22,11 +22,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
      */
     @Bean
     public LettuceConnectionFactory redisConnectionFactory() {
-<span class="nc" id="L25">        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();</span>
-<span class="nc" id="L26">        config.setHostName(redisHost);</span>
-<span class="nc" id="L27">        config.setPort(redisPort);</span>
+<span class="fc" id="L25">        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();</span>
+<span class="fc" id="L26">        config.setHostName(redisHost);</span>
+<span class="fc" id="L27">        config.setPort(redisPort);</span>
 
-<span class="nc" id="L29">        return new LettuceConnectionFactory(config);</span>
+<span class="fc" id="L29">        return new LettuceConnectionFactory(config);</span>
     }
 
     /**
@@ -38,7 +38,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
     public StringRedisTemplate stringRedisTemplate(
             LettuceConnectionFactory redisConnectionFactory
     ) {
-<span class="nc" id="L41">        return new StringRedisTemplate(redisConnectionFactory);</span>
+<span class="fc" id="L41">        return new StringRedisTemplate(redisConnectionFactory);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

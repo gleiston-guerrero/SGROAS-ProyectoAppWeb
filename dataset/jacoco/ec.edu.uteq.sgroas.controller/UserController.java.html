@@ -85,8 +85,8 @@ public class UserController {
      * @return respuesta HTTP sin contenido que confirma la operación realizada.
      */
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Void&gt; desactivar(@PathVariable Long id) {
-<span class="fc" id="L89">        usuarioService.desactivar(id);</span>
+    public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
+<span class="fc" id="L89">        usuarioService.deactivate(id);</span>
 <span class="fc" id="L90">        return ResponseEntity.noContent().build();</span>
     }
 }

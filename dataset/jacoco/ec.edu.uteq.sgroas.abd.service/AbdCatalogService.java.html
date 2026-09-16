@@ -30,19 +30,19 @@ public class AbdCatalogService {
      * @return contenedor con los cuatro listados de catalogos para uso en formularios y filtros.
      */
     public AbdDtos.CatalogsResponse getCatalogs() {
-<span class="nc" id="L33">        List&lt;AbdDtos.ProvinceResponse&gt; provincias = provinciaRepository.findAll().stream()</span>
-<span class="nc" id="L34">                .map(p -&gt; new AbdDtos.ProvinceResponse(p.getIdProvincia(), p.getNombre()))</span>
-<span class="nc" id="L35">                .toList();</span>
-<span class="nc" id="L36">        List&lt;AbdDtos.CityResponse&gt; ciudades = ciudadRepository.findAll().stream()</span>
-<span class="nc" id="L37">                .map(this::toCityResponse)</span>
-<span class="nc" id="L38">                .toList();</span>
-<span class="nc" id="L39">        List&lt;AbdDtos.TerminalResponse&gt; terminales = terminalRepository.findAll().stream()</span>
-<span class="nc" id="L40">                .map(this::toTerminalResponse)</span>
-<span class="nc" id="L41">                .toList();</span>
-<span class="nc" id="L42">        List&lt;AbdDtos.RolResponse&gt; roles = rolAbdRepository.findAll().stream()</span>
-<span class="nc" id="L43">                .map(r -&gt; new AbdDtos.RolResponse(r.getIdRol(), r.getNombre(), r.getDescripcion()))</span>
-<span class="nc" id="L44">                .toList();</span>
-<span class="nc" id="L45">        return new AbdDtos.CatalogsResponse(provincias, ciudades, terminales, roles);</span>
+<span class="fc" id="L33">        List&lt;AbdDtos.ProvinceResponse&gt; provincias = provinciaRepository.findAll().stream()</span>
+<span class="fc" id="L34">                .map(p -&gt; new AbdDtos.ProvinceResponse(p.getIdProvincia(), p.getNombre()))</span>
+<span class="fc" id="L35">                .toList();</span>
+<span class="fc" id="L36">        List&lt;AbdDtos.CityResponse&gt; ciudades = ciudadRepository.findAll().stream()</span>
+<span class="fc" id="L37">                .map(this::toCityResponse)</span>
+<span class="fc" id="L38">                .toList();</span>
+<span class="fc" id="L39">        List&lt;AbdDtos.TerminalResponse&gt; terminales = terminalRepository.findAll().stream()</span>
+<span class="fc" id="L40">                .map(this::toTerminalResponse)</span>
+<span class="fc" id="L41">                .toList();</span>
+<span class="fc" id="L42">        List&lt;AbdDtos.RolResponse&gt; roles = rolAbdRepository.findAll().stream()</span>
+<span class="fc" id="L43">                .map(r -&gt; new AbdDtos.RolResponse(r.getIdRol(), r.getNombre(), r.getDescripcion()))</span>
+<span class="fc" id="L44">                .toList();</span>
+<span class="fc" id="L45">        return new AbdDtos.CatalogsResponse(provincias, ciudades, terminales, roles);</span>
     }
 
     /**
@@ -52,18 +52,18 @@ public class AbdCatalogService {
      * @throws IllegalArgumentException cuando no existe un terminal con el identificador indicado.
      */
     public Terminal findTerminal(Integer idTerminal) {
-<span class="nc" id="L55">        return terminalRepository.findById(idTerminal)</span>
-<span class="nc" id="L56">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Terminal no encontrado: &quot; + idTerminal));</span>
+<span class="fc" id="L55">        return terminalRepository.findById(idTerminal)</span>
+<span class="fc" id="L56">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Terminal no encontrado: &quot; + idTerminal));</span>
     }
 
     private AbdDtos.CityResponse toCityResponse(City c) {
-<span class="nc" id="L60">        Province p = c.getProvincia();</span>
-<span class="nc" id="L61">        return new AbdDtos.CityResponse(c.getIdCiudad(), c.getNombre(), p.getIdProvincia(), p.getNombre());</span>
+<span class="fc" id="L60">        Province p = c.getProvincia();</span>
+<span class="fc" id="L61">        return new AbdDtos.CityResponse(c.getIdCiudad(), c.getNombre(), p.getIdProvincia(), p.getNombre());</span>
     }
 
     private AbdDtos.TerminalResponse toTerminalResponse(Terminal t) {
-<span class="nc" id="L65">        City c = t.getCiudad();</span>
-<span class="nc" id="L66">        return new AbdDtos.TerminalResponse(t.getIdTerminal(), t.getNombre(), c.getIdCiudad(), c.getNombre());</span>
+<span class="fc" id="L65">        City c = t.getCiudad();</span>
+<span class="fc" id="L66">        return new AbdDtos.TerminalResponse(t.getIdTerminal(), t.getNombre(), c.getIdCiudad(), c.getNombre());</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

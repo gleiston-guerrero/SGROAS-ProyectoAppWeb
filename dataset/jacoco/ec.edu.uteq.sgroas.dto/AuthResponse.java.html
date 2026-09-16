@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AuthResponse.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report"></a> &gt; <a href="index.source.html" class="el_package">ec.edu.uteq.sgroas.dto</a> &gt; <span class="el_source">AuthResponse.java</span></div><h1>AuthResponse.java</h1><pre class="source lang-java linenums">package ec.edu.uteq.sgroas.dto;
 
 /**
- * Respuesta de autenticacion con los tokens y los datos basicos del usuario.
- * @param accessToken token de acceso para las peticiones autenticadas.
- * @param refreshToken token para renovar la sesion.
- * @param tokenType tipo de token emitido.
- * @param expiresIn segundos hasta el vencimiento del token de acceso.
- * @param nombre nombre del usuario autenticado.
- * @param email correo del usuario autenticado.
- * @param rol rol del usuario autenticado.
+ * Authentication response with tokens and basic user data.
+ * @param accessToken token for authenticated requests.
+ * @param refreshToken token for session renewal.
+ * @param tokenType type of issued token.
+ * @param expiresIn seconds until access token expiration.
+ * @param name authenticated user name.
+ * @param email authenticated user email.
+ * @param role authenticated user role.
  */
 <span class="fc" id="L13">public record AuthResponse(</span>
         String accessToken,
         String refreshToken,
         String tokenType,
         Long expiresIn,
-        String nombre,
+        String name,
         String email,
-        String rol
+        String role
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -2,52 +2,52 @@
 
 import jakarta.validation.constraints.*;
 
-/**
- * Peticion para crear o actualizar un vehiculo.
- * @param placa placa unica del vehiculo
- * @param marca marca del vehiculo
- * @param modelo modelo del vehiculo
- * @param anio anio de fabricacion del vehiculo
- * @param capacidadPasajeros cantidad maxima de pasajeros
- * @param numeroMotor numero de motor del vehiculo
- * @param numeroChasis numero de chasis del vehiculo
- * @param color color del vehiculo
- * @param estado estado del vehiculo
- */
+    /**
+     * Vehicle data required to create or update a vehicle record.
+     * @param plate vehicle plate number.
+     * @param brand vehicle brand.
+     * @param model vehicle model.
+     * @param year manufacturing year.
+     * @param capacity passenger capacity.
+     * @param engineNumber optional engine number.
+     * @param chassisNumber optional chassis number.
+     * @param color optional vehicle color.
+     * @param status vehicle status code.
+     */
 <span class="fc" id="L17">public record VehicleRequest(</span>
 
         @NotBlank(message = &quot;La placa es obligatoria&quot;)
         @Size(max = 20, message = &quot;La placa no puede superar los 20 caracteres&quot;)
-        String placa,
+        String plate,
 
         @NotBlank(message = &quot;La marca es obligatoria&quot;)
         @Size(max = 50, message = &quot;La marca no puede superar los 50 caracteres&quot;)
-        String marca,
+        String brand,
 
         @NotBlank(message = &quot;El modelo es obligatorio&quot;)
         @Size(max = 50, message = &quot;El modelo no puede superar los 50 caracteres&quot;)
-        String modelo,
+        String model,
 
         @NotNull(message = &quot;El anio es obligatorio&quot;)
         @Min(value = 1990, message = &quot;El anio debe ser mayor o igual a 1990&quot;)
         @Max(value = 2030, message = &quot;El anio debe ser menor o igual a 2030&quot;)
-        Integer anio,
+        Integer year,
 
         @NotNull(message = &quot;La capacidad de pasajeros es obligatoria&quot;)
         @Min(value = 1, message = &quot;La capacidad minima es 1&quot;)
-        Integer capacidadPasajeros,
+        Integer capacity,
 
         @Size(max = 50, message = &quot;El numero de motor no puede superar los 50 caracteres&quot;)
-        String numeroMotor,
+        String engineNumber,
 
         @Size(max = 50, message = &quot;El numero de chasis no puede superar los 50 caracteres&quot;)
-        String numeroChasis,
+        String chassisNumber,
 
         @Size(max = 30, message = &quot;El color no puede superar los 30 caracteres&quot;)
         String color,
 
         @NotBlank(message = &quot;El estado es obligatorio&quot;)
-        String estado
+        String status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

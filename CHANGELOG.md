@@ -22,9 +22,15 @@ y el proyecto usa [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `make all`/`docs`/`bench-render` aclarados y documentados en README.
 
 ### Pruebas
-- Nueva suite ABD (45 tests): `Unidad/Programacion/Incidente/RutaAbdService`
-  + `Alerta/ConductorAbdController`. Ramas: `abd.controller` 91.7%,
-  `abd.service` 91.2% (antes 0%).
+- Suite ABD ampliada a 56 tests: `Unidad/Programacion/Incidente/RutaAbdService`
+  + `Alerta/ConductorAbdController`, más `AbdReportService` (resúmenes y
+  agrupaciones) y `AbdCatalogService` (catálogos y terminales).
+- Nuevos tests de cobertura: `ReportService` (estadísticas y reportes),
+  `CacheConfig`/`OpenApiConfig`/`RedisConfig` y handlers de
+  `GlobalExceptionHandler` (acceso denegado y correo sin verificar).
+- Cobertura total 293 tests JUnit 5: JaCoCo 95,49% instrucciones / 88,38%
+  ramas / 95,94% líneas (`docs/mediciones/jacoco`, versionado en
+  `dataset/jacoco`).
 
 ## [1.0.0] — 2026-08-17 — Entrega final v1.0.0
 

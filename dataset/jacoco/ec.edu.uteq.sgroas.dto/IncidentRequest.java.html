@@ -6,43 +6,43 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
-/**
- * Peticion para crear o actualizar un incidente.
- * @param asignacionId identificador de la asignacion relacionada
- * @param reportadoPor persona que reporta el incidente
- * @param tipo tipo de incidente ocurrido
- * @param descripcion detalle del incidente
- * @param fechaIncidente fecha y hora en que ocurrio
- * @param ubicacion lugar del incidente
- * @param gravedad nivel de gravedad del incidente
- * @param estado estado del incidente
- */
+    /**
+     * Incident data required to create or update an incident record.
+     * @param assignmentId assignment associated with the incident.
+     * @param reportedBy person or system that reported the incident.
+     * @param type incident type code.
+     * @param description free-text description of the incident.
+     * @param incidentDate date and time when the incident happened.
+     * @param location optional place where the incident occurred.
+     * @param severity incident severity code.
+     * @param status incident status code.
+     */
 <span class="fc" id="L20">public record IncidentRequest(</span>
 
         @NotNull(message = &quot;La asignacion es obligatoria&quot;)
-        Long asignacionId,
+        Long assignmentId,
 
         @NotBlank(message = &quot;El reportante es obligatorio&quot;)
         @Size(max = 100, message = &quot;El reportante no puede superar los 100 caracteres&quot;)
-        String reportadoPor,
+        String reportedBy,
 
         @NotBlank(message = &quot;El tipo es obligatorio&quot;)
-        String tipo,
+        String type,
 
         @NotBlank(message = &quot;La descripcion es obligatoria&quot;)
-        String descripcion,
+        String description,
 
         @NotNull(message = &quot;La fecha del incidente es obligatoria&quot;)
-        LocalDateTime fechaIncidente,
+        LocalDateTime incidentDate,
 
         @Size(max = 255, message = &quot;La ubicacion no puede superar los 255 caracteres&quot;)
-        String ubicacion,
+        String location,
 
         @NotBlank(message = &quot;La gravedad es obligatoria&quot;)
-        String gravedad,
+        String severity,
 
         @NotBlank(message = &quot;El estado es obligatorio&quot;)
-        String estado
+        String status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -24,9 +24,9 @@ public class IncidentService {
     private final RouteAssignmentRepository asignacionRutaRepository;
 
     /**
-     * Obtiene la pagina de incidentes activos convertidos a formato de respuesta.
-     * @param pageable objeto con numero de pagina, tamanio y orden solicitados para la consulta
-     * @return pagina con los incidentes activos encontrados
+     * Returns a paginated list of active incidents.
+     * @param pageable pagination and sorting configuration.
+     * @return page of incident response records.
      */
     public Page&lt;IncidentResponse&gt; list(Pageable pageable) {
 <span class="fc" id="L32">        List&lt;IncidentResponse&gt; contenido = listCached(pageable);</span>
@@ -34,145 +34,142 @@ public class IncidentService {
     }
 
     /**
-     * Obtiene desde la memoria cache la lista de incidentes activos de la pagina solicitada.
-     * @param pageable objeto con numero de pagina y tamanio que identifican la entrada guardada en cache
-     * @return lista de incidentes activos correspondientes a la pagina pedida
+     * Returns the cached list of active incidents for the given pageable, keyed by page.
+     * @param pageable pagination and sorting configuration.
+     * @return list of incident response records.
      */
     @Cacheable(value = &quot;incidentes&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
     public List&lt;IncidentResponse&gt; listCached(Pageable pageable) {
-<span class="fc" id="L43">        return incidenteRepository.findByActivoTrue(pageable)</span>
+<span class="fc" id="L43">        return incidenteRepository.findByActiveTrue(pageable)</span>
 <span class="fc" id="L44">                .map(this::mapearAResponse)</span>
 <span class="fc" id="L45">                .getContent();</span>
     }
 
     /**
-     * Recupera el detalle de un incidente activo existente.
-     * @param id identificador del incidente que se desea consultar
-     * @return datos del incidente encontrado
-     * @throws IllegalArgumentException cuando no existe un incidente activo con ese identificador
+     * Retrieves an incident by its unique identifier.
+     * @param id incident unique identifier.
+     * @return the matching incident response.
      */
     public IncidentResponse findById(Long id) {
-<span class="fc" id="L55">        Incident incidente = getActiveIncident(id);</span>
-<span class="fc" id="L56">        return mapearAResponse(incidente);</span>
+<span class="fc" id="L54">        Incident incidente = getActiveIncident(id);</span>
+<span class="fc" id="L55">        return mapearAResponse(incidente);</span>
     }
 
     /**
-     * Registra un nuevo incidente asociado a una asignacion de ruta vigente.
-     * @param request datos del incidente con asignacion, tipo, descripcion, fecha, ubicacion, gravedad y estado
-     * @return datos del incidente recien guardado
-     * @throws IllegalArgumentException cuando la asignacion no existe o esta inactiva, o tipo, gravedad o estado no son validos
+     * Registers a new incident associated with an active assignment. Caches are evicted after creation.
+     * @param request incident data to register.
+     * @return the created incident response.
+     * @throws IllegalArgumentException if the assignment is not found or is inactive.
      */
     @CacheEvict(value = &quot;incidentes&quot;, allEntries = true)
     public IncidentResponse create(IncidentRequest request) {
-<span class="fc" id="L67">        RouteAssignment asignacion = asignacionRutaRepository.findById(request.asignacionId())</span>
-<span class="fc" id="L68">                .filter(RouteAssignment::getActivo)</span>
-<span class="fc" id="L69">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
+<span class="fc" id="L66">        RouteAssignment asignacion = asignacionRutaRepository.findById(request.assignmentId())</span>
+<span class="fc" id="L67">                .filter(RouteAssignment::getActive)</span>
+<span class="fc" id="L68">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
 
-<span class="fc" id="L71">        Incident incidente = Incident.builder()</span>
-<span class="fc" id="L72">                .asignacion(asignacion)</span>
-<span class="fc" id="L73">                .reportadoPor(request.reportadoPor())</span>
-<span class="fc" id="L74">                .tipo(toType(request.tipo()))</span>
-<span class="fc" id="L75">                .descripcion(request.descripcion())</span>
-<span class="fc" id="L76">                .fechaIncidente(request.fechaIncidente())</span>
-<span class="fc" id="L77">                .ubicacion(request.ubicacion())</span>
-<span class="fc" id="L78">                .gravedad(toSeverity(request.gravedad()))</span>
-<span class="fc" id="L79">                .estado(toStatus(request.estado()))</span>
-<span class="fc" id="L80">                .activo(true)</span>
-<span class="fc" id="L81">                .creadoEn(Instant.now())</span>
-<span class="fc" id="L82">                .actualizadoEn(Instant.now())</span>
-<span class="fc" id="L83">                .build();</span>
+<span class="fc" id="L70">        Incident incidente = Incident.builder()</span>
+<span class="fc" id="L71">                .assignment(asignacion)</span>
+<span class="fc" id="L72">                .reportedBy(request.reportedBy())</span>
+<span class="fc" id="L73">                .type(toType(request.type()))</span>
+<span class="fc" id="L74">                .description(request.description())</span>
+<span class="fc" id="L75">                .incidentDate(request.incidentDate())</span>
+<span class="fc" id="L76">                .location(request.location())</span>
+<span class="fc" id="L77">                .severity(toSeverity(request.severity()))</span>
+<span class="fc" id="L78">                .status(toStatus(request.status()))</span>
+<span class="fc" id="L79">                .active(true)</span>
+<span class="fc" id="L80">                .createdAt(Instant.now())</span>
+<span class="fc" id="L81">                .updatedAt(Instant.now())</span>
+<span class="fc" id="L82">                .build();</span>
 
-<span class="fc" id="L85">        Incident incidenteGuardado = incidenteRepository.save(incidente);</span>
-<span class="fc" id="L86">        return mapearAResponse(incidenteGuardado);</span>
+<span class="fc" id="L84">        Incident incidenteGuardado = incidenteRepository.save(incidente);</span>
+<span class="fc" id="L85">        return mapearAResponse(incidenteGuardado);</span>
     }
 
     /**
-     * Reemplaza los datos de un incidente activo por los valores recibidos.
-     * @param id identificador del incidente que se desea modificar
-     * @param request nuevos datos del incidente con asignacion, tipo, descripcion, fecha, ubicacion, gravedad y estado
-     * @return datos del incidente ya actualizado
-     * @throws IllegalArgumentException cuando el incidente o la asignacion no existe o esta inactivo, o tipo, gravedad o estado no son validos
+     * Updates an existing active incident. Caches are evicted after update.
+     * @param id incident unique identifier.
+     * @param request new incident data.
+     * @return the updated incident response.
      */
     @CacheEvict(value = &quot;incidentes&quot;, allEntries = true)
     public IncidentResponse update(Long id, IncidentRequest request) {
-<span class="fc" id="L98">        Incident incidente = getActiveIncident(id);</span>
+<span class="fc" id="L96">        Incident incidente = getActiveIncident(id);</span>
 
-<span class="fc" id="L100">        RouteAssignment asignacion = asignacionRutaRepository.findById(request.asignacionId())</span>
-<span class="fc" id="L101">                .filter(RouteAssignment::getActivo)</span>
-<span class="pc" id="L102">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
+<span class="fc" id="L98">        RouteAssignment asignacion = asignacionRutaRepository.findById(request.assignmentId())</span>
+<span class="fc" id="L99">                .filter(RouteAssignment::getActive)</span>
+<span class="pc" id="L100">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
 
-<span class="fc" id="L104">        incidente.setAsignacion(asignacion);</span>
-<span class="fc" id="L105">        incidente.setReportadoPor(request.reportadoPor());</span>
-<span class="fc" id="L106">        incidente.setTipo(toType(request.tipo()));</span>
-<span class="fc" id="L107">        incidente.setDescripcion(request.descripcion());</span>
-<span class="fc" id="L108">        incidente.setFechaIncidente(request.fechaIncidente());</span>
-<span class="fc" id="L109">        incidente.setUbicacion(request.ubicacion());</span>
-<span class="fc" id="L110">        incidente.setGravedad(toSeverity(request.gravedad()));</span>
-<span class="fc" id="L111">        incidente.setEstado(toStatus(request.estado()));</span>
-<span class="fc" id="L112">        incidente.setActualizadoEn(Instant.now());</span>
+<span class="fc" id="L102">        incidente.setAssignment(asignacion);</span>
+<span class="fc" id="L103">        incidente.setReportedBy(request.reportedBy());</span>
+<span class="fc" id="L104">        incidente.setType(toType(request.type()));</span>
+<span class="fc" id="L105">        incidente.setDescription(request.description());</span>
+<span class="fc" id="L106">        incidente.setIncidentDate(request.incidentDate());</span>
+<span class="fc" id="L107">        incidente.setLocation(request.location());</span>
+<span class="fc" id="L108">        incidente.setSeverity(toSeverity(request.severity()));</span>
+<span class="fc" id="L109">        incidente.setStatus(toStatus(request.status()));</span>
+<span class="fc" id="L110">        incidente.setUpdatedAt(Instant.now());</span>
 
-<span class="fc" id="L114">        Incident incidenteActualizado = incidenteRepository.save(incidente);</span>
-<span class="fc" id="L115">        return mapearAResponse(incidenteActualizado);</span>
+<span class="fc" id="L112">        Incident incidenteActualizado = incidenteRepository.save(incidente);</span>
+<span class="fc" id="L113">        return mapearAResponse(incidenteActualizado);</span>
     }
 
     /**
-     * Marca un incidente como inactivo y lo deja en estado cerrado.
-     * @param id identificador del incidente que se desea dar de baja
-     * @throws IllegalArgumentException cuando no existe un incidente activo con ese identificador
+     * Logically deactivates an incident and closes it. Caches are evicted after deactivation.
+     * @param id incident unique identifier.
      */
     @CacheEvict(value = &quot;incidentes&quot;, allEntries = true)
-    public void desactivar(Long id) {
-<span class="fc" id="L125">        Incident incidente = getActiveIncident(id);</span>
-<span class="fc" id="L126">        incidente.setActivo(false);</span>
-<span class="fc" id="L127">        incidente.setEstado(IncidentStatus.CERRADO);</span>
-<span class="fc" id="L128">        incidente.setActualizadoEn(Instant.now());</span>
-<span class="fc" id="L129">        incidenteRepository.save(incidente);</span>
-<span class="fc" id="L130">    }</span>
+    public void deactivate(Long id) {
+<span class="fc" id="L122">        Incident incidente = getActiveIncident(id);</span>
+<span class="fc" id="L123">        incidente.setActive(false);</span>
+<span class="fc" id="L124">        incidente.setStatus(IncidentStatus.CERRADO);</span>
+<span class="fc" id="L125">        incidente.setUpdatedAt(Instant.now());</span>
+<span class="fc" id="L126">        incidenteRepository.save(incidente);</span>
+<span class="fc" id="L127">    }</span>
 
     private Incident getActiveIncident(Long id) {
-<span class="fc" id="L133">        return incidenteRepository.findById(id)</span>
-<span class="fc" id="L134">                .filter(Incident::getActivo)</span>
-<span class="fc" id="L135">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Incident no encontrado&quot;));</span>
+<span class="fc" id="L130">        return incidenteRepository.findById(id)</span>
+<span class="fc" id="L131">                .filter(Incident::getActive)</span>
+<span class="fc" id="L132">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Incident no encontrado&quot;));</span>
     }
 
-    private IncidentType toType(String tipo) {
+    private IncidentType toType(String type) {
         try {
-<span class="fc" id="L140">            return IncidentType.valueOf(tipo.toUpperCase());</span>
-<span class="fc" id="L141">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L142">            throw new IllegalArgumentException(&quot;Tipo de incidente no valido&quot;);</span>
+<span class="fc" id="L137">            return IncidentType.valueOf(type.toUpperCase());</span>
+<span class="fc" id="L138">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L139">            throw new IllegalArgumentException(&quot;Tipo de incidente no valido&quot;);</span>
         }
     }
 
-    private IncidentSeverity toSeverity(String gravedad) {
+    private IncidentSeverity toSeverity(String severity) {
         try {
-<span class="fc" id="L148">            return IncidentSeverity.valueOf(gravedad.toUpperCase());</span>
-<span class="fc" id="L149">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L150">            throw new IllegalArgumentException(&quot;Gravedad de incidente no valida&quot;);</span>
+<span class="fc" id="L145">            return IncidentSeverity.valueOf(severity.toUpperCase());</span>
+<span class="fc" id="L146">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L147">            throw new IllegalArgumentException(&quot;Gravedad de incidente no valida&quot;);</span>
         }
     }
 
-    private IncidentStatus toStatus(String estado) {
+    private IncidentStatus toStatus(String status) {
         try {
-<span class="fc" id="L156">            return IncidentStatus.valueOf(estado.toUpperCase());</span>
-<span class="fc" id="L157">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L158">            throw new IllegalArgumentException(&quot;Estado de incidente no valido&quot;);</span>
+<span class="fc" id="L153">            return IncidentStatus.valueOf(status.toUpperCase());</span>
+<span class="fc" id="L154">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L155">            throw new IllegalArgumentException(&quot;Estado de incidente no valido&quot;);</span>
         }
     }
 
     private IncidentResponse mapearAResponse(Incident incidente) {
-<span class="fc" id="L163">        return new IncidentResponse(</span>
-<span class="fc" id="L164">                incidente.getId(),</span>
-<span class="fc" id="L165">                incidente.getAsignacion().getId(),</span>
-<span class="fc" id="L166">                incidente.getReportadoPor(),</span>
-<span class="fc" id="L167">                incidente.getTipo().name(),</span>
-<span class="fc" id="L168">                incidente.getDescripcion(),</span>
-<span class="fc" id="L169">                incidente.getFechaIncidente(),</span>
-<span class="fc" id="L170">                incidente.getUbicacion(),</span>
-<span class="fc" id="L171">                incidente.getGravedad().name(),</span>
-<span class="fc" id="L172">                incidente.getEstado().name(),</span>
-<span class="fc" id="L173">                incidente.getActivo(),</span>
-<span class="fc" id="L174">                incidente.getCreadoEn(),</span>
-<span class="fc" id="L175">                incidente.getActualizadoEn()</span>
+<span class="fc" id="L160">        return new IncidentResponse(</span>
+<span class="fc" id="L161">                incidente.getId(),</span>
+<span class="fc" id="L162">                incidente.getAssignment().getId(),</span>
+<span class="fc" id="L163">                incidente.getReportedBy(),</span>
+<span class="fc" id="L164">                incidente.getType().name(),</span>
+<span class="fc" id="L165">                incidente.getDescription(),</span>
+<span class="fc" id="L166">                incidente.getIncidentDate(),</span>
+<span class="fc" id="L167">                incidente.getLocation(),</span>
+<span class="fc" id="L168">                incidente.getSeverity().name(),</span>
+<span class="fc" id="L169">                incidente.getStatus().name(),</span>
+<span class="fc" id="L170">                incidente.getActive(),</span>
+<span class="fc" id="L171">                incidente.getCreatedAt(),</span>
+<span class="fc" id="L172">                incidente.getUpdatedAt()</span>
         );
     }
 }

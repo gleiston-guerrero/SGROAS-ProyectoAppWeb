@@ -74,8 +74,8 @@ public class RouteAssignmentController {
      * @return respuesta HTTP sin contenido que confirma la operación realizada.
      */
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Void&gt; desactivar(@PathVariable Long id) {
-<span class="fc" id="L78">        asignacionRutaService.desactivar(id);</span>
+    public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
+<span class="fc" id="L78">        asignacionRutaService.deactivate(id);</span>
 <span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
     }
 }

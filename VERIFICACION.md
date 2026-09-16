@@ -135,7 +135,7 @@ python3 scripts/check-spanish-methods.py
 
 **Salida (2026-09-15):**
 ```
-Total methods (main + tests): 496
+Total methods (main + tests): 519
 OK: 0 Spanish method names (0%)
 ```
 
@@ -329,7 +329,7 @@ make verify
 [P4] OK
 [P5] OK - no Spanish fields in entities
 [P5] Checking Spanish method names in main...
-Total methods (main + tests): 496
+Total methods (main + tests): 519
 OK: 0 Spanish method names (0%)
 [P6] Checking Javadoc coverage on public methods...
 Javadoc coverage: 226/226 (100.0%)

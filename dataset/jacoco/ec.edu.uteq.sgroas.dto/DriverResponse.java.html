@@ -3,38 +3,38 @@
 import java.time.Instant;
 import java.time.LocalDate;
 
-/**
- * Respuesta con los datos completos de un conductor.
- * @param id identificador unico del conductor
- * @param nombres nombres del conductor
- * @param apellidos apellidos del conductor
- * @param cedula cedula del conductor
- * @param numeroLicencia numero de licencia del conductor
- * @param tipoLicencia tipo de licencia del conductor
- * @param fechaVencimientoLicencia fecha de vencimiento de la licencia
- * @param telefono telefono de contacto del conductor
- * @param email correo electronico del conductor
- * @param estado estado operativo del conductor
- * @param activo indica si el conductor esta activo
- * @param licenseExpiring indica si la licencia esta proxima a vencer
- * @param creadoEn fecha de creacion del registro
- * @param actualizadoEn fecha de la ultima actualizacion
- */
+    /**
+     * Driver data returned by the API after querying or mutating drivers.
+     * @param id driver unique identifier.
+     * @param firstNames driver given names.
+     * @param lastNames driver family names.
+     * @param nationalId national identification number.
+     * @param licenseNumber driver license number.
+     * @param licenseType driver license class or category.
+     * @param licenseExpiry date when the license expires.
+     * @param phone contact phone number.
+     * @param email contact email address.
+     * @param status driver status code.
+     * @param active whether the driver is currently active.
+     * @param licenseExpiring whether the license expires within the warning window.
+     * @param createdAt registration timestamp.
+     * @param updatedAt last update timestamp.
+     */
 <span class="fc" id="L23">public record DriverResponse(</span>
         Long id,
-        String nombres,
-        String apellidos,
-        String cedula,
-        String numeroLicencia,
-        String tipoLicencia,
-        LocalDate fechaVencimientoLicencia,
-        String telefono,
+        String firstNames,
+        String lastNames,
+        String nationalId,
+        String licenseNumber,
+        String licenseType,
+        LocalDate licenseExpiry,
+        String phone,
         String email,
-        String estado,
-        Boolean activo,
+        String status,
+        Boolean active,
         Boolean licenseExpiring,
-        Instant creadoEn,
-        Instant actualizadoEn
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

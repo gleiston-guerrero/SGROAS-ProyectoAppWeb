@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-<span class="nc" id="L12">public class OpenApiConfig {</span>
+<span class="fc" id="L12">public class OpenApiConfig {</span>
 
     /**
      * Expone la documentacion de la API con titulo, version y esquema de cookie.
@@ -17,17 +17,17 @@ import org.springframework.context.annotation.Configuration;
      */
     @Bean
     public OpenAPI openAPI() {
-<span class="nc" id="L20">        return new OpenAPI()</span>
-<span class="nc" id="L21">                .info(new Info()</span>
-<span class="nc" id="L22">                        .title(&quot;SGROAS API&quot;)</span>
-<span class="nc" id="L23">                        .description(&quot;Sistema de Gestion de Recursos Operativos, Administrativos y de Seguridad&quot;)</span>
-<span class="nc" id="L24">                        .version(&quot;0.9.0-rc&quot;))</span>
-<span class="nc" id="L25">                .addSecurityItem(new SecurityRequirement().addList(&quot;cookieAuth&quot;))</span>
-<span class="nc" id="L26">                .components(new Components()</span>
-<span class="nc" id="L27">                        .addSecuritySchemes(&quot;cookieAuth&quot;, new SecurityScheme()</span>
-<span class="nc" id="L28">                                .type(SecurityScheme.Type.APIKEY)</span>
-<span class="nc" id="L29">                                .in(SecurityScheme.In.COOKIE)</span>
-<span class="nc" id="L30">                                .name(&quot;access_token&quot;)));</span>
+<span class="fc" id="L20">        return new OpenAPI()</span>
+<span class="fc" id="L21">                .info(new Info()</span>
+<span class="fc" id="L22">                        .title(&quot;SGROAS API&quot;)</span>
+<span class="fc" id="L23">                        .description(&quot;Sistema de Gestion de Recursos Operativos, Administrativos y de Seguridad&quot;)</span>
+<span class="fc" id="L24">                        .version(&quot;0.9.0-rc&quot;))</span>
+<span class="fc" id="L25">                .addSecurityItem(new SecurityRequirement().addList(&quot;cookieAuth&quot;))</span>
+<span class="fc" id="L26">                .components(new Components()</span>
+<span class="fc" id="L27">                        .addSecuritySchemes(&quot;cookieAuth&quot;, new SecurityScheme()</span>
+<span class="fc" id="L28">                                .type(SecurityScheme.Type.APIKEY)</span>
+<span class="fc" id="L29">                                .in(SecurityScheme.In.COOKIE)</span>
+<span class="fc" id="L30">                                .name(&quot;access_token&quot;)));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

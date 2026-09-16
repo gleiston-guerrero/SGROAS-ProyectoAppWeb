@@ -22,7 +22,7 @@ public final class AbdDtos {
      * @param idProvincia identificador de la provincia.
      * @param nombre nombre de la provincia.
      */
-<span class="nc" id="L25">    public record ProvinceResponse(Integer idProvincia, String nombre) {</span>
+<span class="fc" id="L25">    public record ProvinceResponse(Integer idProvincia, String nombre) {</span>
     }
 
     /**
@@ -32,7 +32,7 @@ public final class AbdDtos {
      * @param idProvincia identificador de la provincia.
      * @param nombreProvincia nombre de la provincia.
      */
-<span class="nc" id="L35">    public record CityResponse(Integer idCiudad, String nombre, Integer idProvincia, String nombreProvincia) {</span>
+<span class="fc" id="L35">    public record CityResponse(Integer idCiudad, String nombre, Integer idProvincia, String nombreProvincia) {</span>
     }
 
     /**
@@ -42,7 +42,7 @@ public final class AbdDtos {
      * @param idCiudad identificador de la ciudad.
      * @param nombreCiudad nombre de la ciudad.
      */
-<span class="nc" id="L45">    public record TerminalResponse(Integer idTerminal, String nombre, Integer idCiudad, String nombreCiudad) {</span>
+<span class="fc" id="L45">    public record TerminalResponse(Integer idTerminal, String nombre, Integer idCiudad, String nombreCiudad) {</span>
     }
 
     /**
@@ -51,7 +51,7 @@ public final class AbdDtos {
      * @param nombre nombre del rol.
      * @param descripcion descripcion del rol.
      */
-<span class="nc" id="L54">    public record RolResponse(Integer idRol, String nombre, String descripcion) {</span>
+<span class="fc" id="L54">    public record RolResponse(Integer idRol, String nombre, String descripcion) {</span>
     }
 
     /**
@@ -61,7 +61,7 @@ public final class AbdDtos {
      * @param terminales lista de terminales.
      * @param roles lista de roles.
      */
-<span class="nc" id="L64">    public record CatalogsResponse(List&lt;ProvinceResponse&gt; provincias,</span>
+<span class="fc" id="L64">    public record CatalogsResponse(List&lt;ProvinceResponse&gt; provincias,</span>
                                     List&lt;CityResponse&gt; ciudades,
                                     List&lt;TerminalResponse&gt; terminales,
                                     List&lt;RolResponse&gt; roles) {
@@ -235,7 +235,7 @@ public final class AbdDtos {
      * @param clave clave del grupo contado.
      * @param total total de elementos del grupo.
      */
-<span class="nc" id="L238">    public record CountResponse(String clave, long total) {</span>
+<span class="fc" id="L238">    public record CountResponse(String clave, long total) {</span>
     }
 
     /**
@@ -244,7 +244,7 @@ public final class AbdDtos {
      * @param descripcion descripcion de la ruta.
      * @param totalProgramaciones total de programaciones de la ruta.
      */
-<span class="nc" id="L247">    public record TopRouteResponse(Integer idRuta, String descripcion, long totalProgramaciones) {</span>
+<span class="fc" id="L247">    public record TopRouteResponse(Integer idRuta, String descripcion, long totalProgramaciones) {</span>
     }
 
     /**
@@ -258,7 +258,7 @@ public final class AbdDtos {
      * @param unidadesEnMantenimiento total de unidades en mantenimiento.
      * @param totalRutas total de rutas.
      */
-<span class="nc" id="L261">    public record SummaryResponse(long totalProgramaciones, long programacionesActivas,</span>
+<span class="fc" id="L261">    public record SummaryResponse(long totalProgramaciones, long programacionesActivas,</span>
                                   long totalIncidentes, long incidentesAltoNivel,
                                   long totalAlertas, long totalUnidades, long unidadesEnMantenimiento,
                                   long totalRutas) {

@@ -3,38 +3,38 @@
 import java.time.Instant;
 import java.time.LocalDate;
 
-/**
- * Respuesta con los datos completos de una asignacion de ruta.
- * @param id identificador unico de la asignacion
- * @param conductorId identificador del conductor asignado
- * @param conductorNombre nombre del conductor asignado
- * @param vehiculoId identificador del vehiculo asignado
- * @param vehiculoPlaca placa del vehiculo asignado
- * @param rutaId identificador de la ruta asignada
- * @param rutaNombre nombre de la ruta asignada
- * @param fechaAsignacion fecha en que se registro la asignacion
- * @param fechaInicio fecha en que inicia la vigencia
- * @param fechaFin fecha en que finaliza la vigencia
- * @param estado estado de la asignacion
- * @param activo indica si la asignacion esta activa
- * @param creadoEn fecha de creacion del registro
- * @param actualizadoEn fecha de la ultima actualizacion
- */
+    /**
+     * Route assignment data returned by the API after querying or mutating assignments.
+     * @param id assignment unique identifier.
+     * @param driverId driver assigned to the route.
+     * @param driverName driver display name.
+     * @param vehicleId vehicle assigned to the route.
+     * @param vehiclePlate vehicle plate number.
+     * @param routeId route that will be covered.
+     * @param routeName route display name.
+     * @param assignmentDate date when the assignment was registered.
+     * @param startDate date when the assignment starts.
+     * @param endDate optional date when the assignment ends.
+     * @param status assignment status code.
+     * @param active whether the assignment is currently active.
+     * @param createdAt registration timestamp.
+     * @param updatedAt last update timestamp.
+     */
 <span class="fc" id="L23">public record RouteAssignmentResponse(</span>
         Long id,
-        Long conductorId,
-        String conductorNombre,
-        Long vehiculoId,
-        String vehiculoPlaca,
-        Long rutaId,
-        String rutaNombre,
-        LocalDate fechaAsignacion,
-        LocalDate fechaInicio,
-        LocalDate fechaFin,
-        String estado,
-        Boolean activo,
-        Instant creadoEn,
-        Instant actualizadoEn
+        Long driverId,
+        String driverName,
+        Long vehicleId,
+        String vehiclePlate,
+        Long routeId,
+        String routeName,
+        LocalDate assignmentDate,
+        LocalDate startDate,
+        LocalDate endDate,
+        String status,
+        Boolean active,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

@@ -37,8 +37,8 @@ public class ReportService {
      * @return lista de filas con los totales y los conteos de registros activos y abiertos
      */
     public List&lt;Map&lt;String, Object&gt;&gt; generalStatistics() {
-<span class="nc" id="L40">        return incidenteRepository.generalStatistics().stream()</span>
-<span class="nc" id="L41">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L40">        return incidenteRepository.generalStatistics().stream()</span>
+<span class="fc" id="L41">                .map(fila -&gt; mapa(</span>
                         &quot;total_conductores&quot;, fila[0],
                         &quot;conductores_activos&quot;, fila[1],
                         &quot;total_vehiculos&quot;, fila[2],
@@ -49,7 +49,7 @@ public class ReportService {
                         &quot;asignaciones_activas&quot;, fila[7],
                         &quot;total_incidentes&quot;, fila[8],
                         &quot;incidentes_abiertos&quot;, fila[9]))
-<span class="nc" id="L52">                .collect(Collectors.toList());</span>
+<span class="fc" id="L52">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -58,12 +58,12 @@ public class ReportService {
      * @return lista de filas con cada gravedad, su total de incidentes y la fecha del ultimo caso
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsBySeverity(String tipo) {
-<span class="nc" id="L61">        return incidenteRepository.incidentsBySeverity(tipo).stream()</span>
-<span class="nc" id="L62">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L61">        return incidenteRepository.incidentsBySeverity(tipo).stream()</span>
+<span class="fc" id="L62">                .map(fila -&gt; mapa(</span>
                         &quot;gravedad&quot;, fila[0],
                         &quot;total_incidentes&quot;, fila[1],
                         &quot;ultimo_incidente&quot;, fila[2]))
-<span class="nc" id="L66">                .collect(Collectors.toList());</span>
+<span class="fc" id="L66">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -73,8 +73,8 @@ public class ReportService {
      * @return lista de filas con el detalle de cada incidente y sus datos de conductor, vehiculo y ruta
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsByRange(Instant desde, Instant hasta) {
-<span class="nc" id="L76">        return incidenteRepository.getIncidentsByRange(desde, hasta).stream()</span>
-<span class="nc" id="L77">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L76">        return incidenteRepository.getIncidentsByRange(desde, hasta).stream()</span>
+<span class="fc" id="L77">                .map(fila -&gt; mapa(</span>
                         &quot;incidente_id&quot;, fila[0],
                         &quot;tipo&quot;, fila[1],
                         &quot;gravedad&quot;, fila[2],
@@ -85,7 +85,7 @@ public class ReportService {
                         &quot;conductor_nombre&quot;, fila[7],
                         &quot;vehiculo_placa&quot;, fila[8],
                         &quot;ruta_codigo&quot;, fila[9]))
-<span class="nc" id="L88">                .collect(Collectors.toList());</span>
+<span class="fc" id="L88">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -94,8 +94,8 @@ public class ReportService {
      * @return lista de filas con los datos del conductor, su licencia y su asignacion vigente
      */
     public List&lt;Map&lt;String, Object&gt;&gt; licensesExpiring(Integer dias) {
-<span class="nc" id="L97">        return conductorRepository.licensesExpiring(dias).stream()</span>
-<span class="nc" id="L98">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L97">        return conductorRepository.licensesExpiring(dias).stream()</span>
+<span class="fc" id="L98">                .map(fila -&gt; mapa(</span>
                         &quot;conductor_id&quot;, fila[0],
                         &quot;nombre_completo&quot;, fila[1],
                         &quot;cedula&quot;, fila[2],
@@ -103,7 +103,7 @@ public class ReportService {
                         &quot;tipo_licencia&quot;, fila[4],
                         &quot;fecha_vencimiento&quot;, fila[5],
                         &quot;asignacion_activa&quot;, fila[6]))
-<span class="nc" id="L106">                .collect(Collectors.toList());</span>
+<span class="fc" id="L106">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -111,8 +111,8 @@ public class ReportService {
      * @return lista de filas con los datos del vehiculo y sus totales de asignaciones e incidentes
      */
     public List&lt;Map&lt;String, Object&gt;&gt; vehiclesInMaintenance() {
-<span class="nc" id="L114">        return vehiculoRepository.vehiclesInMaintenance().stream()</span>
-<span class="nc" id="L115">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L114">        return vehiculoRepository.vehiclesInMaintenance().stream()</span>
+<span class="fc" id="L115">                .map(fila -&gt; mapa(</span>
                         &quot;vehiculo_id&quot;, fila[0],
                         &quot;placa&quot;, fila[1],
                         &quot;marca&quot;, fila[2],
@@ -120,7 +120,7 @@ public class ReportService {
                         &quot;anio&quot;, fila[4],
                         &quot;total_asignaciones&quot;, fila[5],
                         &quot;total_incidentes&quot;, fila[6]))
-<span class="nc" id="L123">                .collect(Collectors.toList());</span>
+<span class="fc" id="L123">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -128,8 +128,8 @@ public class ReportService {
      * @return lista de filas con los totales de asignaciones e incidentes de cada ruta evaluada
      */
     public List&lt;Map&lt;String, Object&gt;&gt; routePerformanceReport() {
-<span class="nc" id="L131">        return rutaRepository.routePerformanceReport().stream()</span>
-<span class="nc" id="L132">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L131">        return rutaRepository.routePerformanceReport().stream()</span>
+<span class="fc" id="L132">                .map(fila -&gt; mapa(</span>
                         &quot;ruta_id&quot;, fila[0],
                         &quot;ruta_codigo&quot;, fila[1],
                         &quot;ruta_nombre&quot;, fila[2],
@@ -140,7 +140,7 @@ public class ReportService {
                         &quot;incidentes_medios&quot;, fila[7],
                         &quot;incidentes_bajos&quot;, fila[8],
                         &quot;promedio_distancia_km&quot;, fila[9]))
-<span class="nc" id="L143">                .collect(Collectors.toList());</span>
+<span class="fc" id="L143">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -149,8 +149,8 @@ public class ReportService {
      * @return lista de filas con cada asignacion activa y los datos de su vehiculo y ruta
      */
     public List&lt;Map&lt;String, Object&gt;&gt; activeAssignmentsByDriver(Long conductorId) {
-<span class="nc" id="L152">        return asignacionRutaRepository.activeAssignmentsByDriver(conductorId).stream()</span>
-<span class="nc" id="L153">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L152">        return asignacionRutaRepository.activeAssignmentsByDriver(conductorId).stream()</span>
+<span class="fc" id="L153">                .map(fila -&gt; mapa(</span>
                         &quot;asignacion_id&quot;, fila[0],
                         &quot;vehiculo_placa&quot;, fila[1],
                         &quot;vehiculo_marca&quot;, fila[2],
@@ -158,15 +158,15 @@ public class ReportService {
                         &quot;ruta_nombre&quot;, fila[4],
                         &quot;fecha_inicio&quot;, fila[5],
                         &quot;fecha_fin&quot;, fila[6]))
-<span class="nc" id="L161">                .collect(Collectors.toList());</span>
+<span class="fc" id="L161">                .collect(Collectors.toList());</span>
     }
 
     private Map&lt;String, Object&gt; mapa(Object... pares) {
-<span class="nc" id="L165">        Map&lt;String, Object&gt; m = new LinkedHashMap&lt;&gt;();</span>
-<span class="nc bnc" id="L166" title="All 2 branches missed.">        for (int i = 0; i &lt; pares.length; i += 2) {</span>
-<span class="nc" id="L167">            m.put((String) pares[i], pares[i + 1]);</span>
+<span class="fc" id="L165">        Map&lt;String, Object&gt; m = new LinkedHashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">        for (int i = 0; i &lt; pares.length; i += 2) {</span>
+<span class="fc" id="L167">            m.put((String) pares[i], pares[i + 1]);</span>
         }
-<span class="nc" id="L169">        return m;</span>
+<span class="fc" id="L169">        return m;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

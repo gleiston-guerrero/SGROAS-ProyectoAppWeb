@@ -26,13 +26,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 <span class="fc" id="L28">        ec.edu.uteq.sgroas.entity.User usuario = usuarioRepository.findByEmail(email)</span>
-<span class="fc" id="L29">                .filter(ec.edu.uteq.sgroas.entity.User::getActivo)</span>
+<span class="fc" id="L29">                .filter(ec.edu.uteq.sgroas.entity.User::getActive)</span>
 <span class="fc" id="L30">                .orElseThrow(() -&gt; new UsernameNotFoundException(&quot;User no encontrado&quot;));</span>
 
 <span class="fc" id="L32">        return new User(</span>
 <span class="fc" id="L33">                usuario.getEmail(),</span>
 <span class="fc" id="L34">                usuario.getPasswordHash(),</span>
-<span class="fc" id="L35">                List.of(new SimpleGrantedAuthority(usuario.getRol().name()))</span>
+<span class="fc" id="L35">                List.of(new SimpleGrantedAuthority(usuario.getRole().name()))</span>
         );
     }
 }

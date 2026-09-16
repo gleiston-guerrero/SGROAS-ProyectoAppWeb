@@ -112,7 +112,7 @@ TTL & Time To Live: tiempo de vida de una entrada de caché. \\
 INCOSE & International Council on Systems Engineering. \\
 CORS & Cross-Origin Resource Sharing. \\
 ABD & subsistema de Administración de Bases de Datos: módulo con tablas propias (programación, unidades, alertas, catálogos) y 28 rutas API bajo \texttt{/api/abd/**}. \\
-\textbf{Núcleo del sistema} & \textbf{Paquetes excluidos del cómputo de cobertura JaCoCo:} \texttt{ec.edu.uteq.sgroas.abd.*} (subsistema ABD completo). La justificación es que el módulo ABD fue desarrollado como práctica independiente de la asignatura de Administración de Bases de Datos y no forma parte del código funcional de la aplicación web. La cobertura del núcleo (sin ABD) es 87,5\,\% instrucciones; la cobertura global (incluyendo ABD) es 64,8\,\% instrucciones. \\
+\textbf{Núcleo del sistema} & \textbf{Paquetes excluidos del cómputo de cobertura JaCoCo:} \texttt{ec.edu.uteq.sgroas.abd.*} (subsistema ABD completo). La justificación es que el módulo ABD fue desarrollado como práctica independiente de la asignatura de Administración de Bases de Datos y no forma parte del código funcional de la aplicación web. La cobertura del reporte completo JaCoCo (incluyendo ABD) es 95,49\,\% instrucciones, 88,38\,\% ramas y 95,94\,\% líneas sobre 293 pruebas JUnit 5; el \texttt{jacoco:check} excluye el paquete \texttt{abd} y mantiene los umbrales LINE $\ge$ 0,70 y BRANCH $\ge$ 0,50. \\
 \bottomrule
 \end{longtable}
 

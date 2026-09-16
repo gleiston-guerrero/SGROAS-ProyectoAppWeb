@@ -8,52 +8,52 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-/**
- * Peticion para crear o actualizar un conductor.
- * @param nombres nombres del conductor
- * @param apellidos apellidos del conductor
- * @param cedula cedula unica del conductor
- * @param numeroLicencia numero de licencia del conductor
- * @param tipoLicencia tipo de licencia del conductor
- * @param fechaVencimientoLicencia fecha de vencimiento de la licencia
- * @param telefono telefono de contacto del conductor
- * @param email correo electronico del conductor
- * @param estado estado operativo del conductor
- */
+    /**
+     * Driver data required to create or update a driver record.
+     * @param firstNames driver given names.
+     * @param lastNames driver family names.
+     * @param nationalId unique 10-digit national identification number.
+     * @param licenseNumber driver license number.
+     * @param licenseType driver license class or category.
+     * @param licenseExpiry date when the license expires.
+     * @param phone optional contact phone number.
+     * @param email optional contact email address.
+     * @param status driver status code.
+     */
 <span class="fc" id="L23">public record DriverRequest(</span>
 
         @NotBlank(message = &quot;Los nombres son obligatorios&quot;)
         @Size(max = 100, message = &quot;Los nombres no pueden superar los 100 caracteres&quot;)
-        String nombres,
+        String firstNames,
 
         @NotBlank(message = &quot;Los apellidos son obligatorios&quot;)
         @Size(max = 100, message = &quot;Los apellidos no pueden superar los 100 caracteres&quot;)
-        String apellidos,
+        String lastNames,
 
         @NotBlank(message = &quot;La cedula es obligatoria&quot;)
         @Pattern(regexp = &quot;\\d{10}&quot;, message = &quot;La cedula debe tener 10 digitos&quot;)
-        String cedula,
+        String nationalId,
 
         @NotBlank(message = &quot;El numero de licencia es obligatorio&quot;)
         @Size(max = 30, message = &quot;El numero de licencia no puede superar los 30 caracteres&quot;)
-        String numeroLicencia,
+        String licenseNumber,
 
         @NotBlank(message = &quot;El tipo de licencia es obligatorio&quot;)
         @Size(max = 10, message = &quot;El tipo de licencia no puede superar los 10 caracteres&quot;)
-        String tipoLicencia,
+        String licenseType,
 
         @NotNull(message = &quot;La fecha de vencimiento de la licencia es obligatoria&quot;)
-        LocalDate fechaVencimientoLicencia,
+        LocalDate licenseExpiry,
 
         @Size(max = 20, message = &quot;El telefono no puede superar los 20 caracteres&quot;)
-        String telefono,
+        String phone,
 
         @Email(message = &quot;El email debe tener un formato valido&quot;)
         @Size(max = 255, message = &quot;El email no puede superar los 255 caracteres&quot;)
         String email,
 
         @NotBlank(message = &quot;El estado es obligatorio&quot;)
-        String estado
+        String status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

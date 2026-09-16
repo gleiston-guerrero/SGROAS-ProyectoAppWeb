@@ -3,23 +3,23 @@
 import java.time.Instant;
 
 /**
- * Respuesta con los datos completos de un usuario.
- * @param id identificador unico del usuario
- * @param nombre nombre del usuario
- * @param email correo electronico del usuario
- * @param rol rol asignado al usuario
- * @param activo indica si el usuario esta activo
- * @param creadoEn fecha de creacion del registro
- * @param actualizadoEn fecha de la ultima actualizacion
+ * Response with full user data.
+ * @param id unique user identifier
+ * @param name user name
+ * @param email user email
+ * @param role assigned role
+ * @param active whether the user is active
+ * @param createdAt record creation timestamp
+ * @param updatedAt last update timestamp
  */
 <span class="fc" id="L15">public record UserResponse(</span>
         Long id,
-        String nombre,
+        String name,
         String email,
-        String rol,
-        Boolean activo,
-        Instant creadoEn,
-        Instant actualizadoEn
+        String role,
+        Boolean active,
+        Instant createdAt,
+        Instant updatedAt
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

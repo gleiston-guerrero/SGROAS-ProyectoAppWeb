@@ -4,37 +4,37 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-/**
- * Peticion para crear o actualizar una asignacion de ruta.
- * @param conductorId identificador del conductor asignado
- * @param vehiculoId identificador del vehiculo asignado
- * @param rutaId identificador de la ruta asignada
- * @param fechaAsignacion fecha en que se registro la asignacion
- * @param fechaInicio fecha en que inicia la vigencia
- * @param fechaFin fecha en que finaliza la vigencia
- * @param estado estado de la asignacion
- */
+    /**
+     * Route assignment data required to create or update an assignment.
+     * @param driverId driver assigned to the route.
+     * @param vehicleId vehicle assigned to the route.
+     * @param routeId route that will be covered.
+     * @param assignmentDate date when the assignment was registered.
+     * @param startDate date when the assignment starts.
+     * @param endDate optional date when the assignment ends.
+     * @param status assignment status code.
+     */
 <span class="fc" id="L17">public record RouteAssignmentRequest(</span>
 
         @NotNull(message = &quot;El conductor es obligatorio&quot;)
-        Long conductorId,
+        Long driverId,
 
         @NotNull(message = &quot;El vehiculo es obligatorio&quot;)
-        Long vehiculoId,
+        Long vehicleId,
 
         @NotNull(message = &quot;La ruta es obligatoria&quot;)
-        Long rutaId,
+        Long routeId,
 
         @NotNull(message = &quot;La fecha de asignacion es obligatoria&quot;)
-        LocalDate fechaAsignacion,
+        LocalDate assignmentDate,
 
         @NotNull(message = &quot;La fecha de inicio es obligatoria&quot;)
-        LocalDate fechaInicio,
+        LocalDate startDate,
 
-        LocalDate fechaFin,
+        LocalDate endDate,
 
         @NotNull(message = &quot;El estado es obligatorio&quot;)
-        String estado
+        String status
 ) {
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

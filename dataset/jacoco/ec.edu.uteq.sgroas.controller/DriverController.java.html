@@ -76,8 +76,8 @@ public class DriverController {
      * @return respuesta HTTP sin contenido que confirma la operación realizada.
      */
     @DeleteMapping(&quot;/{id}&quot;)
-    public ResponseEntity&lt;Void&gt; desactivar(@PathVariable Long id) {
-<span class="fc" id="L80">        conductorService.desactivar(id);</span>
+    public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
+<span class="fc" id="L80">        conductorService.deactivate(id);</span>
 <span class="fc" id="L81">        return ResponseEntity.noContent().build();</span>
     }
 }

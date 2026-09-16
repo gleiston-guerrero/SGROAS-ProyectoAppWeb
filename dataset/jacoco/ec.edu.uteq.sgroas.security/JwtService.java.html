@@ -50,8 +50,8 @@ import java.util.function.Function;
 <span class="fc" id="L50">                .issuedAt(ahora)</span>
 <span class="fc" id="L51">                .notBefore(ahora)</span>
 <span class="fc" id="L52">                .expiration(expiracion)</span>
-<span class="fc" id="L53">                .claim(&quot;nombre&quot;, usuario.getNombre())</span>
-<span class="fc" id="L54">                .claim(&quot;rol&quot;, usuario.getRol().name())</span>
+<span class="fc" id="L53">                .claim(&quot;nombre&quot;, usuario.getName())</span>
+<span class="fc" id="L54">                .claim(&quot;rol&quot;, usuario.getRole().name())</span>
 <span class="fc" id="L55">                .signWith(getSigningKey(), Jwts.SIG.HS256)</span>
 <span class="fc" id="L56">                .compact();</span>
     }
