@@ -55,7 +55,7 @@ audit:
 	scripts/validate-listings.sh
 	@echo "Auditoria: self-test de exit codes (P11)..."
 	scripts/test-validators.sh
-	@echo "Auditoria: demografia SUS cap.5 vs sus-raw.csv (P13)..."
+	@echo "Auditoria: demografia SUS cap.5 vs sus-raw.csv (P8)..."
 	scripts/validate-sus-demografia.sh
 	@echo "Auditorias completas (exit 0 = OK)."
 
@@ -126,6 +126,14 @@ verify:
 	@test -f dataset/sus/CONSENT-FORM.md && echo "  CONSENT-FORM.md exists"
 	@test -f dataset/sus/CONSENT-REGISTRY.md && echo "  CONSENT-REGISTRY.md exists"
 	@echo "[P11] OK"
+	@echo ""
+	@echo "[P3] Checking Lighthouse runs..."
+	@ls dataset/lighthouse/lh-*.json 2>/dev/null | wc -l | xargs -I{} echo "  {} lighthouse runs found"
+	@test $$(ls dataset/lighthouse/lh-*.json 2>/dev/null | wc -l) -ge 9 && echo "[P3] OK"
+	@echo ""
+	@echo "[P8] Checking SUS demographics script..."
+	@$(PYTHON) scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv > /dev/null 2>&1 && echo "  OK: SUS demographics script runs"
+	@echo "[P8] OK"
 	@echo ""
 	@echo "[P9] Checking Postman collection..."
 	@grep -c "asignaciones" docs/postman/coleccion.json | xargs -I{} echo "  {} assignment endpoints found"

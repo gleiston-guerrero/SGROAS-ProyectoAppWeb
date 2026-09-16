@@ -8,6 +8,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P1 — Passwords/secrets a variables de entorno (commit ac72f7a)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos modificados:**
 - `src/main/resources/application.properties` — Reemplazado password hardcodeado por `${SPRING_DATASOURCE_PASSWORD}` y `${JWT_SECRET}`
@@ -19,7 +21,31 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 
 ---
 
+## P2 — k6 corridas crudas versionadas (commit 51202f5)
+**Cerrado por: Luis Tejada**
+
+**Archivos modificados:**
+- dataset/perf/k*-run1.json y k*-cold.json -- 13 corridas crudas.
+- scripts/perf/recalcular-contraste.py -- script reproducible.
+
+**Commit:** 51202f5
+
+---
+
+## P3 — Lighthouse corridas versionadas (commit 1a07dc7)
+**Cerrado por: Luis Tejada**
+
+**Archivos modificados:**
+- dataset/lighthouse/lh-*.json -- 9 corridas (mobile, desktop, tablet).
+- dataset/lighthouse/REPORT.md -- resumen de scores.
+
+**Commit:** 1a07dc7
+
+---
+
 ## P4 — Cookie Secure(true) (commit 92576cf)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos modificados:**
 - `src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java` — 4 cookies actualizadas de `.secure(cookieSecure)` a `.secure(true)` (líneas 158, 195, 235, 252)
@@ -29,6 +55,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P5 — Renombramiento de campos entidades (commit c09f981)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos modificados (entidades):**
 - `src/main/java/ec/edu/uteq/sgroas/entity/Driver.java` — 11 campos renombrados (nombres→firstNames, apellidos→lastNames, cedula→nationalId, etc.)
@@ -105,7 +133,18 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 
 ---
 
+## P6 — Javadoc >= 90% (commit d2b88b7)
+**Cerrado por: Luis Tejada**
+
+**Archivos:** 226 metodos publicos en src/main/java/** documentados (100%).
+
+**Commit:** d2b88b7
+
+---
+
 ## P7 — Captions de figuras/tablas en inglés (commit 33e25e5)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos modificados:**
 - `docs/informe-final/cap*.tex` y `docs/informe-final/capitulos/cap*.tex` — 12 captions traducidos:
@@ -117,6 +156,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P8 — Script demografía SUS (commit 5fa09b4)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos creados:**
 - `scripts/generate-sus-demographics.py` — Lee `dataset/sus/sus-raw.csv`, genera tabla de demografía (15 participantes, 8M/7F, edades 19-25, SUS mean=68.5)
@@ -127,6 +168,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P9 — Postman CRUD asignaciones (commit 20a487f)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos modificados:**
 - `docs/postman/coleccion.json` — Agregada carpeta "Asignaciones" con 6 requests:
@@ -142,6 +185,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P10 — Manifest SHA-256 verificable (commit fc25cb8)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos creados/modificados:**
 - `dataset/MANIFEST.sha256` — 283 entradas SHA-256 (LF), verificadas con `sha256sum -c`
@@ -153,6 +198,8 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P11 — Instrumento Brooke + consentimientos (commit fa1274c)
+**Cerrado por: Luis Tejada**
+
 
 **Archivos creados:**
 - `dataset/sus/SUS-INSTRUMENT.md` — Cuestionario System Usability Scale (Brooke 1996), 10 ítems
