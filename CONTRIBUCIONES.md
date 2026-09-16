@@ -100,7 +100,7 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 **Commit:** `92576cf` + `c09f981` — "P5: rename all entity fields from Spanish to English" + "refactor: update security classes for P5 field renames"
 
 **Verificación (portable a Linux, sin PowerShell):**
-- `scripts/check-spanish-methods.py` — 0 nombres de método en español (496 métodos, 0%)
+- `scripts/check-spanish-methods.py` — 0 nombres de método en español (519 métodos, 0%)
 - `scripts/check-javadoc.py` — 226/226 métodos documentados (100%), ≥ 90%
 
 ---
@@ -183,12 +183,11 @@ powershell -ExecutionPolicy Bypass -File scripts/verify-manifest.ps1
 
 ## Tag v1.1.0
 
-El tag `v1.1.0` se colocó sobre el último commit de la cadena de cierre (contenido
-sustantivo en `51202f5`; el commit del tag corrige el pipeline CI definiendo la
-variable de entorno `JWT_SECRET` para el paso "Build and test", el namespace de la
-imagen con `${{ github.repository_owner }}`, regenera `dataset/MANIFEST.sha256`
-con los hashes reales de los reportes JaCoCo y fuerza `text eol=lf` en `dataset/**`
-vía `.gitattributes` para que `sha256sum -c` dé 283 OK en cualquier plataforma);
+El tag `v1.1.0` apunta a `8398462`, el último commit de la cadena de cierre
+(contenido sustantivo en `51202f5`; los commits posteriores corrigieron el
+pipeline CI definiendo `JWT_SECRET` y el owner dinámico de `ghcr.io`, hicieron
+los checks P5/P6 portables a Linux y regeneraron `dataset/MANIFEST.sha256`
+normalizado a LF para que `sha256sum -c` dé 283 OK en cualquier plataforma);
 incluye traducir los métodos de test al inglés, Javadoc
 226/226, la firma EV-4 con correos institucionales, la evidencia de sesión en vivo,
 el expediente literal de verificación y el contraste no paramétrico reproducible

@@ -1,7 +1,7 @@
 # VERIFICACION — SGROAS Supletorio v1.1.0
 
 Fecha: 2026-09-15
-Commit: 51202f5
+Commit: 8398462
 Tag: v1.1.0
 
 ---
@@ -352,13 +352,15 @@ integrantes con su correo institucional).
 
 ## Tag v1.1.0 (EV-3)
 
-El tag `v1.1.0` se colocó sobre el ÚLTIMO commit de la cadena de cierre
-(contenido sustantivo en `51202f5`; el commit del tag cierra con las correcciones
-del pipeline CI: definir la variable de entorno `JWT_SECRET`, publicar la imagen
-en `ghcr.io/<owner>/sgroas` con el owner dinámico del workflow, regenerar el
-manifiesto `dataset/MANIFEST.sha256` y forzar `text eol=lf` en `dataset/**`
-vía `.gitattributes` para que `sha256sum -c` dé 283 OK en cualquier plataforma).
-Se verifica:
+El tag `v1.1.0` apunta a `8398462`, el commit que cierra la cadena de cierre.
+El contenido sustantivo (expediente literal, cero secrets y P2 reproducible) se
+consolidó en `51202f5`; los commits subsiguientes corrigieron el pipeline CI
+(definir `JWT_SECRET` en el paso "Build and test" y publicar la imagen en
+`ghcr.io/<owner>/sgroas` con el owner dinámico), hicieron los checks P5/P6
+portables a Linux, ajustaron cifras en documentos y normalizaron a LF el
+manifiesto `dataset/MANIFEST.sha256` para que `sha256sum -c` dé 283 OK en
+cualquier plataforma. El último commit (el del tag) regenera el manifiesto sobre
+el CSV Jacoco ya normalizado a LF. Se verifica:
 
 ```bash
 git rev-parse v1.1.0

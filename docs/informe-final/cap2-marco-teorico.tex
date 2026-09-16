@@ -96,7 +96,7 @@ SGROAS documenta su arquitectura en los niveles 1--3 mediante diagramas DSL (Dom
 La arquitectura de tres capas separa la presentación (frontend), la lógica de negocio (backend) y el almacenamiento de datos (base de datos) en capas independientes \cite{martin2017}. SGROAS implementa esta arquitectura con:
 \begin{itemize}
   \item \textbf{Capa de presentación:} Angular 20, que consume la API REST del backend.
-  \item \textbf{Capa de lógica de negocio:} Spring Boot 3.2.x con Java 21 LTS, que implementa los controladores, servicios y repositorios.
+  \item \textbf{Capa de lógica de negocio:} Spring Boot 3.5.x con Java 21 LTS, que implementa los controladores, servicios y repositorios.
   \item \textbf{Capa de datos:} PostgreSQL 16 para persistencia y Redis 7 como caché distribuida.
 \end{itemize}
 
@@ -129,10 +129,10 @@ El estándar RFC 7807 \cite{rfc7807} define un formato uniforme para los errores
 \section{Tecnologías de implementación}
 \label{sec:tech}
 
-\subsection{Spring Boot 3.2.x con Java 21 LTS}
+\subsection{Spring Boot 3.5.x con Java 21 LTS}
 \label{sec:spring}
 
-Spring Boot \cite{springboot} es un framework que simplifica la creación de aplicaciones basadas en Spring. SGROAS utiliza Spring Boot 3.2.x con Java 21 LTS (Long Term Support), aprovechando:
+Spring Boot \cite{springboot} es un framework que simplifica la creación de aplicaciones basadas en Spring. SGROAS utiliza Spring Boot 3.5.x con Java 21 LTS (Long Term Support), aprovechando:
 \begin{itemize}
   \item Spring Data JPA con Hibernate para el mapeo objeto-relacional (ORM).
   \item Spring Security para la autenticación y autorización.

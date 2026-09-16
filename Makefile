@@ -74,7 +74,7 @@ pdf:
 	cd docs/informe-final && biber main
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
-	@echo "PDF generado en docs/informe-final/main.pdf (95 paginas)."
+	@echo "PDF generado en docs/informe-final/main.pdf (98 paginas)."
 
 docs: versions
 	$(PYTHON) scripts/gen-figuras.py
