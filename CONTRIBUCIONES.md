@@ -350,7 +350,10 @@ literales):
   frontend con `ng serve`) y sobre el código ya corregido, con los tokens
   reales truncados/redactados desde el primer momento — ver
   `docs/mediciones/sec/live-session/README.md`;
-  se quitaron credenciales hardcodeadas de `login.ts` y `k6/script.js`; se
+  se quitaron credenciales hardcodeadas de `login.ts` y `k6/script.js`
+  (y, corregido el 2026-09-17 tras una re-verificación con el mismo grep,
+  también de `k6/cold.js`, que se había pasado por alto en la primera
+  ronda); se
   eliminó un `@Value` muerto (`app.cookie.secure`) en `AuthController`.
 - Se corrigieron atribuciones de P3 y P8 en este mismo documento (ver
   arriba) contrastando cada commit citado contra `git log`.

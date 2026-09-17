@@ -18,9 +18,16 @@ const BASE_URL = __ENV.BASE_URL || 'https://sgroas-backend.onrender.com';
 
 export function setup() {
   const loginPayload = JSON.stringify({
-    email: 'admin@sgroas.com',
-    password: 'admin123',
+    email: __ENV.K6_LOGIN_EMAIL || 'admin@sgroas.com',
+    password: __ENV.K6_LOGIN_PASSWORD,
   });
+
+  if (!loginPayload.includes('"password":"') || !__ENV.K6_LOGIN_PASSWORD) {
+    throw new Error(
+      'K6_LOGIN_PASSWORD env var is required (no credentials are hardcoded here). ' +
+      'Run e.g.: k6 run -e K6_LOGIN_PASSWORD=*** -e BASE_URL=... cold.js'
+    );
+  }
 
   const res = http.post(`${BASE_URL}/api/auth/login`, loginPayload, {
     headers: { 'Content-Type': 'application/json' },
