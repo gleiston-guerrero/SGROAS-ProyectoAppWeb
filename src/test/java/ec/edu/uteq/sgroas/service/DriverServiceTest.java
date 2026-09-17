@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -24,6 +25,9 @@ class DriverServiceTest {
 
     @Mock
     private DriverRepository driverRepository;
+
+    @Mock
+    private ObjectProvider<DriverService> self;
 
     @InjectMocks
     private DriverService driverService;
@@ -166,6 +170,7 @@ class DriverServiceTest {
     void listWithoutSearchUsesFindByActiveTrue() {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
 
@@ -180,6 +185,7 @@ class DriverServiceTest {
     void listWithBlankSearchUsesFindByActiveTrue() {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
 

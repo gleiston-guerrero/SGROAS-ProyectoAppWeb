@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Date: Thu, 17 Sep 2026 19:48:31 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+cf-cache-status: DYNAMIC
+content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com
+expires: 0
+pragma: no-cache
+rndr-id: bc9b0066-2cc7-4cda
+Server: cloudflare
+Set-Cookie: access_token=<REDACTED>; Path=/; Max-Age=3600; Expires=Thu, 17 Sep 2026 20:48:31 GMT; Secure; HttpOnly; SameSite=Strict
+Set-Cookie: refresh_token=<REDACTED>; Path=/api/auth; Max-Age=604800; Expires=Thu, 24 Sep 2026 19:48:31 GMT; Secure; HttpOnly; SameSite=Strict
+strict-transport-security: max-age=31536000 ; includeSubDomains
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+vary: Accept-Encoding
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-render-origin-server: Render
+x-xss-protection: 0
+CF-RAY: a3caa0feeeb8825b-GYE
+alt-svc: h3=":443"; ma=86400
+
+{"name":"Admin SGROAS","email":"admin@sgroas.com","role":"ROLE_ADMIN","expiresIn":3600000}

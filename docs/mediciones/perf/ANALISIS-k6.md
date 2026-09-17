@@ -67,15 +67,30 @@ Se analizaron dos series de corridas de k6 (50 VUs, 30 s, p95<200 ms). Cada corr
 
 ## Contraste "frio" (1 VU) vs "caliente" (50 VUs) — recalculado honestamente
 
-> **Aclaracion importante:** el codigo actual (`ConductorService`) para
-> `GET /api/conductores` **no tiene `@Cacheable`** (verificado con
-> `grep -rn "Cacheable" src/main/java` — no aparece en `DriverController` ni
-> en `DriverService`). Por tanto **no existe un escenario real de cache
-> fria/caliente** (Redis, HTTP cache, etc.): cada peticion consulta
-> PostgreSQL directamente. Lo que aqui se llama "frio" y "caliente" es en
-> realidad una comparacion entre **1 VU sin carga** (primer GET tras una
-> pausa de ~90 s) y **50 VUs con carga sostenida durante 30 s**, ambos contra
-> el mismo endpoint sin cache aplicativa.
+> **Aclaracion importante:** las corridas k6 versionadas abajo se capturaron
+> ANTES de que `GET /api/conductores` tuviera `@Cacheable` — en ese momento
+> no existia un escenario real de cache fria/caliente (Redis, HTTP cache,
+> etc.): cada peticion consultaba PostgreSQL directamente. Lo que aqui se
+> llama "frio" y "caliente" en esas corridas es en realidad una comparacion
+> entre **1 VU sin carga** (primer GET tras una pausa de ~90 s) y **50 VUs
+> con carga sostenida durante 30 s**, ambos contra el mismo endpoint sin
+> cache aplicativa.
+>
+> **Corregido 2026-09-17:** se implemento `@Cacheable(value = "conductores",
+> key = "#pageable.pageNumber + '-' + #pageable.pageSize")` en
+> `DriverService.listActiveCached` (invocado a traves de un proxy
+> auto-inyectado para que el `@Cacheable` si se active — una llamada interna
+> directa `this.metodo()` no pasa por el proxy de Spring AOP y nunca
+> cachea, un defecto real que se detecto y corrigio al implementar esto).
+> Prueba de que el cache funciona de verdad, con un `CacheManager` en
+> memoria en un contexto de Spring real (no un mock):
+> `DriverServiceCachingTest.secondUnfilteredCallIsServedFromCacheNotFromRepository`
+> — dos llamadas identicas sin filtro de busqueda, el repositorio se invoca
+> una sola vez. Las corridas de k6 versionadas en este documento son
+> anteriores a esta implementacion y se conservan como estaban (no se
+> volvieron a correr contra el endpoint ya cacheado): el contraste
+> "frio vs caliente" documentado abajo sigue siendo, honestamente, una
+> comparacion de VUs, no de cache real, para las corridas existentes.
 
 Recalculado desde cero con `scripts/perf/recalcular-contraste.py` (reescrito:
 sin `assert` que fijen el resultado de antemano, usando la misma metrica y el

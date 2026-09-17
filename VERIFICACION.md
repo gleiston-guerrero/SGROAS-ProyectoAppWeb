@@ -148,18 +148,57 @@ la caliente (metricas distintas, comparacion invalida). Se reescribio desde
 cero: sin asserts que fijen el resultado, usando la misma metrica
 (`avg`) para ambas condiciones. El numero final coincide con el que ya
 estaba documentado, pero ahora se calcula honestamente en vez de estar
-garantizado por construccion. Ademas: `GET /api/conductores` NO tiene
-`@Cacheable` (confirmado con `grep -rn "Cacheable" src/main/java` — no
-aparece en `DriverController` ni `DriverService`), por lo que esta
-comparacion es "1 VU sin carga" vs "50 VUs con carga", no una cache
-fria/caliente real. Ver `docs/mediciones/perf/ANALISIS-k6.md` para el
-detalle completo.
+garantizado por construccion. En el momento de esas corridas,
+`GET /api/conductores` NO tenia `@Cacheable`, por lo que esa comparacion
+es "1 VU sin carga" vs "50 VUs con carga", no una cache fria/caliente real.
+
+**Actualización 2026-09-17 — se implementó `@Cacheable` real:**
+
+```
+$ grep -n "Cacheable" src/main/java/ec/edu/uteq/sgroas/service/DriverService.java
+11:import org.springframework.cache.annotation.Cacheable;
+29:    // @Cacheable only intercepts calls that go through the proxy, never a
+60:    @Cacheable(value = "conductores", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+```
+
+Se detectó y corrigió, de paso, un defecto real de la propia
+implementación: llamar al método cacheado con `this.metodo()` desde
+dentro de la misma clase NO pasa por el proxy de Spring AOP y por tanto
+NUNCA activa el `@Cacheable` en producción (el mismo patrón —
+`listCached()` sin usar — ya existía sin conectar en `IncidentService` y
+`RouteAssignmentService`, sin que nadie lo hubiera detectado). Se
+corrigió con auto-inyección de un `ObjectProvider<DriverService>` para
+invocar el método a través del proxy real. Prueba de que el caché
+funciona de verdad, con un `CacheManager` real en memoria (no un mock),
+en `DriverServiceCachingTest`:
+
+```
+$ ./mvnw test -Dtest=DriverServiceCachingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+```
+
+`secondUnfilteredCallIsServedFromCacheNotFromRepository`: dos llamadas
+idénticas sin filtro → el repositorio se invoca una sola vez.
+`searchedCallIsNeverCached`: con filtro de búsqueda, cada llamada sí pega
+al repositorio (comportamiento esperado, no se cachea texto libre).
+
+Las 13 corridas de k6 ya versionadas son anteriores a esta implementación
+y no se volvieron a correr contra el endpoint ya cacheado (correrlas de
+nuevo requeriría levantar el stack completo con Redis); el contraste
+"frío vs caliente" documentado en `ANALISIS-k6.md` para esas corridas
+sigue siendo honestamente una comparación de VUs, no de caché real — se
+aclara explícitamente en ese documento para no dar a entender que las
+cifras ya reflejan el `@Cacheable` nuevo.
 
 **Archivos:** `dataset/perf/k*.json` (13 corridas: k01–k03 locales por escenario +
 5 calientes + 5 frías), análisis recalculado con `scripts/perf/recalcular-contraste.py`
 (reescrito 2026-09-16) que carga `scripts/perf/nonparametric.py` (Mann-Whitney + d de Cliff)
 directamente desde las corridas crudas; resultados en `docs/mediciones/perf/ANALISIS-k6.md`
 (y `dataset/perf/REPORT.md` para la serie local K1).
+`src/main/java/ec/edu/uteq/sgroas/service/DriverService.java` —
+`@Cacheable` real + auto-inyección del proxy.
+`src/test/java/ec/edu/uteq/sgroas/service/DriverServiceCachingTest.java` —
+prueba de que el caché se activa de verdad.
 
 ---
 
@@ -362,6 +401,23 @@ ver `docs/mediciones/sec/live-session/README.md` (Generación 3) para el
 detalle completo, incluida una nota honesta sobre el JWT interno (que en
 el momento de esta captura aún no había recogido el fix de claims
 `nombre`/`rol` → `name`/`role` de un redeploy posterior).
+
+**Cierre del detalle pendiente (2026-09-17, ~19:48 UTC):** tras el
+redeploy con el fix de `JwtService.java` (claims `name`/`role`) y la
+rotación de secretos, se repitió el login contra Render y se decodificó
+el payload del JWT (no cifrado, solo firmado):
+
+```
+{"jti":"...","iss":"https://sgroas-backend.onrender.com","sub":"admin@sgroas.com",
+ "aud":["sgroas-frontend"],"iat":...,"nbf":...,"exp":...,
+ "name":"Admin SGROAS","role":"ROLE_ADMIN"}
+```
+
+Confirmado: el JWT interno ya usa `name`/`role` en inglés, igual que el
+cuerpo de la respuesta. Guardado (redactado) en
+`docs/mediciones/sec/live-session/login-response-20260917-render-final.txt`.
+Con esto no queda ningún residuo en español en el contrato de sesión, en
+ningún nivel (cuerpo HTTP, cookie, ni JWT).
 
 ---
 

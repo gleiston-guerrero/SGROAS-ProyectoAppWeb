@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,9 @@ class DriverServiceExtraTest {
 
     @Mock
     private DriverRepository driverRepository;
+
+    @Mock
+    private ObjectProvider<DriverService> self;
 
     @InjectMocks
     private DriverService driverService;
@@ -61,6 +65,7 @@ class DriverServiceExtraTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(conductorEjemplo())));
 

@@ -6,7 +6,9 @@ import ec.edu.uteq.sgroas.entity.Driver;
 import ec.edu.uteq.sgroas.entity.DriverStatus;
 import ec.edu.uteq.sgroas.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -21,18 +23,43 @@ public class DriverService {
 
     private final DriverRepository driverRepository;
 
+    // Self-injected via ObjectProvider (lazy, avoids a circular-dependency
+    // error at construction time) so that calling listActiveCached() goes
+    // through the Spring-managed proxy instead of a plain `this.` call --
+    // @Cacheable only intercepts calls that go through the proxy, never a
+    // same-class internal call, so without this the cache would silently
+    // never be hit in production.
+    private final ObjectProvider<DriverService> self;
+
     /**
      * Returns a paginated list of active drivers, optionally filtered by search text.
+     * Only the unfiltered case (no search text) is cached: it is the common,
+     * repeatable query (e.g. the initial list view / load tests), while a
+     * free-text search is effectively unbounded in key space and would just
+     * fill the cache with one-off entries.
      * @param search optional text filter applied to driver data.
      * @param pageable pagination and sorting configuration.
      * @return page of driver response records.
      */
     public Page<DriverResponse> list(String search, Pageable pageable) {
         if (search == null || search.isBlank()) {
-            return driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+            return self.getObject().listActiveCached(pageable);
         }
         return driverRepository.searchActive(search.trim().toLowerCase(), pageable)
                 .map(this::mapToResponse);
+    }
+
+    /**
+     * Cached path for the unfiltered active-driver listing, keyed by page
+     * number and size. Evicted on create/update/delete (see the
+     * {@code @CacheEvict} methods below), so a cache hit is only ever
+     * served between writes.
+     * @param pageable pagination and sorting configuration.
+     * @return page of driver response records.
+     */
+    @Cacheable(value = "conductores", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
+    public Page<DriverResponse> listActiveCached(Pageable pageable) {
+        return driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);
     }
 
     /**
