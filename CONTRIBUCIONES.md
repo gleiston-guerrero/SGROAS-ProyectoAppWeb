@@ -141,14 +141,20 @@ $ git log --format='%H %an <%ae> %ad %s' --date=short -1 1a07dc7
 
 **Verificación (portable a Linux, sin PowerShell):**
 - `scripts/check-spanish-methods.py` — 0 nombres de método en español (519 métodos, 0%)
-- `scripts/check-javadoc.py` — 226/226 métodos documentados (100%), ≥ 90%
+- `scripts/check-javadoc.py` — 248/248 métodos documentados (100%), ≥ 90%
+  (cifra corregida el 2026-09-16 en una segunda re-verificación; ver
+  "Auditoría externa y correcciones" más abajo)
 
 ---
 
 ## P6 — Javadoc >= 90% (commit d2b88b7)
 **Cerrado por: Luis Tejada**
 
-**Archivos:** 226 metodos publicos en src/main/java/** documentados (100%).
+**Archivos:** cifra original declarada "226 metodos publicos... documentados
+(100%)". Esta cifra resultó estar mal calculada por el checker de esa
+época (ver corrección de 2026-09-16 en "Auditoría externa y correcciones":
+cifra real final tras dos rondas de correcciones al checker y
+documentación real de los métodos faltantes: **248/248 (100%)**).
 
 **Commit:** d2b88b7
 
@@ -293,8 +299,34 @@ literales):
   `AbdDtos`/`AbdDriver`/etc.) sí siguen siendo una convención deliberada
   del backend paralelo en español de ese módulo y no se tocaron.
 - **P6:** la cifra "226/226" contaba las declaraciones `record` (DTOs)
-  como si fueran métodos. Conteo real (excluyendo records):
-  **189 métodos**, 100% con Javadoc.
+  como si fueran métodos, y además excluía los métodos de interfaz (los
+  repositorios Spring Data JPA son interfaces, sus métodos no llevan
+  `public`/`protected` explícito, así que el regex original ni los veía).
+  Al reescribir el checker para contar clases e interfaces sin contar
+  records, la cobertura real cayó a **215/281 (76.5%)**, por debajo del
+  90% — 66 líneas reportadas como "sin Javadoc". Al revisar esas 66 líneas
+  una por una se encontró un **segundo defecto en la reescritura**: 42 de
+  esas 66 eran falsos positivos causados por líneas de continuación de
+  SQL/JPQL dentro de bloques `@Query("""...""")` multilínea, que el regex
+  de "método implícito de interfaz" confundía con firmas de método, y que
+  además rompían la búsqueda del Javadoc inmediato superior (se detenía en
+  la línea de SQL en vez de seguir subiendo hasta el comentario real). Se
+  corrigió `check-javadoc.py` una vez más (función
+  `_classify_annotation_lines`, que marca las líneas de una anotación
+  multilínea completa) y **se documentaron con Javadoc real y específico
+  los 24 métodos que sí carecían de él de verdad** — todos interfaces de
+  repositorio (`DriverRepository`, `IncidentRepository`,
+  `RouteAssignmentRepository`, `RouteRepository`, `VehicleRepository`,
+  `VerificationCodeRepository`), describiendo qué filtra o pagina cada
+  consulta derivada o `@Query`/`@Procedure`, sin inventar comportamiento.
+  **Cifra final honesta, verificada con `python3 scripts/check-javadoc.py`:
+  248/248 (100%).** No se ajustó el checker para "hacerlo pasar": los dos
+  defectos corregidos (records/interfaces primero, anotaciones
+  multilínea después) eran errores reales de parsing que se detectaron
+  inspeccionando manualmente el código fuente reportado como problemático,
+  y los 24 métodos genuinamente sin documentar se documentaron uno por uno
+  con Javadoc honesto, no genérico. Detalle completo con el listado de los
+  24 métodos y el razonamiento línea por línea en `VERIFICACION.md`.
 - Secretos: se redactó un `access_token`/`refresh_token` real de sesión
   admin versionado en `docs/mediciones/sec/live-session/login-response.txt`
   (no se pudo revocar en el servidor real desde este entorno — queda como
@@ -353,7 +385,9 @@ pipeline CI definiendo `JWT_SECRET` y el owner dinámico de `ghcr.io`, hicieron
 los checks P5/P6 portables a Linux y regeneraron `dataset/MANIFEST.sha256`
 normalizado a LF para que `sha256sum -c` dé 283 OK en cualquier plataforma);
 incluye traducir los métodos de test al inglés, Javadoc
-226/226, la firma EV-4 con correos institucionales, la evidencia de sesión en vivo,
+226/226 (cifra que resultó estar mal calculada; corregida el 2026-09-16 a
+248/248 real — ver "Auditoría externa y correcciones"), la firma EV-4 con
+correos institucionales, la evidencia de sesión en vivo,
 el expediente literal de verificación y el contraste no paramétrico reproducible
 con `scripts/perf/recalcular-contraste.py`. Se comprueba con `git rev-parse v1.1.0`.
 

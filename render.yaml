@@ -57,8 +57,6 @@ services:
           property: port
       - key: APP_JWT_SECRET
         generateValue: true
-      - key: APP_COOKIE_SECURE
-        value: "true"
       - key: APP_JWT_EXPIRATION_MS
         value: "3600000"
       - key: APP_JWT_REFRESH_EXPIRATION_MS

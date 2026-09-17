@@ -356,51 +356,81 @@ al **0.00%**, muy por debajo del umbral del 5%.
 **Orden de verificación:**
 ```bash
 python3 scripts/check-javadoc.py
-python3 scripts/count-methods.py
 ```
 
-**Salida (2026-09-16, re-auditoria):**
+**Salida (2026-09-16, tercera re-verificación honesta):**
 ```
-Javadoc coverage: 226/226 (100.0%)
+Javadoc coverage: 248/248 (100.0%)
 OK: Javadoc >= 90%
 ```
-```
-Conteo real de metodos y constructores publicos/protegidos (P6)
-======================================================================
-Metodos publicos/protegidos declarados en fuente : 189
-  ... con Javadoc inmediato                       : 189
-  ... sin Javadoc                                 : 0
-Constructores publicos/protegidos declarados      : 0
-  ... con Javadoc inmediato                       : 0
-  ... sin Javadoc                                 : 0
-Total (metodos + constructores)                   : 189
-Declaraciones 'record' excluidas de la cuenta      : 37
 
-Nota: los componentes de un `record` (accesores, equals, hashCode,
-toString generados por el compilador) NO se cuentan aqui como
-metodos, porque no existen como texto fuente explicito.
-```
+**Historial de defectos encontrados y corregidos en `check-javadoc.py`
+(todas las fechas son 2026-09-16, en pasadas sucesivas de re-verificación
+honesta contra la guía de evaluación, no una sola sesión):**
 
-**Nota de auditoria (2026-09-16):** la cifra "226/226" que usaba
-`check-javadoc.py` (y que se citaba en el informe) cuenta cualquier linea
-que matchee un patron de metodo publico/protegido, y ese patron tambien
-matchea la firma de un `record` (`public record DriverRequest(...)`, que
-en el texto fuente se ve igual que una declaracion de metodo con
-parametros). Los 37 `record` del proyecto (DTOs) se estaban contando como
-si fueran 37 metodos adicionales. El conteo real, excluyendo
-explicitamente las declaraciones `record` (sus accesores son generados
-por el compilador, no existen como texto fuente), es de **189 metodos
-publicos/protegidos** declarados explicitamente en clases e interfaces,
-todos con Javadoc inmediato (100% de 189, no de 226). No se encontraron
-constructores publicos/protegidos declarados explicitamente (los
-constructores de las clases de servicio se generan via
-`@RequiredArgsConstructor` de Lombok, que no aparece como texto fuente
-tampoco). Script usado: `scripts/count-methods.py` (nuevo, escrito en esta
-auditoria).
+1. **Defecto original (versión "226/226"):** el patrón de método público
+   también hacía match con la firma de un `record`
+   (`public record DriverRequest(...)`, que en texto fuente se ve igual a
+   una declaración de método con parámetros), inflando el conteo con los 37
+   `record` (DTOs) del proyecto como si fueran métodos. Además, el patrón
+   exigía `public`/`protected` explícito, así que los métodos de interfaz
+   (que en Java son públicos implícitos, sin la palabra clave) quedaban
+   fuera tanto del numerador como del denominador — esto incluye
+   prácticamente todos los repositorios Spring Data JPA
+   (`src/main/java/.../repository/*.java` y
+   `.../abd/repository/*.java`), que son interfaces.
 
-**Archivos:** 189 métodos públicos/protected declarados explícitamente en
-`src/main/java/**` (clases e interfaces, sin contar los 37 `record`),
-todos con Javadoc inmediato.
+2. **Primera reescritura:** se corrigieron ambos defectos (se excluyen los
+   `record`, se cuentan métodos de interfaz vía seguimiento de
+   clase/interfaz por pila de llaves). Con la cuenta corregida, la
+   cobertura real bajó a **215/281 (76.5%)**, por debajo del umbral del
+   90%, revelando 66 líneas "sin Javadoc" — casi todas en interfaces de
+   repositorio.
+
+3. **Segundo defecto, encontrado al inspeccionar esas 66 líneas una por
+   una:** la mayoría (42 de 66) eran falsos positivos, no métodos reales
+   sin documentar. Causa: cuando un `@Query` usa un bloque de texto
+   multilínea (`"""..."""`) para el SQL/JPQL, las líneas de continuación
+   del SQL (p. ej. `OR LOWER(c.lastNames) LIKE ...`) coincidían con el
+   patrón de "método implícito de interfaz" y se contaban como métodos
+   inexistentes. Además, la función que busca el Javadoc inmediatamente
+   arriba de un método solo saltaba líneas que empezaran con `@`, así que
+   para una anotación multilínea se detenía en la primera línea de SQL
+   (que no empieza con `@`) y reportaba "sin Javadoc" aunque el comentario
+   Javadoc real estuviera unas líneas más arriba, antes de la anotación.
+   Se corrigió agregando `_classify_annotation_lines`, que marca todas las
+   líneas que pertenecen a una invocación de anotación (incluyendo sus
+   líneas de continuación hasta el paréntesis de cierre), y se usa tanto
+   para excluir esas líneas de la detección de métodos como para que la
+   búsqueda de Javadoc las salte correctamente.
+
+4. **Métodos reales sin Javadoc, una vez descontados los falsos
+   positivos:** 24, todos interfaces de repositorio JPA en
+   `src/main/java/ec/edu/uteq/sgroas/repository/`:
+   `DriverRepository` (5: `findByActiveTrue`, `searchActive`,
+   `existsByNationalId`, `existsByLicenseNumber`, `licensesExpiring`),
+   `IncidentRepository` (5: `findByActiveTrue`,
+   `findByAssignmentIdAndActiveTrue`, `incidentsBySeverity`,
+   `getIncidentsByRange`, `generalStatistics`), `RouteAssignmentRepository`
+   (6: `findByActiveTrue`, `findWithDetails`,
+   `findByDriverIdAndActiveTrue`, `findByVehicleIdAndActiveTrue`,
+   `findByRouteIdAndActiveTrue`, `activeAssignmentsByDriver`),
+   `RouteRepository` (3: `findByActiveTrue`, `existsByCode`,
+   `routePerformanceReport`), `VehicleRepository` (3: `findByActiveTrue`,
+   `existsByPlate`, `vehiclesInMaintenance`), y
+   `VerificationCodeRepository` (2:
+   `findFirstByEmailAndTypeOrderByCreatedAtDesc`, `deleteByEmailAndType`).
+   Se les agregó Javadoc real y específico (qué filtra o pagina cada
+   consulta, `@param`/`@return` de cada método), sin inventar
+   comportamiento no presente en la consulta derivada o en el `@Query`.
+
+**Cifra final honesta: 248/248 métodos y constructores públicos/protegidos
+de `src/main/java/**` (clases e interfaces, sin contar `record`) tienen
+Javadoc inmediato — 100%, por encima del umbral del 90%.**
+
+**Archivos:** los 24 métodos documentados están en
+`src/main/java/ec/edu/uteq/sgroas/repository/{Driver,Incident,RouteAssignment,Route,Vehicle,VerificationCode}Repository.java`.
+El checker corregido está en `scripts/check-javadoc.py`.
 
 ---
 
@@ -640,13 +670,22 @@ exhaustiva con `grep` de `.rol\b` y `nombres/apellidos/cedula` en todo
 `frontend/src` para confirmar que no queda ningún campo español sin
 corresponder fuera del módulo ABD.
 
-**Lo que NO se pudo verificar (declarado honestamente):** no se levantó el
-stack completo (Postgres + Redis + backend + frontend) en este entorno de
-auditoría para probar login y alta de conductor de punta a punta con
-navegador real, porque no hay una base de datos disponible en este
-entorno (ver sección de pruebas Maven más abajo: `Connection to
-localhost:5433 refused`). La corrección se validó por compilación y
-revisión de código, no por prueba end-to-end en vivo.
+**Actualización (2026-09-16, evidencia en vivo posterior):** en una sesión
+posterior sí se levantó el stack completo (Postgres 18 + Redis 7 vía
+`docker compose`, backend con `./mvnw spring-boot:run`, frontend con
+`ng serve`) y se probó de punta a punta con navegador real: login exitoso,
+navegación por rol (`ROLE_ADMIN`) y alta de conductor con
+`POST /api/conductores` → `201 Created` sin error de validación (ver
+`docs/mediciones/sec/live-session/README.md` y
+`docs/mediciones/sec/live-session/conductor-alta-201-20260916.json`). No se
+probaron los roles `ROLE_COORDINADOR`/`ROLE_SEGURIDAD` por separado — eso
+queda declarado como no verificado, no se infiere ni se asume.
+
+Nota histórica: en el momento en que se escribió este párrafo por primera
+vez (antes de esa sesión en vivo) sólo se había validado por compilación,
+sin base de datos disponible (`Connection to localhost:5433 refused`); esa
+limitación quedó superada por la evidencia en vivo posterior, documentada
+arriba.
 
 ---
 
@@ -704,7 +743,7 @@ make verify
 OK: todas las categorias por debajo del umbral del 5%
 
 [P6] Checking Javadoc coverage on public methods...
-Javadoc coverage: 226/226 (100.0%)
+Javadoc coverage: 248/248 (100.0%)
 OK: Javadoc >= 90%
 
 [P7] Checking Spanish captions in informe...

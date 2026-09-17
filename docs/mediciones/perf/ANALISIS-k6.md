@@ -131,7 +131,7 @@ del codigo en si.
 1. **Local (K1):** el sistema cumple el umbral p95 < 200 ms con holgura (p95 maximo 173 ms).
 2. **Render free (K4-K8):** el plan gratuito (0,1 vCPU) no permite cumplir el umbral. El p95 va de 4,3 s a 11,4 s. No es regresion del codigo.
 3. **Frio vs caliente:** la diferencia es significativa (p = 0,009, d = -1.00), confirmando que el throttling de CPU es el factor dominante.
-4. **Recomendaciones:** (1) activar `@Cacheable` en `ConductorService.listar`, o (2) migrar a plan no gratuito de Render.
+4. **Recomendaciones:** (1) activar `@Cacheable` en `DriverService.list` (nombre actualizado tras el renombrado P5; antes `ConductorService.listar`), o (2) migrar a plan no gratuito de Render.
 
 ## Reproducibilidad
 
