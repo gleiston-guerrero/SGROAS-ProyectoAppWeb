@@ -78,6 +78,8 @@ pdf:
 
 docs: versions
 	$(PYTHON) scripts/gen-figuras.py
+	$(PYTHON) scripts/gen-sus-demografia-figura.py
+	$(PYTHON) scripts/gen-c4-diagramas.py
 	@echo "Artefactos de documentacion generados."
 
 all: up test bench audit jacoco docs pdf
@@ -133,6 +135,7 @@ verify:
 	@echo ""
 	@echo "[P8] Checking SUS demographics script..."
 	@$(PYTHON) scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv > /dev/null 2>&1 && echo "  OK: SUS demographics script runs"
+	@bash scripts/validate-sus-demografia.sh
 	@echo "[P8] OK"
 	@echo ""
 	@echo "[P9] Checking Postman collection..."

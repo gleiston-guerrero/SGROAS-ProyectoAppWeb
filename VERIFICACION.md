@@ -460,6 +460,38 @@ grep -rn "caption{" docs/informe-final/ 2>/dev/null | wc -l
 figuras generadas por scripts con rótulos en inglés (ver Makefile target `docs`).
 Textos dentro de las figuras (tablas y ejes) producidos por `scripts/gen-figuras.py` en inglés.
 
+**Corrección de contenido en figuras, no solo captions (2026-09-17):**
+
+La guía señaló dos defectos de contenido dentro de las propias imágenes
+(el grep de arriba solo mira `\caption{...}`, nunca el contenido real de
+un PNG):
+
+1. Los diagramas C4 (`docs/arquitectura/c4-nivel1-contexto.png` y
+   `c4-nivel2-contenedores.png`, copiados a `docs/informe-final/
+   c4-level1-context.png` y `c4-level2-containers.png`) decían "Vue.js
+   Frontend" / "[Container: Vue.js 3]", pese a que el frontend real es
+   Angular:
+   ```
+   $ grep -n "@angular/core" frontend/package.json
+   27:    "@angular/core": "^20.3.0",
+   ```
+   Se corrigieron los `.dsl` fuente
+   (`docs/arquitectura/c4-nivel*.dsl`) y se regeneraron los 4 PNG con
+   `scripts/gen-c4-diagramas.py` (nuevo), que lee el nombre/tecnología del
+   contenedor frontend directamente del `.dsl` en vez de repetirlo
+   hardcodeado.
+2. `dataset/sus/fig-sus-demografia.png` (referenciada desde
+   `cap5-materiales-metodos.tex`) tenía los tres paneles en español
+   ("Sexo", "Masculino", "Experiencia web") y un error de encoding en el
+   título ("Demograf?a"). No existía ningún script en el repositorio que
+   la generara. Se creó `scripts/gen-sus-demografia-figura.py`, que la
+   regenera desde `dataset/sus/sus-raw.csv` en inglés, con los mismos 15
+   valores. Verificado con `grep -rln "Vue" docs/arquitectura/` (sin
+   resultados) y revisión visual de las 3 figuras regeneradas.
+
+Ambos scripts se agregaron al target `docs` del Makefile para que dejen de
+ser artefactos huérfanos.
+
 ---
 
 ## P8 — Demografía SUS con trazabilidad CSV (0.7)
@@ -470,7 +502,7 @@ python3 scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv
 bash scripts/validate-sus-demografia.sh
 ```
 
-**Salida (2026-09-15):**
+**Salida (2026-09-15, resumen de texto — histórica):**
 ```
 Total participants: 15
 Codes: P01..P15
@@ -481,14 +513,56 @@ SUS score: mean=68.5, min=47.5, max=90.0
 OK: demografia cap.5 cruza 1:1 con sus-raw.csv (n=15, 8H/7M, 19-25, B3/M10/A2, media SUS 68.5)
 ```
 
+**Corrección de fondo (2026-09-17) — el "OK" de arriba era engañoso:** el
+propio `scripts/validate-sus-demografia.sh` **nunca leía el `.tex`**;
+comparaba el CSV contra constantes fijas escritas a mano en el script
+(8, 7, 19-25, 3/10/2, 68.5, 47.5, 90.0). Ese "OK" habría salido igual
+aunque la tabla del informe tuviera datos completamente distintos. Se
+reescribió para que extraiga cada fila de `tab:sus-demografia` con regex y
+la compare, campo por campo, contra `sus-raw.csv`. Salida real, re-ejecutada
+ahora mismo en este working tree:
+
+```
+$ python3 scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv
+Total participants: 15
+Codes: P01, P02, P03, P04, P05, P06, P07, P08, P09, P10, P11, P12, P13, P14, P15
+Gender: 8 male, 7 female
+Age range: 19-25 years (mean 21.2)
+Web experience: Baja=3, Media=10, Alta=2
+Devices: {'Computadora': 15}
+SUS score: mean=68.5, min=47.5, max=90.0
+
+$ bash scripts/validate-sus-demografia.sh
+OK: las 15 filas de tab:sus-demografia (cap5-materiales-metodos.tex) cruzan 1:1, campo por campo, con dataset/sus/sus-raw.csv (codigo, edad, sexo, experiencia_web, sus_score)
+```
+
+Se verificó además que el script SÍ detecta discrepancias reales (no que
+"siempre pasa"): en una copia temporal fuera del repositorio, alterando la
+edad de P01 en el `.tex` de 23 a 99, el script reportó
+`ERROR: P01: edad tex=99 != csv=23` y salió con código 1.
+
+Adicionalmente, `scripts/generate-sus-demographics.py --latex` ahora
+genera la tabla LaTeX completa (antes solo imprimía un resumen de texto;
+la tabla del informe se mantenía a mano). Verificado que la salida es
+byte por byte idéntica a la tabla actual:
+```
+$ python3 scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv --latex > /tmp/gen.txt
+$ diff <(sed -n '87,112p' docs/informe-final/cap5-materiales-metodos.tex | tr -d '\r') <(tr -d '\r' < /tmp/gen.txt)
+(sin salida = archivos identicos)
+```
+
+`make verify` ([P8]) ahora corre también `validate-sus-demografia.sh`
+(antes solo confirmaba que `generate-sus-demographics.py` no fallara al
+ejecutarse).
+
 **Archivos:**
 - `dataset/sus/sus-raw.csv` — datos crudos (15 participantes)
-- `scripts/generate-sus-demographics.py` — regenera la tabla desde el CSV
-- `scripts/validate-sus-demografia.sh` — cruza la demografía del cap.5 1:1 con el CSV
-- Tabla `tab:sus-demografia` en `docs/informe-final/capitulos/cap5-materiales-metodos.tex`
-  (sección "Participantes SUS"), regenerada desde el CSV por
-  `scripts/generate-sus-demographics.py` y cruzada 1:1 con el CSV por
-  `scripts/validate-sus-demografia.sh`
+- `scripts/generate-sus-demographics.py` — regenera el resumen de texto Y
+  la tabla LaTeX (`--latex`) desde el CSV
+- `scripts/validate-sus-demografia.sh` — cruza fila por fila `tab:sus-demografia`
+  (leída del `.tex` real) contra el CSV
+- Tabla `tab:sus-demografia` en `docs/informe-final/cap5-materiales-metodos.tex`
+  (sección "Participantes SUS")
 
 ---
 

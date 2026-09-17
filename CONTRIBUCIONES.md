@@ -174,6 +174,31 @@ documentación real de los métodos faltantes: **248/248 (100%)**).
 
 **Commit:** `33e25e5` — "P7: translate all Spanish table and listing captions to English"
 
+**Corrección adicional (2026-09-17):** además de los captions, la guía
+señaló dos defectos de contenido en las propias figuras (no en su texto de
+`\caption`), que seguían sin corregirse:
+
+- Los diagramas C4 (`docs/arquitectura/c4-nivel1-contexto.dsl/.png` y
+  `c4-nivel2-contenedores.dsl/.png`, copiados también a
+  `docs/informe-final/c4-level1-context.png` y `c4-level2-containers.png`)
+  decían "Vue.js Frontend" / "[Container: Vue.js 3]" — el frontend real es
+  Angular 20 (`frontend/package.json`: `"@angular/core": "^20.3.0"`).
+  Se corrigieron los `.dsl` fuente y se regeneraron ambos PNG con
+  `scripts/gen-c4-diagramas.py` (no hay Structurizr disponible en este
+  entorno; el script recrea el mismo layout con matplotlib, leyendo el
+  nombre/tecnología del contenedor frontend directamente del `.dsl` en vez
+  de repetirlo hardcodeado, para que no se vuelva a desincronizar).
+- `dataset/sus/fig-sus-demografia.png` (fuera del informe, pero
+  referenciada desde `docs/informe-final/cap5-materiales-metodos.tex`)
+  tenía los tres paneles completamente en español ("Sexo", "Masculino",
+  "Experiencia web", etc.) y un error de encoding en el título
+  ("Demograf?a"). No existía ningún script en el repositorio que la
+  generara (archivo huérfano, añadido directo en el commit `7e49da9`). Se
+  creó `scripts/gen-sus-demografia-figura.py`, que la regenera desde
+  `dataset/sus/sus-raw.csv` con las mismas 15 filas y en inglés, y se
+  agregó al target `docs` del Makefile para que deje de ser un archivo
+  huérfano.
+
 ---
 
 ## P8 — Script demografía SUS (commit 5fa09b4)
@@ -217,6 +242,37 @@ $ git log --format='%H %ad %an %ae %s' --date=short --diff-filter=A -- "docs/med
 
 **Commit:** `5fa09b4` — "P8: add script to generate SUS demographics from raw CSV" (script);
 `e8d7e2f` (datos crudos originales, Escudero Plaza)
+
+**Corrección de fondo (2026-09-17) — dos defectos que la guía señaló y no
+se habían corregido:**
+
+1. `scripts/generate-sus-demographics.py` solo imprimía un resumen de
+   texto; la tabla LaTeX real de `docs/informe-final/cap5-materiales-metodos.tex`
+   (`tab:sus-demografia`) se mantenía a mano, sin generarse desde el CSV.
+   Se le agregó una opción `--latex` que imprime las filas
+   `\begin{tabular}...\end{tabular}` completas listas para pegar en el
+   `.tex`. Verificado que la salida es **byte por byte idéntica** a la
+   tabla actual del informe:
+   ```
+   $ python3 scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv --latex > /tmp/gen.txt
+   $ diff <(sed -n '87,112p' docs/informe-final/cap5-materiales-metodos.tex | tr -d '\r') <(tr -d '\r' < /tmp/gen.txt)
+   (sin salida = archivos idénticos)
+   ```
+2. `scripts/validate-sus-demografia.sh` **no leía el `.tex` en absoluto**:
+   comparaba el CSV contra un puñado de constantes fijas escritas a mano
+   en el propio script (8 hombres, 7 mujeres, media 68.5, etc.), que
+   pasaban aunque la tabla del informe se editara con datos distintos —
+   nunca se leía su contenido real. Se reescribió para extraer cada fila
+   de `tab:sus-demografia` con una expresión regular y compararla, campo
+   por campo, contra la fila correspondiente de `sus-raw.csv`. Se
+   verificó que el nuevo script sí detecta discrepancias reales
+   (prueba con una copia temporal donde se alteró una edad en el `.tex`
+   → el script reportó `ERROR: P01: edad tex=99 != csv=23` y salió con
+   código 1; no se dejó esa prueba en el repositorio, solo se confirmó el
+   comportamiento).
+3. `make verify` ([P8]) ahora corre también `validate-sus-demografia.sh`
+   (antes solo confirmaba que `generate-sus-demographics.py` no fallara al
+   ejecutarse, sin cruzar nada contra el informe).
 
 ---
 

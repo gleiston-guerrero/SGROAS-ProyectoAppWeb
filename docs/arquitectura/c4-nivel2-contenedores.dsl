@@ -4,7 +4,7 @@ workspace "SGROAS - Level 2 - Containers" {
         u = person "User" "System operator"
 
         sgroas = softwareSystem "SGROAS" "Fleet management platform" {
-            frontend = container "Vue.js Frontend" "SPA application" "Vue.js 3"
+            frontend = container "Angular Frontend" "SPA application" "Angular 20"
             api = container "Spring Boot REST API" "Java backend" "Spring Boot 3.5 + Java 21"
             db = container "PostgreSQL Database" "Primary storage" "PostgreSQL 16"
             cache = container "Redis" "Distributed cache" "Redis 7"

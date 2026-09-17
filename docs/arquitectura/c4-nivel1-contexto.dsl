@@ -4,7 +4,7 @@ workspace "SGROAS - Route and Operations Assignment Management System" "Fleet ma
         u = person "User" "System operator (admin, coordinator, security)"
         s = softwareSystem "SGROAS API" "Management platform for routes, drivers, vehicles and incidents"
 
-        u -> s "Uses the platform via" "REST API / Vue.js frontend"
+        u -> s "Uses the platform via" "REST API / Angular frontend"
     }
 
     views {
