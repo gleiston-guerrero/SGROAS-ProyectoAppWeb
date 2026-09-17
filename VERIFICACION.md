@@ -558,7 +558,8 @@ sha256sum -c dataset/MANIFEST.sha256
 
 **Re-verificacion (2026-09-17): salida LITERAL completa, sin recortar
 ("..."), del comando real ejecutado en este working tree
-(`tr -d '' < dataset/MANIFEST.sha256 | sha256sum -c -`, necesario en
+(`tr -d '
+' < dataset/MANIFEST.sha256 | sha256sum -c -`, necesario en
 Windows por CRLF de este checkout local; en un clon Linux
 `sha256sum -c dataset/MANIFEST.sha256` funciona directo por el
 `eol=lf` de `.gitattributes`):**
@@ -847,24 +848,289 @@ dataset/zap/zap-baseline-2026-09-06.html: OK
 dataset/zap/zap-baseline-2026-09-06.md: OK
 dataset/zenodo.json: OK
 ```
-
-283 lineas, las 283 con `: OK`, cero fallos. Esto corrige un defecto que
-la guia externa ya habia senalado en EV-1 ("el expediente recorta la
-salida con '...' en lugar de pegarla entera").
-
-La verificación también se cubre con el script PowerShell (`scripts/verify-manifest.ps1`):
-`Results: 283 OK, 0 FAILED, 0 MISSING out of 283 entries`.
-
-**Archivos:**
-- `dataset/MANIFEST.sha256` — 283 entradas SHA-256 (LF)
-- `scripts/verify-manifest.ps1` — verificación (equivalente a `sha256sum -c`)
-- `scripts/regenerate-manifest.ps1` — regeneración
-
----
-
-## P11 — Instrumento Brooke + consentimientos (0.8)
-
-**Orden de verificación:**
+dataset/DATA-DICTIONARY.md: OK
+dataset/DATA-PROVENANCE.md: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdAlertController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdAlertController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdCatalogController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdCatalogController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdDriverController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdDriverController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdIncidentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdIncidentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdReportController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdReportController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdRouteController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdRouteController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdScheduleController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdScheduleController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdUnitController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdUnitController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdIncidentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdIncidentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdRouteRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdRouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AlertResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CatalogsResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CityResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CountResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ProvinceResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$RolResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ScheduleRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ScheduleResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$SummaryResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$TerminalResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$TopRouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$UnitRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$UnitResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdCatalogService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdCatalogService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdIncidentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdIncidentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdReportService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdReportService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdRouteService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdRouteService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdScheduleService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdScheduleService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdUnitService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdUnitService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/CacheConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/CacheConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/OpenApiConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/OpenApiConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RedisConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RedisConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RenderDataSourceConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RenderDataSourceConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/SecurityConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/SecurityConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/AuthController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/AuthController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/DriverController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/DriverController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/IncidentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/IncidentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/ReportController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/ReportController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteAssignmentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteAssignmentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/UserController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/UserController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/VehicleController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/VehicleController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/AuthResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/AuthResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/EmailRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/EmailRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ErrorResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ErrorResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/LoginRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/LoginRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RefreshTokenRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RefreshTokenRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ResetPasswordRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ResetPasswordRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/SessionResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/SessionResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VerifyEmailRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VerifyEmailRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/AssignmentStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/AssignmentStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/DriverStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/DriverStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentSeverity.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentSeverity.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentType.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentType.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/Role.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/Role.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/RouteStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/RouteStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/VehicleStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/VehicleStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/GlobalExceptionHandler.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/GlobalExceptionHandler.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/UnverifiedEmailException.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/UnverifiedEmailException.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/CustomUserDetailsService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/CustomUserDetailsService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtAuthenticationFilter.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtAuthenticationFilter.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/LoginRateLimiter.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/LoginRateLimiter.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/AuthService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/AuthService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/DriverService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/DriverService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/EmailService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/EmailService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/IncidentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/IncidentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/ReportService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/ReportService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteAssignmentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteAssignmentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/TokenService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/TokenService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/UserService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/UserService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VehicleService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VehicleService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService$Type.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/SgroasApplication.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/SgroasApplication.java.html: OK
+dataset/jacoco/index.html: OK
+dataset/jacoco/jacoco.csv: OK
+dataset/jacoco/jacoco.xml: OK
+dataset/jacoco/jacoco-resources/branchfc.gif: OK
+dataset/jacoco/jacoco-resources/branchnc.gif: OK
+dataset/jacoco/jacoco-resources/branchpc.gif: OK
+dataset/jacoco/jacoco-resources/bundle.gif: OK
+dataset/jacoco/jacoco-resources/class.gif: OK
+dataset/jacoco/jacoco-resources/down.gif: OK
+dataset/jacoco/jacoco-resources/greenbar.gif: OK
+dataset/jacoco/jacoco-resources/group.gif: OK
+dataset/jacoco/jacoco-resources/method.gif: OK
+dataset/jacoco/jacoco-resources/package.gif: OK
+dataset/jacoco/jacoco-resources/prettify.css: OK
+dataset/jacoco/jacoco-resources/prettify.js: OK
+dataset/jacoco/jacoco-resources/redbar.gif: OK
+dataset/jacoco/jacoco-resources/report.css: OK
+dataset/jacoco/jacoco-resources/report.gif: OK
+dataset/jacoco/jacoco-resources/session.gif: OK
+dataset/jacoco/jacoco-resources/sort.gif: OK
+dataset/jacoco/jacoco-resources/sort.js: OK
+dataset/jacoco/jacoco-resources/source.gif: OK
+dataset/jacoco/jacoco-resources/up.gif: OK
+dataset/jacoco/jacoco-sessions.html: OK
+dataset/lighthouse/lhci-20260730-2115.json: OK
+dataset/lighthouse/lhci-20260730-2117.json: OK
+dataset/lighthouse/lh-desktop-1.json: OK
+dataset/lighthouse/lh-desktop-2.json: OK
+dataset/lighthouse/lh-desktop-3.json: OK
+dataset/lighthouse/lh-mobile-1.json: OK
+dataset/lighthouse/lh-mobile-2.json: OK
+dataset/lighthouse/lh-mobile-3.json: OK
+dataset/lighthouse/lh-tablet-1.json: OK
+dataset/lighthouse/lh-tablet-2.json: OK
+dataset/lighthouse/lh-tablet-3.json: OK
+dataset/lighthouse/REPORT.md: OK
+dataset/lighthouse/RESUMEN.md: OK
+dataset/perf/ANALISIS-BOOTSTRAP.md: OK
+dataset/perf/ANALISIS-k6.md: OK
+dataset/perf/bootstrap.json: OK
+dataset/perf/estadisticas.csv: OK
+dataset/perf/estadisticas.json: OK
+dataset/perf/figuras/fig-error-rate.png: OK
+dataset/perf/figuras/fig-media-ic95.png: OK
+dataset/perf/figuras/fig-p95-por-corrida.png: OK
+dataset/perf/figuras/fig-percentiles-corridas.png: OK
+dataset/perf/k01-run1.json: OK
+dataset/perf/k02-run2.json: OK
+dataset/perf/k03-run3.json: OK
+dataset/perf/k04-cold.json: OK
+dataset/perf/k04-run1.json: OK
+dataset/perf/k05-cold.json: OK
+dataset/perf/k05-run1.json: OK
+dataset/perf/k06-cold.json: OK
+dataset/perf/k06-run1.json: OK
+dataset/perf/k07-cold.json: OK
+dataset/perf/k07-run1.json: OK
+dataset/perf/k08-cold.json: OK
+dataset/perf/k08-run1.json: OK
+dataset/perf/RENDER-REPORT.md: OK
+dataset/perf/REPORT.md: OK
+dataset/README.md: OK
+dataset/sus/ANALISIS-SUS.md: OK
+dataset/sus/CONSENT-FORM.md: OK
+dataset/sus/CONSENT-REGISTRY.md: OK
+dataset/sus/estadisticas-item.json: OK
+dataset/sus/estadisticas-sus.json: OK
+dataset/sus/fig-sus-demografia.png: OK
+dataset/sus/figuras/fig-sus-item-respuestas.png: OK
+dataset/sus/figuras/fig-sus-por-participante.png: OK
+dataset/sus/P01.json: OK
+dataset/sus/P02.json: OK
+dataset/sus/P03.json: OK
+dataset/sus/P04.json: OK
+dataset/sus/P05.json: OK
+dataset/sus/P06.json: OK
+dataset/sus/P07.json: OK
+dataset/sus/P08.json: OK
+dataset/sus/P09.json: OK
+dataset/sus/P10.json: OK
+dataset/sus/P11.json: OK
+dataset/sus/P12.json: OK
+dataset/sus/P13.json: OK
+dataset/sus/P14.json: OK
+dataset/sus/P15.json: OK
+dataset/sus/REPORT.md: OK
+dataset/sus/SUS-INSTRUMENT.md: OK
+dataset/sus/sus-raw.csv: OK
+dataset/zap/RESUMEN.md: OK
+dataset/zap/zap.html: OK
+dataset/zap/zap.md: OK
+dataset/zap/zap-baseline-2026-09-06.html: OK
+dataset/zap/zap-baseline-2026-09-06.md: OK
+dataset/zenodo.json: OK
 ```bash
 grep -cE "^[0-9]+\. " dataset/sus/SUS-INSTRUMENT.md
 grep -c "| Yes" dataset/sus/CONSENT-REGISTRY.md
@@ -883,7 +1149,7 @@ dataset/sus/CONSENT-FORM.md
 - `dataset/sus/CONSENT-FORM.md` — Consentimiento informado según LOPDP
 - `dataset/sus/CONSENT-REGISTRY.md` — constancia de aceptación de los 15 participantes (P01..P15)
 
-**Riesgo de Piso 3 — NO resuelto, declarado honestamente (2026-09-16):**
+**Riesgo de Piso 3 — RESUELTO el 2026-09-17 con evidencia real (ver historial completo abajo):**
 
 `dataset/sus/CONSENT-REGISTRY.md` afirma que los 15 participantes firmaron
 consentimiento el 2026-08-15 "antes de la evaluación", pero
@@ -905,18 +1171,68 @@ ce0099f1ed27d1ffded45f02fa7ca2c4ab1f9002 2026-09-01 Alxjandr07
 771b48ed9b89f3dd718178d70436c383ad1635b3 2026-08-16 TheAsesink
 ```
 
-No existe en el repositorio ninguna constancia de consentimiento firmada
-de forma independiente (PDF, imagen, firma digital) para ningún
-participante. Se consolidó todo en
-`docs/etica/consentimientos/CONSENT-STATUS.md` (nuevo) con el detalle
-completo, se dejó una nota de discrepancia en ambos registros existentes
-(no se borró ni se inventó ninguna fecha), y se corrigió el nombre de la
-universidad ("Quintanilla Normal University" -> "Universidad Técnica
-Estatal de Quevedo") en `dataset/sus/CONSENT-FORM.md`, única ocurrencia en
-todo el repositorio (`grep -rln "Quintanilla Normal University" .` = 1
-archivo antes de la corrección, 0 después). **Conclusión: P11 no puede
-calificarse al máximo mientras no exista una constancia de consentimiento
-verificable con fecha coherente.**
+Hasta el 2026-09-16, no existía en el repositorio ninguna constancia de
+consentimiento firmada de forma independiente para ningún participante. Se
+consolidó todo en `docs/etica/consentimientos/CONSENT-STATUS.md` (nuevo en
+esa fecha) con el detalle completo, se dejó una nota de discrepancia en
+ambos registros existentes (no se borró ni se inventó ninguna fecha), y se
+corrigió el nombre de la universidad ("Quintanilla Normal University" ->
+"Universidad Técnica Estatal de Quevedo") en `dataset/sus/CONSENT-FORM.md`,
+única ocurrencia en todo el repositorio.
+
+**Actualización 2026-09-17 — constancias reales localizadas:** el equipo
+encontró los 15 formularios de consentimiento firmados en papel
+(`p01 firma.pdf` … `p15 firma.pdf`). Verificación realizada por esta
+auditoría sobre los archivos reales:
+
+```
+$ python3 -c "
+import hashlib, os
+d = r'consentimientos firmados pdf'
+for i in range(1,16):
+    code = f'P{i:02d}'
+    path = os.path.join(d, f'p{i:02d} firma.pdf')
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        h.update(f.read())
+    print(f'{code}: {h.hexdigest()}')
+"
+P01: a3034963a789df06cff212b43d2ef6e5c9b96ddc3cdf335e8b34b83e5c05739a
+P02: 8381f4e8f0fe16dd05ddc668d200d5deefc5d1be5db66800ebdfe9c69cdec5f8
+P03: 33f4417909ee4fce3f2d13063445f10cbf1a5e70201ec41aa0f9904abcb726fb
+P04: b3d0a209390f4e43abf79fac827110b277aaf0de08ee8fdffc37e6290496cad3
+P05: 8aeba8200d4b814820d4f3487f561c1820665bb769610ee118252cad5787c2f0
+P06: a00523abf50a51937ebcf9b6b89d1e5014cf645172ca285b6e3ecc8214959b10
+P07: f36ed2050e67272494e7d3d6f96bd413d8cf3cf8502e9cd2f3203d7bcdb558fd
+P08: 11891dd8e8a4fd382da0a82ff0cb7db2364a2eee8fc4a6d30754b79758645179
+P09: db055bc4c2429933d98d6a6344c35c3e412d33948dcd9e3671a62af3d682e593
+P10: b0b864109c3665c9430a8b6bab5c7d1cbd22d39ac3759843a56dfdd826d283df
+P11: 6113753eb0aa166f95f921acb47996e48ca7327d8a994b37f853a2e1ce451c50
+P12: a9aba08d40926da009928790f26848b4efc4314e8c3a79623969014e5c1c13e4
+P13: 322beccf5d42f83d2313d698b84ac4016cb877951981ec7d3431907afbd99881
+P14: 341cf1b59d4e3606a051d4ae601581dec1e3c1a0f1bfa817ba160a020462fb44
+P15: b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee
+```
+
+15 hashes distintos (0 duplicados), recalculados también con `sha256sum`
+con resultado idéntico. Fecha de firma extraída de cada PDF con
+`pdftotext -layout`: P01–P10 = 2026-07-24, P11–P15 = 2026-07-26 — ambas
+antes de la evaluación real de cada grupo (P01–P10: 2026-07-30, respaldado
+por el commit `e8d7e2f` del mismo día; P11–P15: 2026-08-03, declarado por el
+equipo, sin artefacto de git que lo confirme de forma independiente).
+
+Los documentos originales **no se subieron al repositorio** (contienen
+firmas manuscritas); el registro público
+(`dataset/sus/CONSENT-REGISTRY.md`, reescrito) solo publica el hash de cada
+uno. Detalle completo en `docs/etica/consentimientos/CONSENT-STATUS.md`
+sección 7.
+
+**Conclusión: el riesgo de Piso 3 sobre P11 queda resuelto** — ya no hay
+fechas contradictorias ni constancias inventadas; hay consentimiento
+individual verificable, previo a la evaluación, para los 15 participantes.
+La única reserva declarada es que la fecha de evaluación de P11–P15
+(2026-08-03) es una declaración del equipo, no confirmada por un artefacto
+de git independiente como sí ocurre con P01–P10.
 
 ---
 

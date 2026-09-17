@@ -108,3 +108,89 @@ Estatal de Quevedo (UTEQ)", que es el nombre correcto usado de forma
 consistente en el resto del repositorio (ver `docs/etica/consentimientos/plantilla.md`).
 Se verificó con `grep -rln "Quintanilla Normal University"` que esta era la
 única ocurrencia en todo el repositorio.
+
+---
+
+## 7. Resolución (2026-09-17): constancias reales localizadas y verificadas
+
+Todo lo anterior (secciones 1-6) documenta el estado del repositorio **hasta
+el 2026-09-16**: sin ninguna constancia verificable. El 2026-09-17 el equipo
+localizó los 15 formularios de consentimiento firmados en papel, escaneados a
+PDF, con nombres de archivo `p01 firma.pdf` … `p15 firma.pdf`. Se verificaron
+de la siguiente forma:
+
+```
+$ python3 -c "
+import hashlib, os
+d = r'consentimientos firmados pdf'
+for i in range(1,16):
+    code = f'P{i:02d}'
+    path = os.path.join(d, f'p{i:02d} firma.pdf')
+    h = hashlib.sha256()
+    with open(path, 'rb') as f:
+        h.update(f.read())
+    print(f'{code}: {h.hexdigest()}')
+"
+P01: a3034963a789df06cff212b43d2ef6e5c9b96ddc3cdf335e8b34b83e5c05739a
+P02: 8381f4e8f0fe16dd05ddc668d200d5deefc5d1be5db66800ebdfe9c69cdec5f8
+P03: 33f4417909ee4fce3f2d13063445f10cbf1a5e70201ec41aa0f9904abcb726fb
+P04: b3d0a209390f4e43abf79fac827110b277aaf0de08ee8fdffc37e6290496cad3
+P05: 8aeba8200d4b814820d4f3487f561c1820665bb769610ee118252cad5787c2f0
+P06: a00523abf50a51937ebcf9b6b89d1e5014cf645172ca285b6e3ecc8214959b10
+P07: f36ed2050e67272494e7d3d6f96bd413d8cf3cf8502e9cd2f3203d7bcdb558fd
+P08: 11891dd8e8a4fd382da0a82ff0cb7db2364a2eee8fc4a6d30754b79758645179
+P09: db055bc4c2429933d98d6a6344c35c3e412d33948dcd9e3671a62af3d682e593
+P10: b0b864109c3665c9430a8b6bab5c7d1cbd22d39ac3759843a56dfdd826d283df
+P11: 6113753eb0aa166f95f921acb47996e48ca7327d8a994b37f853a2e1ce451c50
+P12: a9aba08d40926da009928790f26848b4efc4314e8c3a79623969014e5c1c13e4
+P13: 322beccf5d42f83d2313d698b84ac4016cb877951981ec7d3431907afbd99881
+P14: 341cf1b59d4e3606a051d4ae601581dec1e3c1a0f1bfa817ba160a020462fb44
+P15: b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee
+```
+
+Verificaciones adicionales realizadas:
+- Los 15 hashes son distintos entre sí (0 duplicados).
+- Se recalcularon con `sha256sum` (Git Bash) y con `hashlib.sha256` (Python)
+  de forma independiente, con resultados idénticos en ambas herramientas.
+- Se extrajo con `pdftotext -layout` la fecha de firma legible de cada uno
+  de los 15 PDF, confirmando: **P01–P10 firmados el 2026-07-24**, **P11–P15
+  firmados el 2026-07-26**.
+- Ninguno de los 15 documentos menciona "Quintanilla Normal University" ni
+  ningún otro nombre de institución (el formulario firmado no incluye ese
+  campo).
+
+### Coherencia cronológica final
+
+| Grupo | Firma de consentimiento | Evaluación real | Consentimiento previo a la evaluación |
+|---|---|---|---|
+| P01–P10 | 2026-07-24 | 2026-07-30 (`e8d7e2f`, ver sección 2) | Sí, 6 días antes |
+| P11–P15 | 2026-07-26 | 2026-08-03 (declarada por el equipo; los archivos `P11.json`–`P15.json` se subieron al repo después, el 2026-08-16) | Sí, 8 días antes |
+
+Con esto, los **15 participantes tienen consentimiento informado individual,
+firmado en papel antes de su respectiva evaluación**, con evidencia
+verificable mediante hash sin necesidad de exponer las firmas o identidades
+reales en el repositorio público. Los documentos originales **no se suben a
+este repositorio** — se conservan fuera de control de versiones, en poder
+del equipo, siguiendo el mismo principio de protección de datos personales
+descrito en la sección 5.
+
+### Por qué no se borran las secciones 1-6
+
+Las secciones anteriores documentan un hallazgo real de esta auditoría (dos
+registros contradictorios, sin respaldo, que existieron en el repositorio
+durante semanas) y el proceso honesto seguido para resolverlo. Borrarlas
+ahora que se encontró la evidencia real daría la impresión de que la
+contradicción nunca existió. Se mantienen como registro histórico de la
+auditoría, con esta sección 7 documentando la resolución final.
+
+### Conclusión actualizada
+
+**El riesgo de Piso 3 sobre P11 queda resuelto**: ya no hay una fecha
+inventada ni una contradicción sin explicar — hay evidencia verificable
+(hash + fecha de firma legible en cada documento) de consentimiento
+individual, previo a la evaluación, para los 15 participantes. La única
+reserva que queda, y que se declara explícitamente, es que la fecha de
+evaluación de P11–P15 (2026-08-03) es una declaración del equipo, no algo
+verificado de forma independiente contra un artefacto externo (a diferencia
+de P01–P10, cuya fecha de evaluación sí está respaldada por un commit de git
+del mismo día en que se generaron los resultados agregados).
