@@ -270,8 +270,30 @@ mantienen cubren access_token y refresh_token en login, refresh y logout.
   `Set-Cookie: access_token=...; Secure; HttpOnly; SameSite=Strict` (y `refresh_token` ídem, 7 días).
   Reemplaza a `login-response.txt` (2026-09-14, contra Render, con campos aún
   en español y con un JWT/refresh_token reales que quedaron versionados antes
-  de ser redactados) — ver `docs/mediciones/sec/live-session/README.md` para
-  el detalle de por qué se generó evidencia nueva.
+  de ser redactados).
+
+**Actualización 2026-09-17 — evidencia vigente contra el despliegue público
+real:** tras reconectar el servicio de Render al repositorio correcto
+(`gleiston-guerrero/...`, antes apuntaba al repo viejo) y forzar un
+redeploy, se capturó login real directamente contra
+`https://sgroas-backend.onrender.com`:
+
+```
+$ curl -s -i -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"admin@sgroas.com","password":"admin123"}'
+HTTP/1.1 200 OK
+Set-Cookie: access_token=<REDACTADO>; Path=/; Max-Age=3600; Secure; HttpOnly; SameSite=Strict
+Set-Cookie: refresh_token=<REDACTADO>; Path=/api/auth; Max-Age=604800; Secure; HttpOnly; SameSite=Strict
+{"name":"Admin SGROAS","email":"admin@sgroas.com","role":"ROLE_ADMIN","expiresIn":3600000}
+```
+
+Guardado (tokens redactados) en
+`docs/mediciones/sec/live-session/login-response-20260917-render.txt` —
+ver `docs/mediciones/sec/live-session/README.md` (Generación 3) para el
+detalle completo, incluida una nota honesta sobre el JWT interno (que en
+el momento de esta captura aún no había recogido el fix de claims
+`nombre`/`rol` → `name`/`role` de un redeploy posterior).
 
 ---
 
@@ -691,7 +713,7 @@ $ curl -s -o /dev/null -w '%{http_code}\n' -b cookies.txt \
 ```
 (Login 200 → cookie; asignaciones y `/me` 200 con datos; sin cookie → 403.)
 
-**Evidencia vigente (2026-09-16, en vivo, stack local, código ya corregido):**
+**Evidencia (2026-09-16, en vivo, stack local, código ya corregido):**
 ```
 $ curl -s -i http://localhost:8080/api/asignaciones
 403 (sin sesión)
@@ -701,15 +723,38 @@ $ curl -s -i -X POST http://localhost:8080/api/auth/login -H "Content-Type: appl
 $ curl -s -i -b cookies.txt http://localhost:8080/api/asignaciones
 200 — 8 elementos, campos en inglés (driverName, vehiclePlate, routeName, assignmentDate, ...)
 ```
-Reemplaza la corrida de 2026-09-15 contra Render (campos aún en español:
-`conductorNombre`/`vehiculoPlaca`/`rutaNombre`). Se conserva esa evidencia
-vieja por trazabilidad; ver `docs/mediciones/sec/live-session/README.md`.
+
+**Evidencia VIGENTE (2026-09-17, en vivo, contra el despliegue público real):**
+tras reconectar el servicio de Render al repositorio correcto y forzar un
+redeploy, se reprodujo la misma prueba directamente contra
+`https://sgroas-backend.onrender.com`:
+
+```
+$ curl -s -i https://sgroas-backend.onrender.com/api/asignaciones
+403 (sin sesión)
+$ curl -s -i -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" \
+    -d '{"email":"admin@sgroas.com","password":"admin123"}' -c cookies.txt
+200 (Set-Cookie access_token/refresh_token, Secure; HttpOnly; SameSite=Strict)
+$ curl -s -i -b cookies.txt "https://sgroas-backend.onrender.com/api/asignaciones?page=0&size=10"
+200 — 8 elementos, campos en inglés (driverName, vehiclePlate, routeName, assignmentDate, ...)
+```
+
+Esta es la primera evidencia de P9 desde el redeploy que sí corresponde
+de verdad al despliegue público con el código corregido (la corrida del
+2026-09-15 contra la misma URL era de ANTES del renombrado, con campos en
+español). Reemplaza tanto la corrida vieja contra Render (2026-09-15,
+`conductorNombre`/`vehiculoPlaca`/`rutaNombre`) como la corrida local del
+2026-09-16 como evidencia principal — ambas se conservan por trazabilidad.
 
 **Archivos:**
 - `docs/postman/coleccion.json` — carpeta "Asignaciones" con 6 requests CRUD
-- Vigente (2026-09-16): `docs/mediciones/sec/live-session/asignaciones-200-20260916.json` (200,
-  campos en inglés), `login-response-20260916.txt` (200 + cookies seguras),
-  `sin-sesion-403-20260916.txt` (403 sin cookie)
+- Vigente (2026-09-17, contra Render real):
+  `docs/mediciones/sec/live-session/asignaciones-200-20260917-render.txt`,
+  `login-response-20260917-render.txt`, `sin-sesion-403-20260917-render.txt`
+- Histórica (2026-09-16, stack local):
+  `docs/mediciones/sec/live-session/asignaciones-200-20260916.json`,
+  `login-response-20260916.txt`, `sin-sesion-403-20260916.txt`
 - Desactualizada (2026-09-14/15, conservada por trazabilidad):
   `docs/mediciones/sec/live-session/asignaciones.json`, `auth-me.json`,
   `sin-sesion-403.txt`, `REPORT.md`

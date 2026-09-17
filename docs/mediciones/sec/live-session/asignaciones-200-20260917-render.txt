@@ -1,0 +1,25 @@
+HTTP/1.1 200 OK
+Date: Thu, 17 Sep 2026 18:47:38 GMT
+Content-Type: application/json
+Transfer-Encoding: chunked
+Connection: keep-alive
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+expires: 0
+pragma: no-cache
+rndr-id: 4bb5f04e-f676-464b
+Server: cloudflare
+strict-transport-security: max-age=31536000 ; includeSubDomains
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+vary: Accept-Encoding
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-render-origin-server: Render
+x-xss-protection: 0
+cf-cache-status: DYNAMIC
+CF-RAY: a3ca47cf1c3c824d-GYE
+alt-svc: h3=":443"; ma=86400
+
+{"content":[{"id":1,"driverId":1,"driverName":"Carlos Alberto Perez Gomez","vehicleId":1,"vehiclePlate":"ABC-1234","routeId":1,"routeName":"Universidad - Centro","assignmentDate":"2026-07-01","startDate":"2026-07-01","endDate":null,"status":"ACTIVA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":2,"driverId":2,"driverName":"Maria Fernanda Sanchez Lopez","vehicleId":2,"vehiclePlate":"DEF-5678","routeId":2,"routeName":"Norte - Sur","assignmentDate":"2026-07-01","startDate":"2026-07-01","endDate":"2026-07-30","status":"COMPLETADA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":3,"driverId":3,"driverName":"Jorge Luis Congcona Vega","vehicleId":3,"vehiclePlate":"GHI-9012","routeId":3,"routeName":"Este - Oeste","assignmentDate":"2026-07-15","startDate":"2026-07-15","endDate":null,"status":"ACTIVA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":4,"driverId":4,"driverName":"Ana Lucia Teran Villamar","vehicleId":4,"vehiclePlate":"JKL-3456","routeId":4,"routeName":"Periferico","assignmentDate":"2026-08-01","startDate":"2026-08-01","endDate":null,"status":"ACTIVA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":5,"driverId":5,"driverName":"Pedro Antonio Zambrano Mendoza","vehicleId":5,"vehiclePlate":"MNO-7890","routeId":1,"routeName":"Universidad - Centro","assignmentDate":"2026-06-01","startDate":"2026-06-01","endDate":"2026-06-28","status":"CANCELADA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":6,"driverId":6,"driverName":"Gabriela Elizabeth Cabezas Pincay","vehicleId":1,"vehiclePlate":"ABC-1234","routeId":2,"routeName":"Norte - Sur","assignmentDate":"2026-08-10","startDate":"2026-08-10","endDate":null,"status":"ACTIVA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":7,"driverId":7,"driverName":"Ricardo Manuel Estupinan Galeas","vehicleId":2,"vehiclePlate":"DEF-5678","routeId":5,"routeName":"Ruta Escolar","assignmentDate":"2026-07-05","startDate":"2026-07-05","endDate":"2026-08-15","status":"COMPLETADA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"},{"id":8,"driverId":8,"driverName":"Sonia Maribel Quiroz Alava","vehicleId":3,"vehiclePlate":"GHI-9012","routeId":4,"routeName":"Periferico","assignmentDate":"2026-08-18","startDate":"2026-08-18","endDate":null,"status":"ACTIVA","active":true,"createdAt":"2026-09-16T19:18:49.143364Z","updatedAt":"2026-09-16T19:18:49.143364Z"}],"pageable":{"pageNumber":0,"pageSize":10,"sort":{"empty":false,"unsorted":false,"sorted":true},"offset":0,"unpaged":false,"paged":true},"totalElements":8,"totalPages":1,"last":true,"size":10,"number":0,"sort":{"empty":false,"unsorted":false,"sorted":true},"numberOfElements":8,"first":true,"empty":false}

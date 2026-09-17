@@ -1,10 +1,36 @@
 # Evidencia en vivo — sesiones registradas
 
-Esta carpeta contiene DOS generaciones de evidencia en vivo. Se conserva la
-generacion anterior (no se borra) porque documenta el hallazgo que la motivo,
-pero **esta desactualizada y no debe usarse como evidencia vigente de P4/P9**.
+Esta carpeta contiene TRES generaciones de evidencia en vivo. Se conservan
+las generaciones anteriores (no se borran) porque documentan el proceso real,
+pero **solo la Generacion 3 es evidencia vigente de P4/P9** (es la unica
+capturada contra el despliegue PUBLICO real, con el codigo ya corregido
+desplegado).
 
-## Generacion 2 (vigente) — 2026-09-16
+## Generacion 3 (VIGENTE) — 2026-09-17, contra el despliegue publico real
+
+Capturada con `curl` directamente contra `https://sgroas-backend.onrender.com`,
+DESPUES de reconectar el servicio de Render al repositorio correcto
+(`gleiston-guerrero/SGROAS-ProyectoAppWeb`, antes apuntaba por error al
+repositorio viejo `Alxjandr07/...`, ver `CONTRIBUCIONES.md`) y forzar un
+redeploy del commit `69ed1e7` (o posterior).
+
+| Archivo | Contenido |
+|---|---|
+| `login-response-20260917-render.txt` | `POST /api/auth/login` real contra Render, 200 OK, cookies `access_token`/`refresh_token` con `Secure; HttpOnly; SameSite=Strict`, tokens REDACTADOS; cuerpo con `name`/`role` en ingles |
+| `sin-sesion-403-20260917-render.txt` | `GET /api/asignaciones` sin cookie contra Render → 403 real |
+| `asignaciones-200-20260917-render.txt` | `GET /api/asignaciones` con cookie de sesion real contra Render → 200 OK, 8 asignaciones, campos en **ingles** (`driverName`, `vehiclePlate`, `routeName`, `assignmentDate`, ...) |
+
+**Nota honesta:** en la primera corrida de esta generacion, el JWT interno
+(decodificable, no cifrado) todavia mostraba las claims viejas
+`nombre`/`rol` — el redeploy de Render no habia recogido todavia el commit
+`69ed1e7` (que corrige exactamente eso en `JwtService.java`) en el momento
+de la captura. Esto no afecta la validez de P4 (que exige `Secure`+`HttpOnly`
+en la cookie, presentes) ni P9 (que exige `role`/campos en ingles en el
+CUERPO de la respuesta, tambien correcto), pero se declara explicitamente
+en vez de ocultarlo. Si se repite la captura despues de un redeploy con ese
+commit o posterior, el JWT tambien deberia mostrar `name`/`role`.
+
+## Generacion 2 (historica) — 2026-09-16
 
 Capturada en una sesion local, contra el codigo YA CORREGIDO (post-renombrado
 de campos backend/frontend a ingles, post-cierre P4/P9/P5/P2/P6/P11), con el
@@ -68,4 +94,5 @@ asignaciones) y con una nota de auditoria admitiendo que un
 `access_token`/`refresh_token` reales habian quedado versionados en texto
 plano (posteriormente redactados, ver nota dentro de `login-response.txt`).
 Se conserva por trazabilidad historica del hallazgo, pero la evidencia
-vigente de los criterios P4/P9 es la de la Generacion 2 (2026-09-16).
+vigente de los criterios P4/P9 es la de la Generacion 3 (2026-09-17,
+contra el despliegue publico real).

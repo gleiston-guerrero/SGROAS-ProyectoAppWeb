@@ -1,0 +1,22 @@
+HTTP/1.1 403 Forbidden
+Date: Thu, 17 Sep 2026 18:47:33 GMT
+Content-Length: 0
+Connection: keep-alive
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+content-security-policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+expires: 0
+pragma: no-cache
+rndr-id: 2719fed2-75f8-4eb3
+Server: cloudflare
+strict-transport-security: max-age=31536000 ; includeSubDomains
+vary: Origin
+vary: Access-Control-Request-Method
+vary: Access-Control-Request-Headers
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-render-origin-server: Render
+x-xss-protection: 0
+cf-cache-status: DYNAMIC
+CF-RAY: a3ca47b2097f825b-GYE
+alt-svc: h3=":443"; ma=86400
+
