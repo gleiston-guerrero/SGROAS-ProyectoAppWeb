@@ -1,11 +1,10 @@
 {
-  "generado": "2026-09-06",
-  "n": 15,
-  "media": 68.5,
-  "desviacion_tipica": 13.977,
-  "error_estandar": 3.6089,
-  "t_critico": 2.1448,
-  "ic95_inf": 60.7598,
-  "ic95_sup": 76.2402,
-  "adjetiva": "Regular"
+  "generado": "2026-09-17",
+  "n": 10,
+  "media": 63.0,
+  "desviacion_tipica": 13.884,
+  "error_estandar": 4.391,
+  "ic95_inf": 53.068,
+  "ic95_sup": 72.932,
+  "adjetiva": "Bueno"
 }

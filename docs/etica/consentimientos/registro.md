@@ -46,4 +46,15 @@ inventando una fecha, sigue documentado en `CONSENT-STATUS.md` — no se borra
 esa sección porque documenta un hallazgo real de la auditoría, aunque ya esté
 superado por las constancias encontradas después.
 
+## Actualización 2026-09-17 — P11-P15 retirados del estudio SUS oficial
+
+El consentimiento de los 15 participantes (verificado arriba) sigue siendo
+real. Sin embargo, se detectó por separado que las **respuestas al
+cuestionario SUS** de P11-P15 no tienen respaldo documental verificable de
+la fecha en que se declaró que se recolectaron (ver
+`docs/etica/consentimientos/CONSENT-STATUS.md`, sección 8, y
+`dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md`). Por eso P11-P15 se excluyen
+del estudio de usabilidad oficial, que queda en n=10 (P01-P10). Su
+consentimiento real permanece documentado y no se retira de este registro.
+
 Plantilla utilizada: [plantilla.md](plantilla.md)

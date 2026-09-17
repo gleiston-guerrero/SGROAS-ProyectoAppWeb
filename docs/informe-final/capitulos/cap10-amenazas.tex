@@ -51,9 +51,11 @@ cargas o poblaciones.
 \begin{itemize}
   \item La medición está ligada al endpoint representativo \texttt{GET /api/conductores}
         protegido con JWT; se documenta el protocolo completo.
-  \item El SUS usa 15 participantes heterogéneos (P01--P15) con distinto nivel de
+  \item El SUS usa 10 participantes heterogéneos (P01--P10) con distinto nivel de
         experiencia web, acorde al tamaño mínimo recomendado
-        \cite{kortum2013,lewis2009}.
+        \cite{kortum2013,lewis2009}. Se recolectaron 5 respuestas adicionales
+        (P11--P15) que se excluyeron del análisis oficial por falta de respaldo
+        documental verificable (ver \texttt{dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md}).
   \item Las conclusiones de rendimiento se restringen a la condición de cache
         caliente; el contraste con cache frío queda definido a priori para la
         medición remota (K3).

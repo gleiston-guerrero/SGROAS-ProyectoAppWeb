@@ -1,6 +1,6 @@
 # Analisis de usabilidad (SUS) - Bloque C.3
 
-**Tarea K2** | Fecha de generacion: 2026-08-17
+**Tarea K2** | Fecha de generacion: 2026-09-17
 
 ## Instrumento
 
@@ -20,25 +20,20 @@ System Usability Scale (Brooke, 1996): 10 items Likert 1-5. Puntuacion por parti
 | P08 | 20 | Femenino | Media | 4 | 2 | 3 | 3 | 4 | 4 | 4 | 2 | 4 | 2 | 65.0 |
 | P09 | 21 | Masculino | Alta | 4 | 2 | 3 | 1 | 4 | 2 | 4 | 2 | 4 | 1 | 77.5 |
 | P10 | 19 | Masculino | Media | 3 | 2 | 3 | 1 | 3 | 3 | 4 | 1 | 4 | 2 | 70.0 |
-| P11 | 23 | Masculino | Media | 4 | 1 | 3 | 2 | 5 | 1 | 4 | 2 | 4 | 2 | 80.0 |
-| P12 | 19 | Masculino | Baja | 3 | 2 | 4 | 2 | 4 | 2 | 3 | 1 | 4 | 2 | 72.5 |
-| P13 | 21 | Femenino | Media | 3 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 85.0 |
-| P14 | 21 | Masculino | Baja | 3 | 2 | 4 | 1 | 3 | 2 | 5 | 1 | 5 | 1 | 82.5 |
-| P15 | 20 | Femenino | Media | 3 | 2 | 3 | 1 | 4 | 2 | 4 | 1 | 4 | 1 | 77.5 |
 
-## Estadisticos descriptivos (n = 15)
+## Estadisticos descriptivos (n = 10)
 
 | Metrica | Valor |
 |---|---|
-| Media | **68.5 / 100** |
-| Desviacion tipica | 13.98 |
-| Error estandar | 3.61 |
-| IC 95% | **[60.8; 76.2]** |
+| Media | **63.0 / 100** |
+| Desviacion tipica | 13.88 |
+| Error estandar | 4.39 |
+| IC 95% | **[53.1; 72.9]** |
 | Minimo | 47.5 |
 | Maximo | 90.0 |
 | Calificacion adjetiva (Bangor et al., 2009) | Bueno |
-| Zona de aceptabilidad | Marginal-Alta (50-70 → 68.5) |
-| Umbral de usabilidad (>= 70) | NO CUMPLE (por 1.5 pts) |
+| Zona de aceptabilidad | Marginal (50-70) |
+| Umbral de usabilidad (>= 70) | NO CUMPLE |
 
 ## Estadisticos por item
 
@@ -63,16 +58,16 @@ Items con mejor contribucion promedio: q8, q5, q1.
 
 ## Interpretacion
 
-La media (68.5) queda a 1.5 pts del umbral de 70 (zona marginal-alta). Con n=15 el IC95 [60.8;76.2] incluye el umbral, por lo que no se puede descartar usabilidad aceptable. Se documenta como area de mejora: los items con peor contribucion promedio se revisaran en la iteracion de diseno posterior a la defensa.
+La media (63.0) queda por debajo del umbral de 70 (zona marginal 50-70). Se documenta como area de mejora: los items con peor contribucion promedio se revisaran en la iteracion de diseno posterior a la defensa.
 
 ## Reproducibilidad
 
 | Artefacto | Fuente | Script |
 |---|---|---|
-| Datos crudos | docs/mediciones/sus/sus-raw.csv (15 filas, Sí consistente UTF-8) | — |
-| Datos por participante | P01.json..P15.json (15) | scripts/sus-analysis.py |
-| Estadisticas | estadisticas-sus.json (n=15, media 68.5) | scripts/sus-analysis.py |
+| Datos crudos | docs/mediciones/sus/sus-raw.csv | — |
+| Datos por participante | P01.json..P10.json | scripts/sus-analysis.py |
+| Estadisticas | estadisticas-sus.json | scripts/sus-analysis.py |
 | Puntuacion Brooke | — | scripts/sus/brooke.py |
-| Figura | figuras/fig-sus-por-participante.png (n=15) | scripts/sus-analysis.py |
+| Figura | figuras/fig-sus-por-participante.png | scripts/sus-analysis.py |
 
-Los consentimientos firmados se custodian fuera del repositorio (regla de etica); en el repo solo constan codigos P01..P15. Demografia cap.5 (edad/sexo/exp.) cruza 1:1 con sus-raw.csv.
+Los consentimientos firmados se custodian fuera del repositorio (regla de etica); en el repo solo constan codigos P01..P10.

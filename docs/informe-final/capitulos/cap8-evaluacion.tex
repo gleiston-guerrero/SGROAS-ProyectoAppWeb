@@ -105,20 +105,24 @@ sistema?}
 \textbf{Instrumento:} System Usability Scale de Brooke \cite{brooke1996}, 10 ítems
 Likert 1--5. Puntuación = (suma de contribuciones) $\times$ 2.5.
 
-\textbf{Datos crudos:} 15 participantes (P01--P15) anonimizados en
-\texttt{docs/mediciones/sus/sus-raw.csv} y por participante en
-\texttt{P01.json..P15.json}; consentimientos custodiados fuera del repositorio.
+\textbf{Datos crudos:} 10 participantes (P01--P10) anonimizados en
+\texttt{dataset/sus/sus-raw.csv} y por participante en
+\texttt{P01.json..P10.json}; consentimientos custodiados fuera del repositorio.
+Se recolectaron respuestas adicionales de 5 personas más (P11--P15), con
+consentimiento real y verificado, pero sin respaldo documental verificable de
+la fecha de recolección de sus respuestas al cuestionario; se excluyen del
+análisis oficial (ver \texttt{dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md}).
 
-\textbf{Descriptiva e IC 95\,\%:} media \textbf{68,5/100}, DT 13,98, EE 3,61, IC\,95\,\%
-\textbf{[60,76; 76,24]} (t = 2,145, gl = 14), mínimo 47,5 y máximo 90,0
-(\texttt{docs/mediciones/sus/ANALISIS-SUS.md}). En la escala adjetiva de Bangor et
+\textbf{Descriptiva e IC 95\,\%:} media \textbf{63,0/100}, DT 13,88, EE 4,39, IC\,95\,\%
+\textbf{[53,07; 72,93]} (t = 2,262, gl = 9), mínimo 47,5 y máximo 90,0
+(\texttt{dataset/sus/REPORT.md}). En la escala adjetiva de Bangor et
 al. \cite{bangor2009,bangor2008} la media corresponde a \emph{Bueno}, dentro de la
 zona de aceptabilidad \emph{marginal} (50--70) \cite{lewis2009}.
 
-\textbf{Interpretación:} la media supera el umbral de 70 que Bangor asocia a
-sistemas aceptables, pero el IC 95\% incluye valores por debajo de 70, por lo que
-el resultado es \emph{marginal}. El tamaño muestral (n = 15) supera la
-recomendación mínima para SUS \cite{kortum2013}.
+\textbf{Interpretación:} la media se ubica por debajo del umbral de 70 que Bangor
+asocia a sistemas aceptables, por lo que el resultado es \emph{marginal} y se
+documenta como área de mejora. El tamaño muestral (n = 10) se ubica en el rango
+recomendado para SUS \cite{kortum2013}.
 
 \section{Cobertura de pruebas (Bloque C.4)}
 \label{sec:cobertura}
@@ -175,7 +179,7 @@ Bloque & Indicador & Valor & Cumple \\
 C.1 Rendimiento & p95 $<$ 200\,ms (cache caliente) & 173.13\,ms & Sí \\
 C.1 Rendimiento & error rate $<$ 1\,\% & 0\,\% & Sí \\
 C.2 Seguridad & SQL dinámico / A01--A09 & 0 violaciones & Sí \\
-C.3 Usabilidad & SUS $\ge$ 70 & 68.5 & Marginal \\
+C.3 Usabilidad & SUS $\ge$ 70 & 63.0 & Marginal \\
 C.4 Cobertura & líneas $\ge$ 70\,\% & 95.94\,\% & Sí \\
 C.5 Calidad web & Perf/Acc/BP/SEO $\ge$ 80/90/90/90 & 95/91/92/90 & Sí \\
 \bottomrule

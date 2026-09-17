@@ -1685,4 +1685,54 @@ sigue citando el commit `f7b9b72` de la entrega final original, un hito
 distinto de esta corrección del examen suspenso. Ninguno de los defectos
 señalados por la guía está en el contenido del informe en sí.
 
+## Corrección final (2026-09-17) — P11-P15 retirados del estudio SUS oficial
+
+Las secciones "Tag v1.1.2" y "Tag v1.1.3" de arriba documentan cómo se
+resolvió el problema de las **fechas de consentimiento** de P11-P15 (que sí
+quedó resuelto: los 15 formularios firmados son reales y verificados por
+SHA-256). Sin embargo, una revisión posterior encontró un problema distinto
+y más grave: **los valores de las respuestas al cuestionario SUS de
+P11-P15** (no su consentimiento, sino sus 10 respuestas Likert y su puntaje
+SUS) no tienen ningún respaldo documental anterior a `scripts/update-sus.py`
+(commit `3516019`, 2026-09-06) — no existe CSV exportado, captura ni
+registro de sesión que demuestre que esas 5 personas respondieron el
+cuestionario con esos valores en la fecha declarada.
+
+Resolver la fecha de consentimiento no resuelve esto: dar consentimiento
+real no prueba que la encuesta SUS se haya aplicado y registrado
+correctamente. Por lo tanto, para eliminar el riesgo de presentar datos sin
+trazabilidad ("Piso 3") en el estudio de usabilidad, se tomó esta decisión:
+
+- **El estudio SUS oficial vuelve a n=10 (P01-P10)**, el subconjunto con
+  respaldo documental sólido y sin contradicciones de fecha: CSV subido el
+  2026-07-30 (`e8d7e2f`), consentimientos firmados el 2026-07-24. Cifras:
+  media 63,0, DT 13,88, IC 95 % [53,07; 72,93] (`dataset/sus/REPORT.md`,
+  regenerado con `scripts/generate-sus-demographics.py` y
+  `scripts/sus-analysis.py`).
+- **P11-P15 se retiran del análisis oficial**, pero no se ocultan: su
+  consentimiento real y verificado se documenta en
+  `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md` y en la sección final de
+  `dataset/sus/CONSENT-REGISTRY.md`, junto con sus hashes SHA-256.
+- `dataset/sus/sus-raw.csv`, `dataset/sus/CONSENT-REGISTRY.md`, la tabla
+  `tab:sus-demografia` de `docs/informe-final/cap5-materiales-metodos.tex` y
+  todas las menciones de "n=15" / "68,5" / "60,76-76,24" en el informe se
+  corrigieron a los valores de n=10. `dataset/sus/P11.json`…`P15.json` se
+  movieron a `dataset/sus/no-verificados/` (README explicando el motivo) y
+  `scripts/update-sus.py` se anotó como no ejecutable, conservado solo como
+  evidencia de cómo se originó el problema.
+- `dataset/MANIFEST.sha256` se recalculó para los archivos que cambiaron de
+  contenido.
+
+Verificación reproducible de las cifras oficiales:
+
+```bash
+python3 scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv
+python3 scripts/sus-analysis.py
+scripts/validate-sus-demografia.sh
+```
+
+Este cambio se considera una **mejora** del expediente frente al riesgo de
+Piso 3, no un retroceso: elimina la ambigüedad sobre datos sin trazabilidad
+en vez de intentar justificarla.
+
 URL pública del sistema en la primera pantalla del README: `https://sgroas-backend.onrender.com`.

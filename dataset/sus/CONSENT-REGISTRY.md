@@ -1,14 +1,22 @@
 # SUS Participant Consent Registry
 
-> **Corrected 2026-09-17 with real, verified evidence.** The previous version
-> of this file declared a single signing date (2026-08-15) for all 15
-> participants that contradicted the repository's own git history (the
-> P01-P10 evaluation results were already committed on 2026-07-30, before
-> that claimed date). Signed, in-person paper consent forms for all 15
-> participants were subsequently located and verified. This table reflects
-> the real signing dates found on those documents, cross-checked against the
-> actual evaluation dates. See `docs/etica/consentimientos/CONSENT-STATUS.md`
-> for the full reconciliation and verification history.
+> **Corrected 2026-09-17 with real, verified evidence, and scope reduced to
+> the official study (n=10).** The previous version of this file declared a
+> single signing date (2026-08-15) for 15 participants that contradicted the
+> repository's own git history (the P01-P10 evaluation results were already
+> committed on 2026-07-30, before that claimed date). Signed, in-person paper
+> consent forms for 15 people were subsequently located and verified — all
+> 15 are real and their consent is genuine. However, only P01-P10 have
+> verifiable documentary evidence that they actually answered the SUS
+> questionnaire on the declared date; P11-P15's questionnaire answers have
+> no such evidence (their values were hand-written into
+> `scripts/update-sus.py` on 2026-09-06, ~6 weeks after the claimed
+> evaluation date). P11-P15 are therefore **excluded from the official SUS
+> study** below; their real, verified consent is documented separately in
+> `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md` so as not to erase the fact
+> that they exist and did consent. See
+> `docs/etica/consentimientos/CONSENT-STATUS.md` for the full reconciliation
+> and verification history.
 
 Each participant signed an individual paper copy of the consent form
 (`dataset/sus/CONSENT-FORM.md`) in person, before the evaluation session.
@@ -30,19 +38,22 @@ document itself.
 | P08  | 20  | Female | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `11891dd8e8a4fd382da0a82ff0cb7db2364a2eee8fc4a6d30754b79758645179` |
 | P09  | 21  | Male   | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `db055bc4c2429933d98d6a6344c35c3e412d33948dcd9e3671a62af3d682e593` |
 | P10  | 19  | Male   | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `b0b864109c3665c9430a8b6bab5c7d1cbd22d39ac3759843a56dfdd826d283df` |
-| P11  | 23  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `6113753eb0aa166f95f921acb47996e48ca7327d8a994b37f853a2e1ce451c50` |
-| P12  | 19  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `a9aba08d40926da009928790f26848b4efc4314e8c3a79623969014e5c1c13e4` |
-| P13  | 21  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `322beccf5d42f83d2313d698b84ac4016cb877951981ec7d3431907afbd99881` |
-| P14  | 21  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `341cf1b59d4e3606a051d4ae601581dec1e3c1a0f1bfa817ba160a020462fb44` |
-| P15  | 20  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee` |
 
-All 15 hashes were computed independently with two different tools
-(`sha256sum` and Python's `hashlib.sha256`) against the same 15 files on
-2026-09-17, both producing identical results; no two hashes collide (15
-distinct files, 15 distinct hashes). Every signed form was also checked to
+All 10 hashes were computed independently with two different tools
+(`sha256sum` and Python's `hashlib.sha256`) against the same 10 files on
+2026-09-17, both producing identical results; no two hashes collide (10
+distinct files, 10 distinct hashes). Every signed form was also checked to
 contain a legible signing date matching the table above, extracted with
 `pdftotext -layout`.
 
-All 15 participants provided written informed consent **before** their
-respective evaluation session (P01-P10: 6 days before; P11-P15: 21 days
-before).
+All 10 participants provided written informed consent **before** their
+respective evaluation session (6 days before).
+
+## P11-P15: consent is real, survey data is not used
+
+5 more people (P11-P15) also signed real, verified consent forms (signed on
+2026-07-26). They are **not part of the official SUS study above** because
+their SUS questionnaire answers have no verifiable documentary evidence of
+the date they were collected. Their consent is not in question — only their
+survey data's traceability is. See `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md`
+for the full explanation and their preserved consent hashes.

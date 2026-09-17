@@ -211,3 +211,26 @@ de JSON individuales). A diferencia de P01–P10, cuya fecha de evaluación
 respaldo directo — sí es consistente con toda la cadena de fechas
 (consentimiento 26-jul, subida a git 6-sep), simplemente no está anclada a
 un artefacto externo del día mismo.
+
+## 8. Corrección final (2026-09-17) — P11-P15 retirados del estudio SUS oficial
+
+Todo lo anterior en este documento resuelve el consentimiento de P11-P15:
+es real y está verificado. Pero el consentimiento y la encuesta SUS son dos
+cosas distintas. Una revisión posterior encontró que **las respuestas al
+cuestionario SUS** de P11-P15 (10 valores Likert + puntaje SUS por persona)
+no tienen ningún respaldo documental anterior al commit `3516019`
+(2026-09-06, `scripts/update-sus.py`), donde se escribieron a mano. Que
+alguien haya firmado consentimiento no demuestra que después haya
+respondido el cuestionario con esos valores concretos en la fecha
+declarada.
+
+Dado que ese respaldo no existe y no puede reconstruirse honestamente, se
+decidió (2026-09-17) **retirar a P11-P15 del estudio SUS oficial**. El
+estudio queda en n=10 (P01-P10), con respaldo documental contemporáneo y
+sin contradicciones (consentimiento 2026-07-24, evaluación y subida del CSV
+2026-07-30). Esto **no invalida el consentimiento de P11-P15 documentado
+arriba** — sigue siendo real y verificado, y se conserva íntegro en
+`dataset/sus/CONSENT-REGISTRY.md` y `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md` —
+simplemente sus datos de encuesta no se usan por falta de trazabilidad
+verificable. Esta decisión reduce el riesgo de Piso 3 en vez de dejarlo
+abierto con una justificación parcial.

@@ -36,7 +36,7 @@ Abrir y narrar brevemente cada uno:
 |---|---|---|
 | `docs/mediciones/perf/ANALISIS-k6.md` | p95 < 200 ms, 0 % error | media de medias 23.01 ms, IC95 [−7.88; 53.91] |
 | `docs/mediciones/perf/figuras/` | figuras Okabe-Ito | 4 PNG regenerables |
-| `docs/mediciones/sus/ANALISIS-SUS.md` | SUS media/DT/IC95 | media 68.5 (n=15), IC95 [60.76; 76.24] |
+| `dataset/sus/ANALISIS-SUS.md` | SUS media/DT/IC95 | media 63.0 (n=10), IC95 [53.07; 72.93] |
 | `docs/mediciones/lighthouse/RESUMEN.md` | categorías | desktop 95/91/92/90 (mobile 75–79, throttling free tier) |
 | `docs/mediciones/sec/zap/RESUMEN.md` | baseline OWASP ZAP | alertas y severidades |
 | `docs/mediciones/jacoco/` | cobertura | 87.5 % instr / 87.9 % ramas / 95.5 % líneas |

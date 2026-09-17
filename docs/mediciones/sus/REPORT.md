@@ -4,16 +4,15 @@
 
 | Métrica | Valor |
 |---|---|
-| Participantes | 15 (P01–P15) |
+| Participantes | 10 (P01–P10) |
 | Instrumento | System Usability Scale (Brooke, 1996), 10 ítems Likert 1–5 |
 | Tareas evaluadas | Login, alta de conductor, edición, eliminación lógica, logout |
-| Puntuación media | **68,5 / 100** |
-| Desviación típica | 13,98 |
-| Error estándar | 3,61 |
-| IC 95 % (t = 2,145, gl = 14) | **[60,8; 76,2]** |
-| Mínimo / Máximo | 47,5 / 90,0 |
+| Puntuación media | **63,0 / 100** |
+| Desviación típica | 13,88 |
+| Error estándar | 4,39 |
+| IC 95 % (t = 2,262, gl = 9) | **[53,07; 72,93]** |
 | Calificación (escala adjetiva de Bangor et al., 2009) | **Bueno** (rango 52,7–72,5) |
-| Zona de aceptabilidad (Bangor et al.) | Marginal-alta (50–70) |
+| Zona de aceptabilidad (Bangor et al.) | Marginal (50–70) |
 
 ## Puntuación por participante
 
@@ -33,24 +32,13 @@ la suma se multiplica por 2,5.
 | P08 | 20 | Femenino | Media | 4 | 2 | 3 | 3 | 4 | 4 | 4 | 2 | 4 | 2 | 65,0 |
 | P09 | 21 | Masculino | Alta | 4 | 2 | 3 | 1 | 4 | 2 | 4 | 2 | 4 | 1 | 77,5 |
 | P10 | 19 | Masculino | Media | 3 | 2 | 3 | 1 | 3 | 3 | 4 | 1 | 4 | 2 | 70,0 |
-| P11 | 23 | Masculino | Media | 4 | 1 | 3 | 2 | 5 | 1 | 4 | 2 | 4 | 2 | 80,0 |
-| P12 | 19 | Masculino | Baja | 3 | 2 | 4 | 2 | 4 | 2 | 3 | 1 | 4 | 2 | 72,5 |
-| P13 | 21 | Femenino | Media | 3 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 85,0 |
-| P14 | 21 | Masculino | Baja | 3 | 2 | 4 | 1 | 3 | 2 | 5 | 1 | 5 | 1 | 82,5 |
-| P15 | 20 | Femenino | Media | 3 | 2 | 3 | 1 | 4 | 2 | 4 | 1 | 4 | 1 | 77,5 |
 
 ## Contexto de la medición
 
 - Fecha: 30 de julio de 2026 (sesiones moderadas en el equipo de la evaluadora)
 - Modo: cada participante operó la aplicación SGROAS y respondió el formulario SUS por sí mismo
 - Aplicación accesada en `http://localhost:4200` (frontend) con backend en `http://localhost:8080`
-- Matriz de datos crudos: `docs/mediciones/sus/sus-raw.csv` (15 filas, P01–P15)
-- Datos por participante: `P01.json`…`P15.json` (15 archivos)
-- Demografía (edad, sexo, experiencia web) y puntaje SUS cruzan 1:1 con la
-  Tabla de demografía del capítulo 5 del informe (verificado por
-  `scripts/validate-sus-demografia.sh`)
-- Interpretación: la media (68,5) corresponde a la calificación adjetiva *Bueno* de Bangor et al.
-  (2009); se ubica en la zona de aceptabilidad *marginal-alta* (50–70) y queda a 1,5 puntos del
-  umbral de 70 que Bangor et al. asocian a sistemas aceptables, por lo que se documenta como
-  área de mejora. Con n=15, el IC 95 % [60,8; 76,2] incluye el umbral, de modo que no se puede
-  descartar que la usabilidad sea aceptable.
+- Matriz de datos crudos: `docs/mediciones/sus/sus-raw.csv`
+- Interpretación: la media (63,0) corresponde a la calificación adjetiva *Bueno* de Bangor et al.
+  (2009); se ubica en la zona de aceptabilidad *marginal* (50–70) y por debajo del umbral de 70
+  que Bangor et al. asocian a sistemas aceptables, por lo que se documenta como área de mejora.

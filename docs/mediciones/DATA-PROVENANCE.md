@@ -62,9 +62,15 @@ Todo número del informe es re-derivable desde estas fuentes (reglas de oro 6 y 
 
 | Artefacto (tabla/figura) en informe | Datos crudos | Script | Commit |
 |---|---|---|---|
-| Tabla "Demografía y puntaje SUS" (`tab:sus-demografia`) | `docs/mediciones/sus/sus-raw.csv` (15 filas `P01`…`P15`, con `edad/sexo/experiencia_web/dispositivo`) | `scripts/validate-sus-demografia.sh` | `7e49da9` |
-| Fig. "Demografía vs SUS" | ídem | `scripts/gen-figuras.py` → `fig-sus-demografia.png` | `7e49da9` |
-| Reporte SUS alineado (n=15) | ídem | — | `7e49da9` |
+| Tabla "Demografía y puntaje SUS" (`tab:sus-demografia`) | `dataset/sus/sus-raw.csv` (10 filas `P01`…`P10`, con `edad/sexo/experiencia_web/dispositivo`) | `scripts/validate-sus-demografia.sh` | `7e49da9` |
+| Fig. "Demografía vs SUS" | ídem | `scripts/gen-sus-demografia-figura.py` → `fig-sus-demografia.png` | `7e49da9` |
+| Reporte SUS alineado (n=10) | ídem | — | `7e49da9` |
+
+> **Nota 2026-09-17:** esta sección documentaba originalmente 15 filas
+> (P01–P15). 5 de esas filas (P11–P15) no tenían respaldo documental
+> verificable de la fecha de recolección y fueron retiradas del estudio
+> oficial; ver `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md`. El estudio
+> oficial queda en n=10.
 
 ## 6. Dataset público (Zenodo) — Bloque G / K6
 

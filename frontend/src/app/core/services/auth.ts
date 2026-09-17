@@ -100,7 +100,19 @@ export class Auth {
   private cargarLocal(): Sesion | null {
     try {
       const bruto = localStorage.getItem(SESION_KEY);
-      return bruto ? (JSON.parse(bruto) as Sesion) : null;
+      if (!bruto) return null;
+      const sesion = JSON.parse(bruto) as Sesion;
+      // Defensa contra sesiones cacheadas con el contrato viejo (campos en
+      // espanol `rol`/`nombre` en vez de `role`/`name`, de antes del fix del
+      // contrato backend-frontend): si falta `role`, la sesion guardada no
+      // sirve con el codigo actual (el menu por rol quedaria vacio en
+      // silencio). Se descarta y se fuerza un login nuevo en vez de operar
+      // con datos incompletos.
+      if (!sesion || typeof sesion.role !== 'string' || !sesion.role) {
+        localStorage.removeItem(SESION_KEY);
+        return null;
+      }
+      return sesion;
     } catch {
       return null;
     }

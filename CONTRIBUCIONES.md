@@ -620,6 +620,28 @@ reconocidos en las secciones P3 y P8 de este documento, con el respaldo de
 correcciones del examen suspenso**, porque no participaron en ella ni la
 revisaron.
 
+## Corrección final (2026-09-17) — P11-P15 retirados del estudio SUS oficial
+
+Las secciones de arriba (Tag v1.1.2, Tag v1.1.3, sección P11) resolvieron el
+problema de la **fecha de consentimiento** de P11-P15: los 15 formularios
+firmados son reales y verificados por SHA-256. Una revisión posterior
+encontró un problema distinto: los **valores de las respuestas al
+cuestionario SUS** de P11-P15 (las 10 respuestas Likert y el puntaje SUS
+atribuidos a cada persona, escritos a mano en `scripts/update-sus.py`,
+commit `3516019`, 2026-09-06) no tienen ningún respaldo documental anterior
+a esa fecha. Consentir participar no equivale a demostrar que la encuesta
+se aplicó y registró correctamente con esos valores.
+
+Por eso, el 2026-09-17 se decidió retirar a P11-P15 del estudio SUS oficial,
+que vuelve a n=10 (P01-P10, media 63,0, IC 95 % [53,07; 72,93]; ver
+`dataset/sus/REPORT.md`). El consentimiento real de P11-P15 no se descarta
+ni se oculta: se documenta en `dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md` y
+en la sección final de `dataset/sus/CONSENT-REGISTRY.md`, con sus hashes
+SHA-256 preservados. `scripts/update-sus.py` se conserva sin borrar,
+anotado como no ejecutable, para no ocultar cómo se originó el problema.
+Este cambio es una corrección honesta que reduce el riesgo de Piso 3, no un
+retroceso.
+
 ## Firmas
 
 Declaro que los puntos de esta ronda de correcciones del examen suspenso

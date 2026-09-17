@@ -1,3 +1,29 @@
+"""
+update-sus.py
+
+** DO NOT RUN. Kept only as evidence of how the P11-P15 data problem
+originated; its effect on the repository was reverted on 2026-09-17. **
+
+This script appended 5 participants (P11-P15) to the SUS study by writing
+their 10 Likert answers and SUS score literally by hand into `new_data`
+below, then generating their P11.json..P15.json and appending 5 rows to
+sus-raw.csv. It was committed on 2026-09-06 (commit 3516019) -- almost 6
+weeks after the date the repository declared the SUS evaluation had taken
+place (2026-07-30). No source file predating that commit (exported CSV,
+screenshots, session log) demonstrates that these 5 people actually answered
+the SUS questionnaire with these values on that date.
+
+The 5 people behind P11-P15 are real and did give real, verified informed
+consent (see dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md for their preserved
+consent hashes). What could not be verified is that they answered the SUS
+questionnaire with the values hard-coded here. To avoid presenting
+unverifiable survey data as part of the official study (a "Piso 3" /
+fabricated-data risk), P11-P15 were removed from the official SUS study on
+2026-09-17: sus-raw.csv now contains only P01-P10, and the P11-P15 JSON
+files were moved to dataset/sus/no-verificados/ and docs/mediciones/sus/
+no-verificados/. The official SUS numbers are n=10, mean 63.0,
+95% CI [53.07; 72.93] (dataset/sus/REPORT.md).
+"""
 import json, csv, os, statistics
 from scipy import stats as sp_stats
 

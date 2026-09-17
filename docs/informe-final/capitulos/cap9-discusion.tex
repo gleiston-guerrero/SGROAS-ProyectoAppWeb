@@ -22,12 +22,15 @@ limitación de tasa. Los riesgos identificados en la literatura de microservicio
 \cite{soldani2018,waseem2021,taibi2018} se abordan con \texttt{@Procedure} y
 \texttt{@Query} constantes.
 
-\textbf{RQ3 (usabilidad).} La media SUS de 68,5 (IC\,95\,\% [60,76; 76,24], n=15)
+\textbf{RQ3 (usabilidad).} La media SUS de 63,0 (IC\,95\,\% [53,07; 72,93], n=10)
 clasifica al sistema como \emph{Bueno} en la escala adjetiva, dentro de la zona
 marginal \cite{bangor2009,bangor2008}. Comparado con productos de software
-generalistas medidos en \cite{kortum2013}, el valor se acerca al rango típico de
-aplicaciones web ($\approx$67--74); el IC 95\% incluye valores por debajo de 70, por
+generalistas medidos en \cite{kortum2013}, el valor queda por debajo del rango
+típico de aplicaciones web ($\approx$67--74); el IC 95\% incluye valores por debajo de 70, por
 lo que se recomienda iterar sobre la complejidad percibida de los ítems pares.
+Se recolectaron 5 respuestas adicionales (P11--P15) que se excluyeron del
+análisis oficial por falta de respaldo documental verificable de la fecha de
+recolección (ver \texttt{dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md}).
 
 \textbf{RQ4 (reproducibilidad y calidad web).} El proyecto es reproducible: todos
 los artefactos (datos crudos, scripts, figuras) están versionados y el protocolo
@@ -45,7 +48,7 @@ por debajo del umbral de 80, en línea con SPA modernos bien configurados.
   y SpotBugs) complementa la evidencia dinámica OWASP de \cite{owasp2021},
   emulando prácticas de revisión automatizada propuestas en la literatura de
   calidad de microservicios \cite{taibi2018}.
-- \emph{Usabilidad:} el uso de SUS con 15 participantes y la escala adjetiva sigue
+- \emph{Usabilidad:} el uso de SUS con 10 participantes y la escala adjetiva sigue
   el protocolo estándar \cite{brooke1996,bangor2009}; la discusión sobre tamaño
   muestral mínimo y factor estructural de la escala se respalda en \cite{lewis2009}.
 - \emph{Cobertura:} se reconocen las limitaciones de la cobertura como predictor
@@ -65,7 +68,7 @@ por debajo del umbral de 80, en línea con SPA modernos bien configurados.
 \section{Implicaciones prácticas}
 
 - Para la operación real en cooperativas, el punto de mejora inmediato es la
-  usabilidad (SUS 68,5): simplificar los formularios de alta/edición.
+  usabilidad (SUS 63,0): simplificar los formularios de alta/edición.
 - Para el operador de plataforma, mantener el cache Redis caliente reduce el p95
   de 173 a $<$40\,ms; la política TTL debe dimensionarse a la carga esperada.
 - La reproducibilidad del artefacto (FAIR) simplifica la lectura y replicación del

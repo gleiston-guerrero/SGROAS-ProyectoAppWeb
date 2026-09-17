@@ -35,8 +35,10 @@ except FileNotFoundError:
 
 if LATEX_MODE:
     rows.sort(key=lambda r: int(r["codigo"][1:]))
+    first_code = rows[0]["codigo"]
+    last_code = rows[-1]["codigo"]
     print(r"\begin{table}[htbp]")
-    print(r"\caption{SUS demographics and score by participant (P01--P15). Source: \texttt{docs/mediciones/sus/sus-raw.csv}.}")
+    print(rf"\caption{{SUS demographics and score by participant ({first_code}--{last_code}). Source: \texttt{{dataset/sus/sus-raw.csv}}.}}")
     print(r"\label{tab:sus-demografia}")
     print(r"\small")
     print(r"\begin{tabular}{@{}llllr@{}}")
