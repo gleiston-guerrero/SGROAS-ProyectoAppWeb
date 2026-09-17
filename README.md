@@ -1,6 +1,6 @@
 # SGROAS - Sistema de Gestión de Recursos Operativos, Administrativos y de Seguridad
 
-[![CI](https://github.com/Alxjandr07/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml/badge.svg)](https://github.com/Alxjandr07/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml)
+[![CI](https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml/badge.svg)](https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Java](https://img.shields.io/badge/Java-21-blue)](https://adoptium.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5-green)](https://spring.io/projects/spring-boot)
@@ -25,7 +25,7 @@
 
 ```bash
 # Clonar
-git clone https://github.com/Alxjandr07/SGROAS-ProyectoAppWeb.git
+git clone https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb.git
 cd SGROAS-ProyectoAppWeb
 
 # Copiar variables de entorno
@@ -172,7 +172,7 @@ Distribuido bajo licencia MIT. Ver [LICENSE](LICENSE).
   year = 2026,
   publisher = {Zenodo},
   doi = {10.5281/zenodo.22522109},
-  url = {https://github.com/Alxjandr07/SGROAS-ProyectoAppWeb}
+  url = {https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb}
 }
 ```
 
