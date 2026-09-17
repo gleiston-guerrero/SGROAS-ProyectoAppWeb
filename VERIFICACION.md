@@ -1,13 +1,20 @@
-# VERIFICACION — SGROAS Supletorio v1.1.0 / v1.1.2
+# VERIFICACION — SGROAS Supletorio v1.1.0
+
+**ACTUALIZACION CRITICA (2026-09-17):** siguiendo la regla explicita de la
+guia del examen ("Lo que no este dentro de la etiqueta no existe. Muevan
+v1.1.0 al ultimo commit que quieren que revise"), la etiqueta `v1.1.0` se
+MOVIO del commit original `f2fb883` a `c25dc06` (o posterior — ver
+`git rev-parse v1.1.0^{commit}`), que incluye TODAS las correcciones
+documentadas en este archivo. Los tags `v1.1.1`, `v1.1.2`, `v1.1.3` y
+`v1.1.4`, creados durante el proceso de correccion antes de saber que
+habia que mover `v1.1.0` en vez de crear tags nuevos, se conservan sin
+borrar como historial intermedio, pero **`v1.1.0` es ahora el unico tag
+relevante para la evaluacion** — es el que la guia revisa por definicion.
 
 Fecha original: 2026-09-15
 Commit citado originalmente: 8398462 (INCORRECTO, ver seccion "Tag v1.1.0"
-mas abajo — corregido 2026-09-17: el tag v1.1.0 en realidad apunta a
-f2fb883)
-Tag evaluado por la guia externa: v1.1.0 (-> f2fb883)
-Tag vigente con todas las correcciones de esta auditoria (incluye la
-resolucion del riesgo de Piso 3 en P11): v1.1.2
-Tag historico intermedio (P11 aun sin resolver en ese punto): v1.1.1
+mas abajo — corregido 2026-09-17: el tag v1.1.0 apuntaba a f2fb883, y
+desde el 2026-09-17 apunta al commit final de esta auditoria)
 
 **Re-auditoria: 2026-09-16.** Todos los comandos de este archivo se
 re-ejecutaron en este working tree en esa fecha y la salida se pego
@@ -1734,5 +1741,30 @@ scripts/validate-sus-demografia.sh
 Este cambio se considera una **mejora** del expediente frente al riesgo de
 Piso 3, no un retroceso: elimina la ambigüedad sobre datos sin trazabilidad
 en vez de intentar justificarla.
+
+## Tag v1.1.0 — MOVIDO (2026-09-17): esta es ahora la etiqueta vigente
+
+La guía del examen dice, literalmente: *"Lo que no esté dentro de la
+etiqueta no existe. Muevan `v1.1.0` al último commit que quieren que
+revise."* Esta regla no se había aplicado hasta ahora — todas las
+correcciones de este archivo se habían ido documentando bajo tags nuevos
+(`v1.1.1`, `v1.1.2`, `v1.1.3`) en vez de mover `v1.1.0`, por precaución
+general de no reescribir un tag ya publicado. Era un error: la guía exige
+explícitamente mover `v1.1.0`, así que se hizo, con confirmación explícita
+del responsable del repositorio (necesaria porque mover un tag anotado ya
+publicado requiere `git push --force` sobre esa referencia).
+
+```
+$ git rev-parse v1.1.0^{commit}
+c25dc0680fb86d280aef95b3f16a24776801f082
+```
+
+`v1.1.0` apunta ahora al mismo commit que `v1.1.3` y las secciones
+posteriores de este documento (el commit que retira P11-P15 del estudio
+SUS oficial). Los tags `v1.1.1`, `v1.1.2`, `v1.1.3` y `v1.1.4` se
+conservan sin borrar como historial intermedio del proceso de corrección,
+pero **`v1.1.0` es el único tag relevante para la evaluación** a partir de
+ahora — es el que la guía revisa por definición, y el que contiene
+absolutamente todas las correcciones documentadas en este archivo.
 
 URL pública del sistema en la primera pantalla del README: `https://sgroas-backend.onrender.com`.

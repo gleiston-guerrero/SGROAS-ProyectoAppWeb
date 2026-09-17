@@ -581,6 +581,27 @@ git rev-parse v1.1.3^{commit}
 git log --oneline v1.1.3 -1
 ```
 
+## Tag v1.1.0 — MOVIDO (2026-09-17): esta es ahora la etiqueta vigente
+
+La guía del examen dice, literalmente: *"Lo que no esté dentro de la
+etiqueta no existe. Muevan `v1.1.0` al último commit que quieren que
+revise."* Esa regla no se había aplicado — todas las correcciones se
+habían ido documentando bajo tags nuevos (`v1.1.1` a `v1.1.4`) en vez de
+mover `v1.1.0`, por precaución general de no reescribir un tag ya
+publicado. Fue un error: la guía exige explícitamente moverlo. Se movió,
+con confirmación explícita de Luis Tejada (necesaria porque mover un tag
+anotado ya publicado requiere `git push --force` sobre esa referencia).
+
+```
+$ git rev-parse v1.1.0^{commit}
+c25dc0680fb86d280aef95b3f16a24776801f082
+```
+
+`v1.1.0` apunta ahora al commit que retira P11-P15 del estudio SUS oficial
+(ver sección siguiente). Los tags `v1.1.1` a `v1.1.4` se conservan sin
+borrar como historial intermedio, pero **`v1.1.0` es el único tag
+relevante para la evaluación** a partir de ahora.
+
 ---
 
 ## Situación del equipo en el examen suspenso (aclaración 2026-09-1X)
