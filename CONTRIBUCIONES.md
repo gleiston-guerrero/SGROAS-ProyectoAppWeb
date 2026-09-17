@@ -431,15 +431,30 @@ ronda.
 
 María del Rosario Escudero Plaza y Kevin Moisés Castro Espinoza ya aprobaron
 su evaluación individual y no están rindiendo el examen suspenso en esta
-ronda. Según indica Luis Tejada, la rúbrica del examen suspenso establece que,
-para los integrantes que ya aprobaron, seguir haciendo commits en esta etapa
-es opcional — **esta afirmación sobre el contenido de la rúbrica no ha sido
-verificada de forma independiente en este expediente** (no se citó ni se
-adjuntó el texto literal del documento de rúbrica); si el evaluador la
-requiere, debe presentarse en la defensa oral. Por eso, de aquí en adelante
-todo el trabajo de corrección de esta ronda del examen suspenso (auditoría
-externa del 2026-09-16/17, ver sección anterior) fue ejecutado en solitario
-por Luis Alejandro Tejada Bajaña.
+ronda. Esto se puede verificar de forma objetiva en el propio historial de
+git: ninguno de los dos tiene commits posteriores al commit `110d5a1`
+(13-sep-2026, fecha en que se revisó la guía de evaluación) ni durante esta
+ronda de correcciones (2026-09-16/17):
+
+```
+$ git log --format='%an <%ae> %ad' --date=short 110d5a1..HEAD | grep -iE "escudero|castro|mescuderop|kcastroe|0999595561kevin" 
+(sin resultados)
+```
+
+Luis Tejada afirma que, según la rúbrica del examen suspenso, para los
+integrantes que ya aprobaron individualmente seguir haciendo commits en
+esta etapa es opcional. **Esta evaluación es automatizada y no incluye una
+defensa oral**, por lo que esta afirmación sobre el contenido de la rúbrica
+no puede sustentarse verbalmente en ningún momento posterior: queda
+registrada aquí como una declaración de Luis Tejada, sin el respaldo de una
+cita textual del documento de rúbrica (que no se adjuntó a este
+repositorio). Lo que sí es objetivamente verificable con el comando de
+arriba es que ninguno de los dos hizo trabajo en esta ronda; lo que no es
+verificable desde este repositorio es si la rúbrica realmente exime de esa
+obligación a quienes ya aprobaron. Por eso, de aquí en adelante todo el
+trabajo de corrección de esta ronda del examen suspenso (auditoría externa
+del 2026-09-16/17, ver sección anterior) fue ejecutado en solitario por
+Luis Alejandro Tejada Bajaña.
 
 Esto no borra la autoría real de María y Kevin en el proyecto original: sus
 aportes históricos (CSV de datos SUS, corridas de Lighthouse, evidencia de
