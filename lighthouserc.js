@@ -14,7 +14,13 @@ module.exports = {
       settings: PRESET === 'desktop'
         ? { preset: 'desktop' }
         : {
-            preset: 'mobile',
+            // Nota (2026-09-16): 'mobile' NO es un valor valido de --preset en
+            // Lighthouse 13.4.1 (choices reales: perf | experimental | desktop).
+            // El default de la CLI ya es mobile (formFactor mobile + screenEmulation
+            // movil), asi que basta con omitir 'preset' y dejar el throttling Slow 4G
+            // explicito. Antes esto rompia `npx lhci autorun` con
+            // "Invalid values: Argument: preset, Given: mobile" y nunca se habia
+            // ejecutado end-to-end con esta version de Lighthouse.
             throttling: {
               rttMs: 150,
               throughputKbps: 1600,

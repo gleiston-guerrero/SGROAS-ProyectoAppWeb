@@ -122,22 +122,111 @@ directamente desde las corridas crudas; resultados en `docs/mediciones/perf/ANAL
 
 ## P3 — Lighthouse corridas versionadas (1.0)
 
+**Nota de auditoria (2026-09-16):** las 9 corridas `lh-{mobile,desktop,tablet}-{1,2,3}.json`
+son del 2026-09-15, contra `https://sgroas-backend.onrender.com`, ANTES de la
+correccion del contrato backend-frontend y otros defectos corregidos hasta
+`v1.1.3`. Ademas el "orden de verificacion" original solo contaba archivos
+(`wc -l`) y nunca mostraba la URL auditada ni los scores reales — no probaba
+que las corridas fueran validas ni vigentes.
+
+Se generaron 6 corridas FRESCAS (3 movil + 3 escritorio) contra el codigo
+actual de `main` (post `v1.1.3`), sirviendo el build de produccion del
+frontend Angular con `frontend/serve-gzip.js` (estatico + gzip, replica un
+contenedor nginx) en `http://localhost:4200/` — mismo metodo que las 2
+corridas locales `lhci-20260730-21{15,17}.json` ya versionadas, para que el
+resultado no dependa de la disponibilidad ni del estado de despliegue de
+Render. Se intento tambien auditar `https://sgroas-backend.onrender.com`
+directamente (para tener evidencia comparable a la anterior) pero el
+servicio no respondio: `curl -v https://sgroas-backend.onrender.com/` con
+timeout de 60s no recibio bytes (TLS conecta, luego cuelga) — no se pudo
+confirmar si el Free tier de Render solo tardaba en despertar o si el
+servicio esta caido/no tiene el codigo de `main` desplegado, asi que no se
+uso esa URL como evidencia para no arriesgar attribuir a `main` un resultado
+que en realidad vino de un despliegue desactualizado o inexistente.
+
+De paso se encontro y corrigio un defecto en `lighthouserc.js`: el preset
+movil pasaba `settings.preset = 'mobile'`, pero en Lighthouse 13.4.1 (la
+version realmente instalada, confirmada con `npx lighthouse@13.4.1 --help`)
+`--preset` solo acepta `perf | experimental | desktop` — `mobile` rompia
+`npx lhci autorun` con `Invalid values: Argument: preset, Given: "mobile"`.
+Nunca se habia ejecutado el comando documentado de punta a punta con esta
+version de Lighthouse. Se quito la clave `preset` del perfil movil (el
+default de la CLI ya es mobile con emulacion de pantalla movil) dejando solo
+el `throttling` Slow 4G explicito; el preset `desktop` no se toco porque ese
+valor si es valido.
+
 **Orden de verificación:**
 ```bash
-# Verificar que existen al menos 3 corridas por perfil
+# Verificar que existen al menos 3 corridas por perfil (incluye las frescas)
 ls dataset/lighthouse/lh-*.json | wc -l
-# Verificar que contienen scores
-grep -l '"performance"' dataset/lighthouse/lh-*.json | wc -l
+# Mostrar URL auditada y scores reales de las 3 corridas frescas de escritorio
+python3 -c "
+import json
+for i in (1,2,3):
+    d = json.load(open(f'dataset/lighthouse/lh-desktop-fresh-20260916-{i}.json', encoding='utf-8'))
+    c = d['categories']
+    print(i, d['requestedUrl'], {k: round(v['score']*100) for k, v in c.items()})
+"
+# Mismo, para movil
+python3 -c "
+import json
+for i in (1,2,3):
+    d = json.load(open(f'dataset/lighthouse/lh-mobile-fresh-20260916-{i}.json', encoding='utf-8'))
+    c = d['categories']
+    print(i, d['requestedUrl'], {k: round(v['score']*100) for k, v in c.items()})
+"
 ```
 
-**Salida (2026-09-15):**
+**Salida real (2026-09-16, corridas frescas contra `main`/v1.1.3, local
+`http://localhost:4200/` via `serve-gzip.js`):**
 ```
-9
-9
+15
+1 http://localhost:4200/ {'performance': 100, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
+2 http://localhost:4200/ {'performance': 98, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
+3 http://localhost:4200/ {'performance': 100, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
+1 http://localhost:4200/ {'performance': 89, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
+2 http://localhost:4200/ {'performance': 88, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
+3 http://localhost:4200/ {'performance': 85, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
 ```
 
-**Archivos:** `dataset/lighthouse/lh-{mobile,desktop,tablet}-{1,2,3}.json` (9 corridas)
-contra `https://sgroas-backend.onrender.com`; resumen en `dataset/lighthouse/REPORT.md`.
+Las 6 corridas frescas cumplen los 4 umbrales de `lighthouserc.js`
+(`categories:performance >= 0.8`, `accessibility/best-practices/seo >= 0.9`);
+confirmado tambien por `npx @lhci/cli assert --config=lighthouserc.js`
+(`All results processed!`, sin errores de assertion) para ambos perfiles.
+
+**Reproducir las corridas frescas:**
+```bash
+cd frontend && npm run build
+node serve-gzip.js &                 # sirve dist/ en :4200
+cd ..
+LHCI_URL=http://localhost:4200/ LHCI_PRESET=mobile   npx @lhci/cli@latest collect --config=lighthouserc.js
+npx @lhci/cli@latest assert --config=lighthouserc.js
+npx @lhci/cli@latest upload --config=lighthouserc.js   # deja los JSON en docs/mediciones/lighthouse/
+rm -rf .lighthouseci
+LHCI_URL=http://localhost:4200/ LHCI_PRESET=desktop  npx @lhci/cli@latest collect --config=lighthouserc.js
+npx @lhci/cli@latest assert --config=lighthouserc.js
+npx @lhci/cli@latest upload --config=lighthouserc.js
+```
+(el `LHCI_PRESET` NO debe estar seteado al correr `assert` sola en la misma
+shell — `lhci assert` tambien lee esa variable como si fuera su propio flag
+`--preset`, que solo acepta `lighthouse:all|lighthouse:recommended|lighthouse:no-pwa`,
+y falla con "Invalid values". Correr `collect` y `assert` en pasos separados,
+o en subshells, evita el choque.)
+
+**Archivos:**
+- `dataset/lighthouse/lh-{mobile,desktop,tablet}-{1,2,3}.json` (9 corridas,
+  2026-09-15, contra Render, PRE-corrección de contrato — se conservan por
+  trazabilidad historica, ya NO representan el estado actual del codigo).
+- `dataset/lighthouse/lh-{mobile,desktop}-fresh-20260916-{1,2,3}.json` (6
+  corridas nuevas, 2026-09-16, contra `main`/v1.1.3 local — VIGENTES,
+  reemplazan a las anteriores como evidencia de performance actual).
+- `dataset/lighthouse/lhci-20260730-2115.json` y `-2117.json` (2 corridas
+  locales previas, mismo metodo `serve-gzip.js`, ya vigentes antes de esta
+  ronda).
+- `lighthouserc.js` — fix del preset movil invalido.
+- Resumen historico en `dataset/lighthouse/REPORT.md` (no actualizado con las
+  corridas frescas en esta ronda; los scores reales y reproducibles de las
+  corridas frescas quedan documentados arriba).
 
 ---
 

@@ -58,6 +58,42 @@ $ git log --format='%H %an <%ae> %ad %s' --date=short -1 1a07dc7
 
 ---
 
+**Actualización (2026-09-16) — corridas frescas post v1.1.3:**
+**Cerrado por: Luis Tejada**
+
+Las 9 corridas de 1a07dc7 son del 2026-09-15 contra
+`https://sgroas-backend.onrender.com`, antes de la corrección del contrato
+backend-frontend y otros defectos resueltos hasta el tag `v1.1.3`. Se
+generaron 6 corridas nuevas (3 móvil + 3 escritorio) contra el código actual
+de `main`, sirviendo el build de producción del frontend con
+`frontend/serve-gzip.js` en `http://localhost:4200/` (mismo método que las 2
+corridas locales `lhci-20260730-21{15,17}.json` ya existentes). Se intentó
+también auditar el despliegue de Render directamente, pero el servicio no
+respondió (timeout de 60s sin bytes recibidos) — no se pudo confirmar su
+estado, así que no se usó como evidencia.
+
+De paso se encontró y corrigió un defecto real en `lighthouserc.js`: el
+perfil móvil pasaba `settings.preset = 'mobile'`, valor inválido para
+`--preset` en Lighthouse 13.4.1 (solo acepta `perf | experimental |
+desktop`), lo que rompía `npx lhci autorun` con
+`Invalid values: Argument: preset, Given: "mobile"`. El comando documentado
+en `VERIFICACION.md` nunca se había corrido de punta a punta con esta
+versión de Lighthouse.
+
+**Archivos modificados:**
+- `lighthouserc.js` -- se quitó `preset: 'mobile'` inválido (el default de la
+  CLI ya es mobile), se mantuvo el throttling Slow 4G explícito.
+- `dataset/lighthouse/lh-{mobile,desktop}-fresh-20260916-{1,2,3}.json` -- 6
+  corridas nuevas, vigentes, contra `main`/v1.1.3.
+- `dataset/MANIFEST.sha256` -- 6 entradas nuevas para los archivos anteriores.
+- `VERIFICACION.md` (sección P3) -- orden de verificación reescrito para
+  mostrar URL auditada y scores reales, en vez de solo contar archivos.
+
+Las 9 corridas de `1a07dc7` se conservan sin borrar por trazabilidad
+histórica; las 6 nuevas son la evidencia vigente de performance actual.
+
+---
+
 ## P4 — Cookie Secure(true) (commit 92576cf)
 **Cerrado por: Luis Tejada**
 
