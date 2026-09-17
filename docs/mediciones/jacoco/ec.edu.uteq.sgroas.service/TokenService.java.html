@@ -66,8 +66,8 @@ public class TokenService {
      * @param accessToken token de acceso vigente que se desea invalidar
      */
     public void addAccessTokenToBlacklist(String accessToken) {
-<span class="fc" id="L69">        String jti = jwtService.extractJti(accessToken);</span>
-<span class="fc" id="L70">        long tiempoRestante = jwtService.extractExpiration(accessToken).getTime()</span>
+<span class="fc" id="L69">        String jti = jwtService.extraerJti(accessToken);</span>
+<span class="fc" id="L70">        long tiempoRestante = jwtService.extraerExpiracion(accessToken).getTime()</span>
 <span class="fc" id="L71">                - System.currentTimeMillis();</span>
 
 <span class="fc bfc" id="L73" title="All 2 branches covered.">        if (tiempoRestante &gt; 0) {</span>
@@ -86,7 +86,7 @@ public class TokenService {
      * @return verdadero cuando el token esta anulado, falso en caso contrario
      */
     public boolean accessTokenEnBlacklist(String accessToken) {
-<span class="fc" id="L89">        String jti = jwtService.extractJti(accessToken);</span>
+<span class="fc" id="L89">        String jti = jwtService.extraerJti(accessToken);</span>
 <span class="fc" id="L90">        String key = &quot;blacklist:&quot; + jti;</span>
 
 <span class="fc" id="L92">        return Boolean.TRUE.equals(redisTemplate.hasKey(key));</span>

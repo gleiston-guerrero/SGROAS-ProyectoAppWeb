@@ -33,25 +33,25 @@ import java.util.function.Function;
     }
 
     /**
-     * Crea un token firmado con los datos del user para autenticar sus peticiones.
-     * @param user entidad con correo, nombre y rol que se guardan en el token
+     * Crea un token firmado con los datos del usuario para autenticar sus peticiones.
+     * @param usuario entidad con correo, nombre y rol que se guardan en el token
      * @return token compacto listo para enviar en cabecera o cookie
      */
-    public String generateToken(User user) {
-<span class="fc" id="L41">        Date now = new Date();</span>
-<span class="fc" id="L42">        Date expiration = new Date(now.getTime() + jwtExpirationMs);</span>
+    public String generateToken(User usuario) {
+<span class="fc" id="L41">        Date ahora = new Date();</span>
+<span class="fc" id="L42">        Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);</span>
 <span class="fc" id="L43">        String jti = UUID.randomUUID().toString();</span>
 
 <span class="fc" id="L45">        return Jwts.builder()</span>
 <span class="fc" id="L46">                .id(jti)</span>
 <span class="fc" id="L47">                .issuer(jwtIssuer)</span>
-<span class="fc" id="L48">                .subject(user.getEmail())</span>
+<span class="fc" id="L48">                .subject(usuario.getEmail())</span>
 <span class="fc" id="L49">                .audience().add(jwtAudience).and()</span>
-<span class="fc" id="L50">                .issuedAt(now)</span>
-<span class="fc" id="L51">                .notBefore(now)</span>
-<span class="fc" id="L52">                .expiration(expiration)</span>
-<span class="fc" id="L53">                .claim(&quot;name&quot;, user.getName())</span>
-<span class="fc" id="L54">                .claim(&quot;role&quot;, user.getRole().name())</span>
+<span class="fc" id="L50">                .issuedAt(ahora)</span>
+<span class="fc" id="L51">                .notBefore(ahora)</span>
+<span class="fc" id="L52">                .expiration(expiracion)</span>
+<span class="fc" id="L53">                .claim(&quot;nombre&quot;, usuario.getName())</span>
+<span class="fc" id="L54">                .claim(&quot;rol&quot;, usuario.getRole().name())</span>
 <span class="fc" id="L55">                .signWith(getSigningKey(), Jwts.SIG.HS256)</span>
 <span class="fc" id="L56">                .compact();</span>
     }
@@ -61,8 +61,8 @@ import java.util.function.Function;
      * @param token texto compacto previamente generado por este servicio
      * @return correo guardado en el asunto del token
      */
-    public String extractEmail(String token) {
-<span class="fc" id="L65">        return extractClaim(token, Claims::getSubject);</span>
+    public String extraerEmail(String token) {
+<span class="fc" id="L65">        return extraerClaim(token, Claims::getSubject);</span>
     }
 
     /**
@@ -70,8 +70,8 @@ import java.util.function.Function;
      * @param token texto compacto previamente generado por este servicio
      * @return identificador unico asignado al crear el token
      */
-    public String extractJti(String token) {
-<span class="fc" id="L74">        return extractClaim(token, Claims::getId);</span>
+    public String extraerJti(String token) {
+<span class="fc" id="L74">        return extraerClaim(token, Claims::getId);</span>
     }
 
     /**
@@ -79,8 +79,8 @@ import java.util.function.Function;
      * @param token texto compacto previamente generado por este servicio
      * @return fecha a partir de la cual el token deja de aceptarse
      */
-    public Date extractExpiration(String token) {
-<span class="fc" id="L83">        return extractClaim(token, Claims::getExpiration);</span>
+    public Date extraerExpiracion(String token) {
+<span class="fc" id="L83">        return extraerClaim(token, Claims::getExpiration);</span>
     }
 
     /**
@@ -92,21 +92,21 @@ import java.util.function.Function;
     }
 
     /**
-     * Comprueba que un token pertenezca al user esperado y siga vigente.
-     * @param token texto compacto a validar con firma y fecha de expiration
+     * Comprueba que un token pertenezca al usuario esperado y siga vigente.
+     * @param token texto compacto a validar con firma y fecha de expiracion
      * @param email correo esperado del propietario para comparar con el asunto
      * @return verdadero cuando el correo coincide y el token no ha expirado
      */
-    public boolean isTokenValid(String token, String email) {
-<span class="fc" id="L101">        String tokenEmail = extractEmail(token);</span>
-<span class="pc bpc" id="L102" title="1 of 4 branches missed.">        return tokenEmail.equals(email) &amp;&amp; !isTokenExpired(token);</span>
+    public boolean tokenValido(String token, String email) {
+<span class="fc" id="L101">        String emailToken = extraerEmail(token);</span>
+<span class="pc bpc" id="L102" title="1 of 4 branches missed.">        return emailToken.equals(email) &amp;&amp; !tokenExpirado(token);</span>
     }
 
-    private boolean isTokenExpired(String token) {
-<span class="fc" id="L106">        return extractExpiration(token).before(new Date());</span>
+    private boolean tokenExpirado(String token) {
+<span class="fc" id="L106">        return extraerExpiracion(token).before(new Date());</span>
     }
 
-    private &lt;T&gt; T extractClaim(String token, Function&lt;Claims, T&gt; claimsResolver) {
+    private &lt;T&gt; T extraerClaim(String token, Function&lt;Claims, T&gt; claimsResolver) {
 <span class="fc" id="L110">        Claims claims = extractAllClaims(token);</span>
 <span class="fc" id="L111">        return claimsResolver.apply(claims);</span>
     }

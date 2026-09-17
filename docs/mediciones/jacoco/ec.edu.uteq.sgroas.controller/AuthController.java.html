@@ -36,14 +36,10 @@ public class AuthController {
     private final LoginRateLimiter loginRateLimiter;
     private final JwtService jwtService;
     private final TokenService tokenService;
-    private final UserRepository userRepository;
+    private final UserRepository usuarioRepository;
 
-    // Nota de auditoria (2026-09-16): existia un @Value(&quot;${app.cookie.secure:false}&quot;)
-    // que quedo sin usar despues de que las cookies se fijaran con .secure(true)
-    // a fuego mas abajo. Se elimino el campo muerto en lugar de conectarlo,
-    // porque una cookie de sesion sin el flag Secure es un riesgo real si algun
-    // entorno terminara con app.cookie.secure=false por error de configuracion;
-    // Secure siempre activo es la opcion mas segura y no depende de config externa.
+    @Value(&quot;${app.cookie.secure:false}&quot;)
+    private boolean cookieSecure;
 
     @Value(&quot;${app.jwt.refresh-expiration-ms:604800000}&quot;)
     private long refreshExpirationMs;
@@ -59,29 +55,29 @@ public class AuthController {
             @CookieValue(name = &quot;access_token&quot;, required = false) String accessTokenCookie,
             @RequestHeader(value = &quot;Authorization&quot;, required = false) String authorizationHeader
     ) {
-<span class="fc" id="L62">        String token = accessTokenCookie;</span>
-<span class="pc bpc" id="L63" title="1 of 6 branches missed.">        if ((token == null || token.isBlank()) &amp;&amp; authorizationHeader != null</span>
-<span class="pc bpc" id="L64" title="1 of 2 branches missed.">                &amp;&amp; authorizationHeader.startsWith(&quot;Bearer &quot;)) {</span>
-<span class="fc" id="L65">            token = authorizationHeader.substring(7);</span>
+<span class="fc" id="L58">        String token = accessTokenCookie;</span>
+<span class="pc bpc" id="L59" title="1 of 6 branches missed.">        if ((token == null || token.isBlank()) &amp;&amp; authorizationHeader != null</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                &amp;&amp; authorizationHeader.startsWith(&quot;Bearer &quot;)) {</span>
+<span class="fc" id="L61">            token = authorizationHeader.substring(7);</span>
         }
-<span class="pc bpc" id="L67" title="1 of 6 branches missed.">        if (token == null || token.isBlank() || tokenService.accessTokenEnBlacklist(token)) {</span>
+<span class="pc bpc" id="L63" title="1 of 6 branches missed.">        if (token == null || token.isBlank() || tokenService.accessTokenEnBlacklist(token)) {</span>
+<span class="fc" id="L64">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
+        }
+<span class="fc" id="L66">        String email = jwtService.extraerEmail(token);</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">        if (email == null) {</span>
 <span class="fc" id="L68">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
         }
-<span class="fc" id="L70">        String email = jwtService.extractEmail(token);</span>
-<span class="fc bfc" id="L71" title="All 2 branches covered.">        if (email == null) {</span>
-<span class="fc" id="L72">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
+<span class="fc" id="L70">        User usuario = usuarioRepository.findByEmail(email)</span>
+<span class="fc" id="L71">                .filter(User::getActive)</span>
+<span class="fc" id="L72">                .orElse(null);</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">        if (usuario == null) {</span>
+<span class="fc" id="L74">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
         }
-<span class="fc" id="L74">        User usuario = userRepository.findByEmail(email)</span>
-<span class="fc" id="L75">                .filter(User::getActive)</span>
-<span class="fc" id="L76">                .orElse(null);</span>
-<span class="fc bfc" id="L77" title="All 2 branches covered.">        if (usuario == null) {</span>
-<span class="fc" id="L78">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
-        }
-<span class="fc" id="L80">        return ResponseEntity.ok(new SessionResponse(</span>
-<span class="fc" id="L81">                usuario.getName(),</span>
-<span class="fc" id="L82">                usuario.getEmail(),</span>
-<span class="fc" id="L83">                usuario.getRole().name(),</span>
-<span class="fc" id="L84">                jwtService.getExpirationMs()</span>
+<span class="fc" id="L76">        return ResponseEntity.ok(new SessionResponse(</span>
+<span class="fc" id="L77">                usuario.getName(),</span>
+<span class="fc" id="L78">                usuario.getEmail(),</span>
+<span class="fc" id="L79">                usuario.getRole().name(),</span>
+<span class="fc" id="L80">                jwtService.getExpirationMs()</span>
         ));
     }
 
@@ -105,23 +101,23 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request,
             HttpServletRequest httpRequest
     ) {
-<span class="fc" id="L108">        String ip = httpRequest.getRemoteAddr();</span>
-<span class="fc bfc" id="L109" title="All 2 branches covered.">        if (loginRateLimiter.isBlocked(ip)) {</span>
-<span class="fc" id="L110">            ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.TOO_MANY_REQUESTS);</span>
-<span class="fc" id="L111">            detail.setTitle(&quot;Demasiadas solicitudes&quot;);</span>
-<span class="fc" id="L112">            detail.setDetail(&quot;Has superado el limite de intentos de inicio de sesion. Espera 60 segundos.&quot;);</span>
-<span class="fc" id="L113">            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(detail);</span>
+<span class="fc" id="L104">        String ip = httpRequest.getRemoteAddr();</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">        if (loginRateLimiter.isBlocked(ip)) {</span>
+<span class="fc" id="L106">            ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.TOO_MANY_REQUESTS);</span>
+<span class="fc" id="L107">            detail.setTitle(&quot;Demasiadas solicitudes&quot;);</span>
+<span class="fc" id="L108">            detail.setDetail(&quot;Has superado el limite de intentos de inicio de sesion. Espera 60 segundos.&quot;);</span>
+<span class="fc" id="L109">            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(detail);</span>
         }
         try {
-<span class="fc" id="L116">            AuthResponse response = authService.login(request);</span>
-<span class="fc" id="L117">            loginRateLimiter.reset(ip);</span>
-<span class="fc" id="L118">            return ResponseEntity.ok()</span>
-<span class="fc" id="L119">                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
-<span class="fc" id="L120">                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L121">                    .body(aSesion(response));</span>
-<span class="fc" id="L122">        } catch (Exception e) {</span>
-<span class="fc" id="L123">            loginRateLimiter.recordFailedAttempt(ip);</span>
-<span class="fc" id="L124">            throw e;</span>
+<span class="fc" id="L112">            AuthResponse response = authService.login(request);</span>
+<span class="fc" id="L113">            loginRateLimiter.reset(ip);</span>
+<span class="fc" id="L114">            return ResponseEntity.ok()</span>
+<span class="fc" id="L115">                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
+<span class="fc" id="L116">                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
+<span class="fc" id="L117">                    .body(aSesion(response));</span>
+<span class="fc" id="L118">        } catch (Exception e) {</span>
+<span class="fc" id="L119">            loginRateLimiter.recordFailedAttempt(ip);</span>
+<span class="fc" id="L120">            throw e;</span>
         }
     }
 
@@ -136,18 +132,18 @@ public class AuthController {
             @CookieValue(name = &quot;refresh_token&quot;, required = false) String refreshCookie,
             @RequestBody(required = false) RefreshTokenRequest body
     ) {
-<span class="fc" id="L139">        String refreshToken = refreshCookie;</span>
-<span class="pc bpc" id="L140" title="1 of 6 branches missed.">        if ((refreshToken == null || refreshToken.isBlank()) &amp;&amp; body != null) {</span>
-<span class="fc" id="L141">            refreshToken = body.refreshToken();</span>
+<span class="fc" id="L135">        String refreshToken = refreshCookie;</span>
+<span class="pc bpc" id="L136" title="1 of 6 branches missed.">        if ((refreshToken == null || refreshToken.isBlank()) &amp;&amp; body != null) {</span>
+<span class="fc" id="L137">            refreshToken = body.refreshToken();</span>
         }
-<span class="pc bpc" id="L143" title="1 of 4 branches missed.">        if (refreshToken == null || refreshToken.isBlank()) {</span>
-<span class="fc" id="L144">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
+<span class="pc bpc" id="L139" title="1 of 4 branches missed.">        if (refreshToken == null || refreshToken.isBlank()) {</span>
+<span class="fc" id="L140">            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();</span>
         }
-<span class="fc" id="L146">        AuthResponse response = authService.refresh(new RefreshTokenRequest(refreshToken));</span>
-<span class="fc" id="L147">        return ResponseEntity.ok()</span>
-<span class="fc" id="L148">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
-<span class="fc" id="L149">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L150">                .body(aSesion(response));</span>
+<span class="fc" id="L142">        AuthResponse response = authService.refresh(new RefreshTokenRequest(refreshToken));</span>
+<span class="fc" id="L143">        return ResponseEntity.ok()</span>
+<span class="fc" id="L144">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
+<span class="fc" id="L145">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
+<span class="fc" id="L146">                .body(aSesion(response));</span>
     }
 
     /**
@@ -159,11 +155,11 @@ public class AuthController {
     public ResponseEntity&lt;SessionResponse&gt; verifyEmail(
             @Valid @RequestBody VerifyEmailRequest request
     ) {
-<span class="fc" id="L162">        AuthResponse response = authService.verifyEmail(request.email(), request.codigo());</span>
-<span class="fc" id="L163">        return ResponseEntity.ok()</span>
-<span class="fc" id="L164">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
-<span class="fc" id="L165">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L166">                .body(aSesion(response));</span>
+<span class="fc" id="L158">        AuthResponse response = authService.verifyEmail(request.email(), request.codigo());</span>
+<span class="fc" id="L159">        return ResponseEntity.ok()</span>
+<span class="fc" id="L160">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
+<span class="fc" id="L161">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
+<span class="fc" id="L162">                .body(aSesion(response));</span>
     }
 
     /**
@@ -175,8 +171,8 @@ public class AuthController {
     public ResponseEntity&lt;Map&lt;String, String&gt;&gt; resendCode(
             @Valid @RequestBody EmailRequest request
     ) {
-<span class="fc" id="L178">        authService.resendVerificationCode(request.email());</span>
-<span class="fc" id="L179">        return ResponseEntity.ok(Map.of(</span>
+<span class="fc" id="L174">        authService.resendVerificationCode(request.email());</span>
+<span class="fc" id="L175">        return ResponseEntity.ok(Map.of(</span>
                 &quot;mensaje&quot;,
                 &quot;Si el correo corresponde a una cuenta pendiente, enviamos un nuevo codigo. Revisa tambien tu carpeta de spam.&quot;
         ));
@@ -191,8 +187,8 @@ public class AuthController {
     public ResponseEntity&lt;Map&lt;String, String&gt;&gt; forgotPassword(
             @Valid @RequestBody EmailRequest request
     ) {
-<span class="fc" id="L194">        authService.requestPasswordReset(request.email());</span>
-<span class="fc" id="L195">        return ResponseEntity.ok(Map.of(</span>
+<span class="fc" id="L190">        authService.requestPasswordReset(request.email());</span>
+<span class="fc" id="L191">        return ResponseEntity.ok(Map.of(</span>
                 &quot;mensaje&quot;,
                 &quot;Si el correo esta registrado, enviamos un codigo para restablecer la contrasena.&quot;
         ));
@@ -207,8 +203,8 @@ public class AuthController {
     public ResponseEntity&lt;Map&lt;String, String&gt;&gt; resetPassword(
             @Valid @RequestBody ResetPasswordRequest request
     ) {
-<span class="fc" id="L210">        authService.resetPassword(request.email(), request.codigo(), request.nuevaPassword());</span>
-<span class="fc" id="L211">        return ResponseEntity.ok(Map.of(</span>
+<span class="fc" id="L206">        authService.resetPassword(request.email(), request.codigo(), request.nuevaPassword());</span>
+<span class="fc" id="L207">        return ResponseEntity.ok(Map.of(</span>
                 &quot;mensaje&quot;, &quot;Contrasena actualizada correctamente. Ya puedes iniciar sesion.&quot;
         ));
     }
@@ -226,70 +222,70 @@ public class AuthController {
             @CookieValue(name = &quot;refresh_token&quot;, required = false) String refreshCookie,
             @RequestBody(required = false) RefreshTokenRequest body
     ) {
-<span class="fc bfc" id="L229" title="All 2 branches covered.">        String accessToken = accessTokenCookie == null ? &quot;&quot; : accessTokenCookie;</span>
-<span class="fc" id="L230">        String refreshToken = refreshCookie;</span>
-<span class="pc bpc" id="L231" title="2 of 6 branches missed.">        if ((refreshToken == null || refreshToken.isBlank()) &amp;&amp; body != null) {</span>
-<span class="fc" id="L232">            refreshToken = body.refreshToken();</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">        String accessToken = accessTokenCookie == null ? &quot;&quot; : accessTokenCookie;</span>
+<span class="fc" id="L226">        String refreshToken = refreshCookie;</span>
+<span class="pc bpc" id="L227" title="2 of 6 branches missed.">        if ((refreshToken == null || refreshToken.isBlank()) &amp;&amp; body != null) {</span>
+<span class="fc" id="L228">            refreshToken = body.refreshToken();</span>
         }
-<span class="fc" id="L234">        authService.logout(accessToken,</span>
-<span class="pc bpc" id="L235" title="1 of 2 branches missed.">                new RefreshTokenRequest(refreshToken == null ? &quot;&quot; : refreshToken));</span>
-<span class="fc" id="L236">        return ResponseEntity.noContent()</span>
-<span class="fc" id="L237">                .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie())</span>
-<span class="fc" id="L238">                .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie())</span>
-<span class="fc" id="L239">                .build();</span>
+<span class="fc" id="L230">        authService.logout(accessToken,</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                new RefreshTokenRequest(refreshToken == null ? &quot;&quot; : refreshToken));</span>
+<span class="fc" id="L232">        return ResponseEntity.noContent()</span>
+<span class="fc" id="L233">                .header(HttpHeaders.SET_COOKIE, removeAccessTokenCookie())</span>
+<span class="fc" id="L234">                .header(HttpHeaders.SET_COOKIE, removeRefreshTokenCookie())</span>
+<span class="fc" id="L235">                .build();</span>
     }
 
     private SessionResponse aSesion(AuthResponse response) {
-<span class="fc" id="L243">        return new SessionResponse(</span>
-<span class="fc" id="L244">                response.name(),</span>
-<span class="fc" id="L245">                response.email(),</span>
-<span class="fc" id="L246">                response.role(),</span>
-<span class="fc" id="L247">                response.expiresIn()</span>
+<span class="fc" id="L239">        return new SessionResponse(</span>
+<span class="fc" id="L240">                response.name(),</span>
+<span class="fc" id="L241">                response.email(),</span>
+<span class="fc" id="L242">                response.role(),</span>
+<span class="fc" id="L243">                response.expiresIn()</span>
         );
     }
 
     private String buildAccessTokenCookie(String token) {
-<span class="fc" id="L252">        return ResponseCookie.from(&quot;access_token&quot;, token)</span>
-<span class="fc" id="L253">                .httpOnly(true)</span>
-<span class="fc" id="L254">                .secure(true)</span>
-<span class="fc" id="L255">                .sameSite(&quot;Strict&quot;)</span>
-<span class="fc" id="L256">                .path(&quot;/&quot;)</span>
-<span class="fc" id="L257">                .maxAge(Duration.ofHours(1))</span>
-<span class="fc" id="L258">                .build()</span>
-<span class="fc" id="L259">                .toString();</span>
+<span class="fc" id="L248">        return ResponseCookie.from(&quot;access_token&quot;, token)</span>
+<span class="fc" id="L249">                .httpOnly(true)</span>
+<span class="fc" id="L250">                .secure(true)</span>
+<span class="fc" id="L251">                .sameSite(&quot;Strict&quot;)</span>
+<span class="fc" id="L252">                .path(&quot;/&quot;)</span>
+<span class="fc" id="L253">                .maxAge(Duration.ofHours(1))</span>
+<span class="fc" id="L254">                .build()</span>
+<span class="fc" id="L255">                .toString();</span>
     }
 
     private String buildRefreshTokenCookie(String token) {
-<span class="fc" id="L263">        return ResponseCookie.from(&quot;refresh_token&quot;, token)</span>
-<span class="fc" id="L264">                .httpOnly(true)</span>
-<span class="fc" id="L265">                .secure(true)</span>
-<span class="fc" id="L266">                .sameSite(&quot;Strict&quot;)</span>
-<span class="fc" id="L267">                .path(&quot;/api/auth&quot;)</span>
-<span class="fc" id="L268">                .maxAge(Duration.ofMillis(refreshExpirationMs))</span>
-<span class="fc" id="L269">                .build()</span>
-<span class="fc" id="L270">                .toString();</span>
+<span class="fc" id="L259">        return ResponseCookie.from(&quot;refresh_token&quot;, token)</span>
+<span class="fc" id="L260">                .httpOnly(true)</span>
+<span class="fc" id="L261">                .secure(true)</span>
+<span class="fc" id="L262">                .sameSite(&quot;Strict&quot;)</span>
+<span class="fc" id="L263">                .path(&quot;/api/auth&quot;)</span>
+<span class="fc" id="L264">                .maxAge(Duration.ofMillis(refreshExpirationMs))</span>
+<span class="fc" id="L265">                .build()</span>
+<span class="fc" id="L266">                .toString();</span>
     }
 
     private String removeAccessTokenCookie() {
-<span class="fc" id="L274">        return ResponseCookie.from(&quot;access_token&quot;, &quot;&quot;)</span>
-<span class="fc" id="L275">                .httpOnly(true)</span>
-<span class="fc" id="L276">                .secure(true)</span>
-<span class="fc" id="L277">                .sameSite(&quot;Strict&quot;)</span>
-<span class="fc" id="L278">                .path(&quot;/&quot;)</span>
-<span class="fc" id="L279">                .maxAge(0)</span>
-<span class="fc" id="L280">                .build()</span>
-<span class="fc" id="L281">                .toString();</span>
+<span class="fc" id="L270">        return ResponseCookie.from(&quot;access_token&quot;, &quot;&quot;)</span>
+<span class="fc" id="L271">                .httpOnly(true)</span>
+<span class="fc" id="L272">                .secure(true)</span>
+<span class="fc" id="L273">                .sameSite(&quot;Strict&quot;)</span>
+<span class="fc" id="L274">                .path(&quot;/&quot;)</span>
+<span class="fc" id="L275">                .maxAge(0)</span>
+<span class="fc" id="L276">                .build()</span>
+<span class="fc" id="L277">                .toString();</span>
     }
 
     private String removeRefreshTokenCookie() {
-<span class="fc" id="L285">        return ResponseCookie.from(&quot;refresh_token&quot;, &quot;&quot;)</span>
-<span class="fc" id="L286">                .httpOnly(true)</span>
-<span class="fc" id="L287">                .secure(true)</span>
-<span class="fc" id="L288">                .sameSite(&quot;Strict&quot;)</span>
-<span class="fc" id="L289">                .path(&quot;/api/auth&quot;)</span>
-<span class="fc" id="L290">                .maxAge(0)</span>
-<span class="fc" id="L291">                .build()</span>
-<span class="fc" id="L292">                .toString();</span>
+<span class="fc" id="L281">        return ResponseCookie.from(&quot;refresh_token&quot;, &quot;&quot;)</span>
+<span class="fc" id="L282">                .httpOnly(true)</span>
+<span class="fc" id="L283">                .secure(true)</span>
+<span class="fc" id="L284">                .sameSite(&quot;Strict&quot;)</span>
+<span class="fc" id="L285">                .path(&quot;/api/auth&quot;)</span>
+<span class="fc" id="L286">                .maxAge(0)</span>
+<span class="fc" id="L287">                .build()</span>
+<span class="fc" id="L288">                .toString();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

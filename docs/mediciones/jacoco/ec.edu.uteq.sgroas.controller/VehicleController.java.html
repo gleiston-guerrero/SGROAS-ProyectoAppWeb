@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class VehicleController {
 
-    private final VehicleService vehicleService;
+    private final VehicleService vehiculoService;
 
     /**
      * Recupera la lista paginada de vehículos registrados en el sistema.
@@ -28,7 +28,7 @@ public class VehicleController {
     public ResponseEntity&lt;Page&lt;VehicleResponse&gt;&gt; list(
             @PageableDefault(size = 10, sort = &quot;id&quot;) Pageable pageable
     ) {
-<span class="fc" id="L31">        return ResponseEntity.ok(vehicleService.list(pageable));</span>
+<span class="fc" id="L31">        return ResponseEntity.ok(vehiculoService.list(pageable));</span>
     }
 
     /**
@@ -38,7 +38,7 @@ public class VehicleController {
      */
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;VehicleResponse&gt; findById(@PathVariable Long id) {
-<span class="fc" id="L41">        return ResponseEntity.ok(vehicleService.findById(id));</span>
+<span class="fc" id="L41">        return ResponseEntity.ok(vehiculoService.findById(id));</span>
     }
 
     /**
@@ -50,7 +50,7 @@ public class VehicleController {
     public ResponseEntity&lt;VehicleResponse&gt; create(
             @Valid @RequestBody VehicleRequest request
     ) {
-<span class="fc" id="L53">        VehicleResponse response = vehicleService.create(request);</span>
+<span class="fc" id="L53">        VehicleResponse response = vehiculoService.create(request);</span>
 <span class="fc" id="L54">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
@@ -65,7 +65,7 @@ public class VehicleController {
             @PathVariable Long id,
             @Valid @RequestBody VehicleRequest request
     ) {
-<span class="fc" id="L68">        return ResponseEntity.ok(vehicleService.update(id, request));</span>
+<span class="fc" id="L68">        return ResponseEntity.ok(vehiculoService.update(id, request));</span>
     }
 
     /**
@@ -75,7 +75,7 @@ public class VehicleController {
      */
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
-<span class="fc" id="L78">        vehicleService.deactivate(id);</span>
+<span class="fc" id="L78">        vehiculoService.deactivate(id);</span>
 <span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
     }
 }

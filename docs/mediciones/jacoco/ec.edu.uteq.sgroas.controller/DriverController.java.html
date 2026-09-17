@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class DriverController {
 
-    private final DriverService driverService;
+    private final DriverService conductorService;
 
     /**
      * Recupera la lista paginada de conductores con filtro opcional por texto.
@@ -30,7 +30,7 @@ public class DriverController {
             @RequestParam(required = false) String search,
             @PageableDefault(size = 10, sort = &quot;id&quot;) Pageable pageable
     ) {
-<span class="fc" id="L33">        return ResponseEntity.ok(driverService.list(search, pageable));</span>
+<span class="fc" id="L33">        return ResponseEntity.ok(conductorService.list(search, pageable));</span>
     }
 
     /**
@@ -40,7 +40,7 @@ public class DriverController {
      */
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;DriverResponse&gt; findById(@PathVariable Long id) {
-<span class="fc" id="L43">        return ResponseEntity.ok(driverService.findById(id));</span>
+<span class="fc" id="L43">        return ResponseEntity.ok(conductorService.findById(id));</span>
     }
 
     /**
@@ -52,7 +52,7 @@ public class DriverController {
     public ResponseEntity&lt;DriverResponse&gt; create(
             @Valid @RequestBody DriverRequest request
     ) {
-<span class="fc" id="L55">        DriverResponse response = driverService.create(request);</span>
+<span class="fc" id="L55">        DriverResponse response = conductorService.create(request);</span>
 <span class="fc" id="L56">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
@@ -67,7 +67,7 @@ public class DriverController {
             @PathVariable Long id,
             @Valid @RequestBody DriverRequest request
     ) {
-<span class="fc" id="L70">        return ResponseEntity.ok(driverService.update(id, request));</span>
+<span class="fc" id="L70">        return ResponseEntity.ok(conductorService.update(id, request));</span>
     }
 
     /**
@@ -77,7 +77,7 @@ public class DriverController {
      */
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
-<span class="fc" id="L80">        driverService.deactivate(id);</span>
+<span class="fc" id="L80">        conductorService.deactivate(id);</span>
 <span class="fc" id="L81">        return ResponseEntity.noContent().build();</span>
     }
 }

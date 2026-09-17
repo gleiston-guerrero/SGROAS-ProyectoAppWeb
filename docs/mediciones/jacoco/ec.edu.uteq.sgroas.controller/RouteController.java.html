@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RouteController {
 
-    private final RouteService routeService;
+    private final RouteService rutaService;
 
     /**
      * Recupera la lista paginada de rutas registradas en el sistema.
@@ -28,7 +28,7 @@ public class RouteController {
     public ResponseEntity&lt;Page&lt;RouteResponse&gt;&gt; list(
             @PageableDefault(size = 10, sort = &quot;id&quot;) Pageable pageable
     ) {
-<span class="fc" id="L31">        return ResponseEntity.ok(routeService.list(pageable));</span>
+<span class="fc" id="L31">        return ResponseEntity.ok(rutaService.list(pageable));</span>
     }
 
     /**
@@ -38,7 +38,7 @@ public class RouteController {
      */
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;RouteResponse&gt; findById(@PathVariable Long id) {
-<span class="fc" id="L41">        return ResponseEntity.ok(routeService.findById(id));</span>
+<span class="fc" id="L41">        return ResponseEntity.ok(rutaService.findById(id));</span>
     }
 
     /**
@@ -50,7 +50,7 @@ public class RouteController {
     public ResponseEntity&lt;RouteResponse&gt; create(
             @Valid @RequestBody RouteRequest request
     ) {
-<span class="fc" id="L53">        RouteResponse response = routeService.create(request);</span>
+<span class="fc" id="L53">        RouteResponse response = rutaService.create(request);</span>
 <span class="fc" id="L54">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
@@ -65,7 +65,7 @@ public class RouteController {
             @PathVariable Long id,
             @Valid @RequestBody RouteRequest request
     ) {
-<span class="fc" id="L68">        return ResponseEntity.ok(routeService.update(id, request));</span>
+<span class="fc" id="L68">        return ResponseEntity.ok(rutaService.update(id, request));</span>
     }
 
     /**
@@ -75,7 +75,7 @@ public class RouteController {
      */
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
-<span class="fc" id="L78">        routeService.deactivate(id);</span>
+<span class="fc" id="L78">        rutaService.deactivate(id);</span>
 <span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
     }
 }

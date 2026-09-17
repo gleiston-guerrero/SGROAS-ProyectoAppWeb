@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReportController {
 
-    private final ReportService reportService;
+    private final ReportService reporteService;
 
     /**
      * Genera el resumen con las estadísticas generales de la operación del sistema.
@@ -25,7 +25,7 @@ public class ReportController {
     @GetMapping(&quot;/estadisticas-generales&quot;)
     @PreAuthorize(&quot;hasAnyRole('ADMIN', 'COORDINADOR', 'SEGURIDAD')&quot;)
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; generalStatistics() {
-<span class="fc" id="L28">        return ResponseEntity.ok(reportService.generalStatistics());</span>
+<span class="fc" id="L28">        return ResponseEntity.ok(reporteService.generalStatistics());</span>
     }
 
     /**
@@ -38,7 +38,7 @@ public class ReportController {
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; incidentsBySeverity(
             @RequestParam(required = false) String tipo
     ) {
-<span class="fc" id="L41">        return ResponseEntity.ok(reportService.incidentsBySeverity(tipo));</span>
+<span class="fc" id="L41">        return ResponseEntity.ok(reporteService.incidentsBySeverity(tipo));</span>
     }
 
     /**
@@ -53,7 +53,7 @@ public class ReportController {
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant desde,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant hasta
     ) {
-<span class="fc" id="L56">        return ResponseEntity.ok(reportService.incidentsByRange(desde, hasta));</span>
+<span class="fc" id="L56">        return ResponseEntity.ok(reporteService.incidentsByRange(desde, hasta));</span>
     }
 
     /**
@@ -66,7 +66,7 @@ public class ReportController {
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; licensesExpiring(
             @RequestParam(defaultValue = &quot;30&quot;) Integer dias
     ) {
-<span class="fc" id="L69">        return ResponseEntity.ok(reportService.licensesExpiring(dias));</span>
+<span class="fc" id="L69">        return ResponseEntity.ok(reporteService.licensesExpiring(dias));</span>
     }
 
     /**
@@ -76,7 +76,7 @@ public class ReportController {
     @GetMapping(&quot;/vehiculos-en-mantenimiento&quot;)
     @PreAuthorize(&quot;hasAnyRole('ADMIN', 'COORDINADOR')&quot;)
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; vehiclesInMaintenance() {
-<span class="fc" id="L79">        return ResponseEntity.ok(reportService.vehiclesInMaintenance());</span>
+<span class="fc" id="L79">        return ResponseEntity.ok(reporteService.vehiclesInMaintenance());</span>
     }
 
     /**
@@ -86,7 +86,7 @@ public class ReportController {
     @GetMapping(&quot;/rendimiento-rutas&quot;)
     @PreAuthorize(&quot;hasAnyRole('ADMIN', 'COORDINADOR')&quot;)
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; routePerformance() {
-<span class="fc" id="L89">        return ResponseEntity.ok(reportService.routePerformanceReport());</span>
+<span class="fc" id="L89">        return ResponseEntity.ok(reporteService.routePerformanceReport());</span>
     }
 
     /**
@@ -99,7 +99,7 @@ public class ReportController {
     public ResponseEntity&lt;List&lt;Map&lt;String, Object&gt;&gt;&gt; activeAssignments(
             @PathVariable Long conductorId
     ) {
-<span class="fc" id="L102">        return ResponseEntity.ok(reportService.activeAssignmentsByDriver(conductorId));</span>
+<span class="fc" id="L102">        return ResponseEntity.ok(reporteService.activeAssignmentsByDriver(conductorId));</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

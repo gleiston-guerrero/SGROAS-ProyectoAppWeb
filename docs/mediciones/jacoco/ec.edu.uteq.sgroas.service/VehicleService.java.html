@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VehicleService {
 
-    private final VehicleRepository vehicleRepository;
+    private final VehicleRepository vehiculoRepository;
 
     /**
      * Returns a paginated list of active vehicles.
@@ -39,8 +39,8 @@ public class VehicleService {
      */
     @Cacheable(value = &quot;vehiculos&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
     public List&lt;VehicleResponse&gt; listCached(Pageable pageable) {
-<span class="fc" id="L42">        return vehicleRepository.findByActiveTrue(pageable)</span>
-<span class="fc" id="L43">                .map(this::mapToResponse)</span>
+<span class="fc" id="L42">        return vehiculoRepository.findByActiveTrue(pageable)</span>
+<span class="fc" id="L43">                .map(this::mapearAResponse)</span>
 <span class="fc" id="L44">                .getContent();</span>
     }
 
@@ -51,7 +51,7 @@ public class VehicleService {
      */
     public VehicleResponse findById(Long id) {
 <span class="fc" id="L53">        Vehicle vehiculo = getActiveVehicle(id);</span>
-<span class="fc" id="L54">        return mapToResponse(vehiculo);</span>
+<span class="fc" id="L54">        return mapearAResponse(vehiculo);</span>
     }
 
     /**
@@ -62,7 +62,7 @@ public class VehicleService {
      */
     @CacheEvict(value = &quot;vehiculos&quot;, allEntries = true)
     public VehicleResponse create(VehicleRequest request) {
-<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (vehicleRepository.existsByPlate(request.plate())) {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (vehiculoRepository.existsByPlate(request.plate())) {</span>
 <span class="fc" id="L66">            throw new IllegalArgumentException(&quot;Ya existe un vehiculo con esa placa&quot;);</span>
         }
 
@@ -81,8 +81,8 @@ public class VehicleService {
 <span class="fc" id="L81">                .updatedAt(Instant.now())</span>
 <span class="fc" id="L82">                .build();</span>
 
-<span class="fc" id="L84">        Vehicle vehiculoGuardado = vehicleRepository.save(vehiculo);</span>
-<span class="fc" id="L85">        return mapToResponse(vehiculoGuardado);</span>
+<span class="fc" id="L84">        Vehicle vehiculoGuardado = vehiculoRepository.save(vehiculo);</span>
+<span class="fc" id="L85">        return mapearAResponse(vehiculoGuardado);</span>
     }
 
     /**
@@ -96,7 +96,7 @@ public class VehicleService {
 <span class="fc" id="L96">        Vehicle vehiculo = getActiveVehicle(id);</span>
 
 <span class="fc bfc" id="L98" title="All 2 branches covered.">        if (!vehiculo.getPlate().equals(request.plate())</span>
-<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                &amp;&amp; vehicleRepository.existsByPlate(request.plate())) {</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">                &amp;&amp; vehiculoRepository.existsByPlate(request.plate())) {</span>
 <span class="fc" id="L100">            throw new IllegalArgumentException(&quot;Ya existe un vehiculo con esa placa&quot;);</span>
         }
 
@@ -111,8 +111,8 @@ public class VehicleService {
 <span class="fc" id="L111">        vehiculo.setStatus(toStatus(request.status()));</span>
 <span class="fc" id="L112">        vehiculo.setUpdatedAt(Instant.now());</span>
 
-<span class="fc" id="L114">        Vehicle vehiculoActualizado = vehicleRepository.save(vehiculo);</span>
-<span class="fc" id="L115">        return mapToResponse(vehiculoActualizado);</span>
+<span class="fc" id="L114">        Vehicle vehiculoActualizado = vehiculoRepository.save(vehiculo);</span>
+<span class="fc" id="L115">        return mapearAResponse(vehiculoActualizado);</span>
     }
 
     /**
@@ -125,11 +125,11 @@ public class VehicleService {
 <span class="fc" id="L125">        vehiculo.setActive(false);</span>
 <span class="fc" id="L126">        vehiculo.setStatus(VehicleStatus.FUERA_DE_SERVICIO);</span>
 <span class="fc" id="L127">        vehiculo.setUpdatedAt(Instant.now());</span>
-<span class="fc" id="L128">        vehicleRepository.save(vehiculo);</span>
+<span class="fc" id="L128">        vehiculoRepository.save(vehiculo);</span>
 <span class="fc" id="L129">    }</span>
 
     private Vehicle getActiveVehicle(Long id) {
-<span class="fc" id="L132">        return vehicleRepository.findById(id)</span>
+<span class="fc" id="L132">        return vehiculoRepository.findById(id)</span>
 <span class="fc" id="L133">                .filter(Vehicle::getActive)</span>
 <span class="fc" id="L134">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle no encontrado&quot;));</span>
     }
@@ -142,7 +142,7 @@ public class VehicleService {
         }
     }
 
-    private VehicleResponse mapToResponse(Vehicle vehiculo) {
+    private VehicleResponse mapearAResponse(Vehicle vehiculo) {
 <span class="fc" id="L146">        return new VehicleResponse(</span>
 <span class="fc" id="L147">                vehiculo.getId(),</span>
 <span class="fc" id="L148">                vehiculo.getPlate(),</span>

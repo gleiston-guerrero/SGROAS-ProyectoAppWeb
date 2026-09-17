@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RouteAssignmentController {
 
-    private final RouteAssignmentService routeAssignmentService;
+    private final RouteAssignmentService asignacionRutaService;
 
     /**
      * Recupera la lista paginada de asignaciones de rutas registradas en el sistema.
@@ -28,7 +28,7 @@ public class RouteAssignmentController {
     public ResponseEntity&lt;Page&lt;RouteAssignmentResponse&gt;&gt; list(
             @PageableDefault(size = 10, sort = &quot;id&quot;) Pageable pageable
     ) {
-<span class="fc" id="L31">        return ResponseEntity.ok(routeAssignmentService.list(pageable));</span>
+<span class="fc" id="L31">        return ResponseEntity.ok(asignacionRutaService.list(pageable));</span>
     }
 
     /**
@@ -38,7 +38,7 @@ public class RouteAssignmentController {
      */
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;RouteAssignmentResponse&gt; findById(@PathVariable Long id) {
-<span class="fc" id="L41">        return ResponseEntity.ok(routeAssignmentService.findById(id));</span>
+<span class="fc" id="L41">        return ResponseEntity.ok(asignacionRutaService.findById(id));</span>
     }
 
     /**
@@ -50,7 +50,7 @@ public class RouteAssignmentController {
     public ResponseEntity&lt;RouteAssignmentResponse&gt; create(
             @Valid @RequestBody RouteAssignmentRequest request
     ) {
-<span class="fc" id="L53">        RouteAssignmentResponse response = routeAssignmentService.create(request);</span>
+<span class="fc" id="L53">        RouteAssignmentResponse response = asignacionRutaService.create(request);</span>
 <span class="fc" id="L54">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
@@ -65,7 +65,7 @@ public class RouteAssignmentController {
             @PathVariable Long id,
             @Valid @RequestBody RouteAssignmentRequest request
     ) {
-<span class="fc" id="L68">        return ResponseEntity.ok(routeAssignmentService.update(id, request));</span>
+<span class="fc" id="L68">        return ResponseEntity.ok(asignacionRutaService.update(id, request));</span>
     }
 
     /**
@@ -75,7 +75,7 @@ public class RouteAssignmentController {
      */
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
-<span class="fc" id="L78">        routeAssignmentService.deactivate(id);</span>
+<span class="fc" id="L78">        asignacionRutaService.deactivate(id);</span>
 <span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
     }
 }
