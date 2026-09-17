@@ -663,6 +663,37 @@ anotado como no ejecutable, para no ocultar cómo se originó el problema.
 Este cambio es una corrección honesta que reduce el riesgo de Piso 3, no un
 retroceso.
 
+## Corrección adicional (2026-09-17) — claims del JWT seguían en español
+
+Al verificar el despliegue real en Render (`sgroas-backend.onrender.com`)
+después de reconectarlo al repositorio correcto y redesplegarlo, se
+confirmó que el cuerpo de `POST /api/auth/login` ya usa el contrato en
+inglés (`{"name":..., "role":...}`), pero el **JWT emitido internamente**
+seguía llevando las claims `nombre`/`rol` (visibles al decodificar el
+payload del token, que no está cifrado, solo firmado). Esto no rompía
+nada en producción (ningún componente lee esas claims de vuelta — la
+sesión se reconstruye desde el cuerpo de la respuesta / cookie, no
+decodificando el JWT en el cliente), pero era inconsistente con el
+renombrado a inglés de P5.
+
+`src/main/java/ec/edu/uteq/sgroas/security/JwtService.java` líneas 53-54:
+`.claim("nombre", ...)` / `.claim("rol", ...)` → `.claim("name", ...)` /
+`.claim("role", ...)`. Verificado que ningún otro archivo del backend ni
+del frontend lee esas claims por nombre (`grep -rn "\"nombre\"\|\"rol\""`
+solo encontró columnas de base de datos `@Column(name = "nombre"/"rol")`,
+que son un asunto de esquema de BD fuera del alcance de P5, no
+identificadores Java). `JwtServiceTest`: 4/4 pasan sin cambios.
+
+## Nota de seguridad — no exponer tokens reales
+
+Durante la verificación del despliegue se hizo un login real de prueba
+contra Render con la cuenta de desarrollo sembrada
+(`admin@sgroas.com`/`admin123`, ver `V2__seed.sql`) para confirmar el
+contrato corregido. El `access_token`/`refresh_token` de esa respuesta
+**no se guardó en ningún archivo de este repositorio** — solo se vio en la
+salida de un comando `curl` durante esta sesión de auditoría. Expira en 1
+hora (access) / 7 días (refresh) desde el momento de esa prueba.
+
 ## Firmas
 
 Declaro que los puntos de esta ronda de correcciones del examen suspenso
