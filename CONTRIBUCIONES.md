@@ -422,7 +422,7 @@ antemano, P5 al 0% real (main y test), P6 al 100% real contando interfaces
 (sin constancias reales localizadas todavía). Superado por `v1.1.2` (ver
 abajo); se conserva como referencia histórica y no se mueve ni se borra.
 
-## Tag v1.1.2 (2026-09-17) — vigente: resuelve P11 y corrige EV-1 adicional
+## Tag v1.1.2 (2026-09-17, historico) — resuelve P11 con una fecha luego corregida
 
 Apunta al commit final de esta auditoría, que agrega sobre `v1.1.1`:
 
@@ -457,20 +457,34 @@ contenido del informe). Si el evaluador requiere que la portada del informe
 también cite `v1.1.2`, es un paso pendiente adicional, no incluido en esta
 ronda.
 
-**Nota de autorreferencia honesta:** este párrafo y el resto de las
-referencias a `v1.1.2` en este documento se escribieron en un commit
-posterior al propio commit al que apunta el tag `v1.1.2` (para evitar
-otro force-push sobre un tag ya publicado, el mismo tipo de operación que
-esta auditoría trató con cautela en todo momento). Es decir: el código,
-scripts y expedientes técnicos de `v1.1.2` ya incluyen toda la resolución
-de P11 y las correcciones de EV-1 descritas arriba, pero la versión de
-`CONTRIBUCIONES.md`/`VERIFICACION.md` que ves en el propio commit
-`v1.1.2` todavía menciona `v1.1.1` en estas dos secciones de "Tag". La
-versión corregida de estas dos secciones (la que estás leyendo) vive en
-`main`, un commit después del tag. No se creó un tag `v1.1.3` solo para
-esta actualización de referencias cruzadas, porque no corrige ningún
-hallazgo nuevo de la guía — sería spam de tags. Si esto importa para la
-evaluación, lo correcto es citar el commit real de `main` en vez del tag.
+**Nota de autorreferencia honesta (histórica):** cuando se creó `v1.1.2`,
+este documento todavía citaba `v1.1.1` en sus propias secciones de "Tag"
+(el mismo problema de autorreferencia que ya se explicaba aquí). Esa
+inconsistencia de referencias cruzadas, por sí sola, no ameritaba un tag
+nuevo. Lo que sí lo ameritó fue encontrar, poco después, que la fecha de
+evaluación de P11-P15 usada en `v1.1.2` (2026-08-03) era incorrecta —ver
+"Tag v1.1.3" abajo—, así que el tag nuevo se creó por esa corrección
+sustantiva, no por las referencias cruzadas.
+
+## Tag v1.1.3 (2026-09-17) — vigente: corrige la fecha real de evaluación de P11-P15
+
+Apunta al commit final de esta auditoría. Corrige sobre `v1.1.2`:
+
+- La fecha de evaluación de P11-P15 declarada por el equipo: **2026-08-16**
+  (no 2026-08-03, dato provisional usado por error en `v1.1.2`).
+- Un error propio de esta auditoría: se había generalizado que los
+  archivos `P11.json`…`P15.json` se subieron al repositorio "el 2026-08-16"
+  (esa fecha corresponde solo a `P01.json`…`P10.json`). Verificado
+  individualmente, `P11.json`…`P15.json` se suben el **2026-09-06**
+  (commit `3516019`, autoría de María del Rosario Escudero Plaza —
+  atribución agregada en la sección P8 de este documento).
+
+Se comprueba con:
+
+```
+git rev-parse v1.1.3^{commit}
+git log --oneline v1.1.3 -1
+```
 
 ---
 

@@ -1483,7 +1483,7 @@ documentado como riesgo de Piso 3 NO resuelto** (sin constancias reales
 localizadas todavía). Superado por `v1.1.2`; se conserva sin mover ni
 borrar, como referencia histórica.
 
-## Tag v1.1.2 (2026-09-17) — vigente: resuelve P11 y corrige EV-1 adicional
+## Tag v1.1.2 (2026-09-17, historico) — resuelve P11 con una fecha luego corregida
 
 Apunta al commit final de esta auditoría. Agrega sobre `v1.1.1`:
 
@@ -1495,11 +1495,26 @@ Apunta al commit final de esta auditoría. Agrega sobre `v1.1.1`:
   corregidos en `CONTRIBUCIONES.md`; mención desactualizada de que
   `CONTRIBUCIONES.md` está "firmado por los tres integrantes" corregida.
 
+**Nota histórica:** la fecha de evaluación de P11-P15 usada en este tag
+(2026-08-03) resultó ser incorrecta. Ver "Tag v1.1.3" abajo, el tag vigente.
+
+## Tag v1.1.3 (2026-09-17) — vigente: corrige la fecha real de evaluación de P11-P15
+
+Apunta al commit final de esta auditoría. Corrige sobre `v1.1.2`:
+
+- La fecha de evaluación de P11-P15 declarada por el equipo: **2026-08-16**
+  (no 2026-08-03, dato provisional usado por error en `v1.1.2`).
+- Un error propio de esta auditoría: se había generalizado que los
+  archivos `P11.json`…`P15.json` se subieron al repositorio "el 2026-08-16"
+  (esa fecha corresponde solo a `P01.json`…`P10.json`). Verificado
+  individualmente, `P11.json`…`P15.json` se suben el **2026-09-06**
+  (commit `3516019`, autoría de María del Rosario Escudero Plaza).
+
 Se verifica:
 
 ```bash
-git rev-parse v1.1.2^{commit}
-git log --oneline v1.1.2 -1
+git rev-parse v1.1.3^{commit}
+git log --oneline v1.1.3 -1
 ```
 
 No se regeneró el PDF de `docs/informe-final/` para esta ronda: su portada
