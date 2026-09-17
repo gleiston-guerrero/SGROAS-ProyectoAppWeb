@@ -1,11 +1,13 @@
-# VERIFICACION — SGROAS Supletorio v1.1.0 / v1.1.1
+# VERIFICACION — SGROAS Supletorio v1.1.0 / v1.1.2
 
 Fecha original: 2026-09-15
 Commit citado originalmente: 8398462 (INCORRECTO, ver seccion "Tag v1.1.0"
 mas abajo — corregido 2026-09-17: el tag v1.1.0 en realidad apunta a
 f2fb883)
 Tag evaluado por la guia externa: v1.1.0 (-> f2fb883)
-Tag con las correcciones de esta auditoria: v1.1.1
+Tag vigente con todas las correcciones de esta auditoria (incluye la
+resolucion del riesgo de Piso 3 en P11): v1.1.2
+Tag historico intermedio (P11 aun sin resolver en ese punto): v1.1.1
 
 **Re-auditoria: 2026-09-16.** Todos los comandos de este archivo se
 re-ejecutaron en este working tree en esa fecha y la salida se pego
@@ -1453,18 +1455,34 @@ objeto tag, `847ee44`; `git rev-parse v1.1.0^{commit}` o
 al que apunta el tag. `v1.1.0` -> `f2fb883` es la versión que evaluó la
 guía externa, con todos los defectos allí descritos.
 
-## Tag v1.1.1 (2026-09-17) — corrige los hallazgos de la auditoría sobre v1.1.0
+## Tag v1.1.1 (2026-09-17, histórico) — primera ronda de correcciones
 
-Apunta al commit con las correcciones de: contrato backend/frontend (P0),
-P2 (script honesto), P5 (0% real en main y test), P6 (248/248 real
-contando interfaces, sin contar `record`), P11 (documentado honestamente,
-riesgo de Piso 3 no resuelto por falta de constancias), secretos
+Apuntaba al commit con la primera ronda de correcciones: contrato
+backend/frontend (P0), P2 (script honesto), P5 (0% real en main y test),
+P6 (248/248 real contando interfaces, sin contar `record`), secretos
 (redactados/removidos), configuración muerta (`app.cookie.secure`), y
-evidencia en vivo nueva de P4/P9. Se verifica:
+evidencia en vivo nueva de P4/P9. **En ese momento P11 seguía
+documentado como riesgo de Piso 3 NO resuelto** (sin constancias reales
+localizadas todavía). Superado por `v1.1.2`; se conserva sin mover ni
+borrar, como referencia histórica.
+
+## Tag v1.1.2 (2026-09-17) — vigente: resuelve P11 y corrige EV-1 adicional
+
+Apunta al commit final de esta auditoría. Agrega sobre `v1.1.1`:
+
+- **P11: riesgo de Piso 3 RESUELTO** con constancias de consentimiento
+  reales localizadas y verificadas (ver sección "P11" más arriba para el
+  detalle completo con hashes SHA-256 y fechas extraídas de cada PDF).
+- **EV-1 adicional:** salida de P10 recortada con "..." reemplazada por
+  las 283 líneas literales; placeholders `CHANGE_ME` inexistentes
+  corregidos en `CONTRIBUCIONES.md`; mención desactualizada de que
+  `CONTRIBUCIONES.md` está "firmado por los tres integrantes" corregida.
+
+Se verifica:
 
 ```bash
-git rev-parse v1.1.1
-git log --oneline v1.1.1 -1
+git rev-parse v1.1.2^{commit}
+git log --oneline v1.1.2 -1
 ```
 
 No se regeneró el PDF de `docs/informe-final/` para esta ronda: su portada

@@ -403,19 +403,39 @@ guía externa (`Evaluacion_SGROAS.md`), con los defectos allí descritos:
 contrato backend/frontend roto, P5/P6 mal contados, P11 con riesgo de
 Piso 3, secretos versionados, etc.
 
-## Tag v1.1.1 (2026-09-17) — corrige los hallazgos de la auditoría sobre v1.1.0
+## Tag v1.1.1 (2026-09-17, histórico) — primera ronda de correcciones sobre v1.1.0
 
-Apunta al commit que incluye todas las correcciones descritas en
-"Auditoría externa y correcciones" más abajo: contrato backend/frontend
-reparado, P11 documentado honestamente (sin resolver el riesgo de Piso 3
-por falta de constancias reales), P2 recalculado sin resultados fijados de
+Apuntaba al commit con la primera ronda de correcciones: contrato
+backend/frontend reparado, P2 recalculado sin resultados fijados de
 antemano, P5 al 0% real (main y test), P6 al 100% real contando interfaces
-(248/248), secretos redactados/removidos, y evidencia en vivo nueva de
-P4/P9. Se comprueba con:
+(248/248), secretos redactados/removidos, evidencia en vivo nueva de P4/P9.
+**En ese momento P11 seguía documentado como riesgo de Piso 3 NO resuelto**
+(sin constancias reales localizadas todavía). Superado por `v1.1.2` (ver
+abajo); se conserva como referencia histórica y no se mueve ni se borra.
+
+## Tag v1.1.2 (2026-09-17) — vigente: resuelve P11 y corrige EV-1 adicional
+
+Apunta al commit final de esta auditoría, que agrega sobre `v1.1.1`:
+
+- **P11: riesgo de Piso 3 RESUELTO.** Se localizaron y verificaron los 15
+  formularios de consentimiento firmados en papel (P01–P15): SHA-256 de
+  cada uno (verificado con `sha256sum` y `hashlib.sha256`, resultados
+  idénticos), fecha de firma legible extraída con `pdftotext`: P01–P10
+  firmados 2026-07-24 (evaluados 2026-07-30), P11–P15 firmados 2026-07-26
+  (evaluados 2026-08-03, según declaración del equipo). Ambos grupos con
+  consentimiento previo a su evaluación. Los documentos originales **no**
+  se versionaron (contienen firmas manuscritas); el registro público
+  (`dataset/sus/CONSENT-REGISTRY.md`) solo publica el hash de cada uno.
+- **EV-1 adicional:** salida de P10 recortada con "..." (reemplazada por
+  las 283 líneas literales), placeholders `CHANGE_ME` citados que nunca
+  existieron, y una mención desactualizada de que este documento está
+  "firmado por los tres integrantes".
+
+Se comprueba con:
 
 ```
-git rev-parse v1.1.1
-git log --oneline v1.1.1 -1
+git rev-parse v1.1.2^{commit}
+git log --oneline v1.1.2 -1
 ```
 
 **No se regeneró el PDF de `docs/informe-final/` ni se cambió su portada**
@@ -425,8 +445,23 @@ un hito distinto de esta ronda de correcciones del examen suspenso, y
 regenerar un PDF de 98 páginas no era necesario para corregir los defectos
 señalados por la guía (que son de código, scripts y expedientes, no de
 contenido del informe). Si el evaluador requiere que la portada del informe
-también cite `v1.1.1`, es un paso pendiente adicional, no incluido en esta
+también cite `v1.1.2`, es un paso pendiente adicional, no incluido en esta
 ronda.
+
+**Nota de autorreferencia honesta:** este párrafo y el resto de las
+referencias a `v1.1.2` en este documento se escribieron en un commit
+posterior al propio commit al que apunta el tag `v1.1.2` (para evitar
+otro force-push sobre un tag ya publicado, el mismo tipo de operación que
+esta auditoría trató con cautela en todo momento). Es decir: el código,
+scripts y expedientes técnicos de `v1.1.2` ya incluyen toda la resolución
+de P11 y las correcciones de EV-1 descritas arriba, pero la versión de
+`CONTRIBUCIONES.md`/`VERIFICACION.md` que ves en el propio commit
+`v1.1.2` todavía menciona `v1.1.1` en estas dos secciones de "Tag". La
+versión corregida de estas dos secciones (la que estás leyendo) vive en
+`main`, un commit después del tag. No se creó un tag `v1.1.3` solo para
+esta actualización de referencias cruzadas, porque no corrige ningún
+hallazgo nuevo de la guía — sería spam de tags. Si esto importa para la
+evaluación, lo correcto es citar el commit real de `main` en vez del tag.
 
 ---
 
