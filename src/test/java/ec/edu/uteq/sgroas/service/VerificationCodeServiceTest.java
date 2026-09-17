@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CodigoVerificacionServiceTest {
+class VerificationCodeServiceTest {
 
     private static final String EMAIL = "carlos@sgroas.com";
 
@@ -73,7 +73,7 @@ class CodigoVerificacionServiceTest {
     }
 
     @Test
-    void puedeReenviarSinRegistroDebeSerTrue() {
+    void canResendWithoutRecordShouldBeTrue() {
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.empty());
 
@@ -81,7 +81,7 @@ class CodigoVerificacionServiceTest {
     }
 
     @Test
-    void puedeReenviarConCodigoRecienteDebeSerFalse() {
+    void canResendWithRecentCodeShouldBeFalse() {
         VerificationCode reciente = registro("123456");
         reciente.setCreatedAt(Instant.now().minusSeconds(10));
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
@@ -91,7 +91,7 @@ class CodigoVerificacionServiceTest {
     }
 
     @Test
-    void puedeReenviarConCodigoAntiguoDebeSerTrue() {
+    void canResendWithOldCodeShouldBeTrue() {
         VerificationCode antiguo = registro("123456");
         antiguo.setCreatedAt(Instant.now().minusSeconds(120));
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(

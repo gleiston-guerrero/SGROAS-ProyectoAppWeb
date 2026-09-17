@@ -42,12 +42,12 @@ class AuthControllerTest {
     private TokenService tokenService;
 
     @Mock
-    private UserRepository usuarioRepository;
+    private UserRepository userRepository;
 
     private MockMvc mockMvc() {
         return MockMvcBuilders.standaloneSetup(
                         new AuthController(authService, loginRateLimiter, jwtService,
-                                tokenService, usuarioRepository))
+                                tokenService, userRepository))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
@@ -75,11 +75,11 @@ class AuthControllerTest {
     }
 
     @Test
-    void meDesdeCookieDebeRetornar200ConDatosDelUsuario() throws Exception {
+    void meFromCookieShouldReturn200WithUserData() throws Exception {
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(jwtService.getExpirationMs()).thenReturn(3600000L);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuarioActivo()));
 
         mockMvc().perform(get("/api/auth/me")
@@ -91,11 +91,11 @@ class AuthControllerTest {
     }
 
     @Test
-    void meDesdeAuthorizationHeaderDebeRetornar200() throws Exception {
+    void meFromAuthorizationHeaderShouldReturn200() throws Exception {
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(jwtService.getExpirationMs()).thenReturn(3600000L);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuarioActivo()));
 
         mockMvc().perform(get("/api/auth/me")
@@ -105,13 +105,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void meSinTokenDebeRetornar401() throws Exception {
+    void meWithoutTokenShouldReturn401() throws Exception {
         mockMvc().perform(get("/api/auth/me"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void meConTokenEnBlacklistDebeRetornar401() throws Exception {
+    void meWithBlacklistedTokenShouldReturn401() throws Exception {
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(true);
 
         mockMvc().perform(get("/api/auth/me")
@@ -120,9 +120,9 @@ class AuthControllerTest {
     }
 
     @Test
-    void meConEmailInvalidoDebeRetornar401() throws Exception {
+    void meWithInvalidEmailShouldReturn401() throws Exception {
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn(null);
+        when(jwtService.extractEmail("access-token")).thenReturn(null);
 
         mockMvc().perform(get("/api/auth/me")
                         .cookie(new jakarta.servlet.http.Cookie("access_token", "access-token")))
@@ -130,12 +130,12 @@ class AuthControllerTest {
     }
 
     @Test
-    void meConUsuarioInactivoDebeRetornar401() throws Exception {
+    void meWithInactiveUserShouldReturn401() throws Exception {
         User inactivo = usuarioActivo();
         inactivo.setActive(false);
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(inactivo));
 
         mockMvc().perform(get("/api/auth/me")
@@ -144,7 +144,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void resendCodeDebeRetornar200ConMensajeGenerico() throws Exception {
+    void resendCodeShouldReturn200WithGenericMessage() throws Exception {
         mockMvc().perform(post("/api/auth/resend-code")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -176,7 +176,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void olvidarContrasenaDebeRetornar200ConMensajeGenerico() throws Exception {
+    void forgotPasswordShouldReturn200WithGenericMessage() throws Exception {
         mockMvc().perform(post("/api/auth/forgot-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -189,7 +189,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void restablecerContrasenaDebeRetornar200() throws Exception {
+    void resetPasswordShouldReturn200() throws Exception {
         mockMvc().perform(post("/api/auth/reset-password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -204,7 +204,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginCorrectoDebeRetornar200YCookieSinTokenEnBody() throws Exception {
+    void loginSuccessShouldReturn200AndCookieWithoutTokenInBody() throws Exception {
         when(loginRateLimiter.isBlocked("127.0.0.1")).thenReturn(false);
         when(authService.login(any())).thenReturn(authResponse());
 
@@ -224,7 +224,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginConIpBloqueadaDebeRetornar429() throws Exception {
+    void loginWithBlockedIpShouldReturn429() throws Exception {
         when(loginRateLimiter.isBlocked("127.0.0.1")).thenReturn(true);
 
         mockMvc().perform(post("/api/auth/login")
@@ -240,7 +240,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void loginConCredencialesInvalidasDebeRetornar401() throws Exception {
+    void loginWithInvalidCredentialsShouldReturn401() throws Exception {
         when(loginRateLimiter.isBlocked("127.0.0.1")).thenReturn(false);
         when(authService.login(any()))
                 .thenThrow(new BadCredentialsException("Credenciales invalidas"));
@@ -257,7 +257,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshConCookieDebeRetornar200SinTokenEnBody() throws Exception {
+    void refreshWithCookieShouldReturn200WithoutTokenInBody() throws Exception {
         when(authService.refresh(any())).thenReturn(authResponse());
 
         mockMvc().perform(post("/api/auth/refresh")
@@ -269,7 +269,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshConBodyDebeRetornar200PorCompatibilidad() throws Exception {
+    void refreshWithBodyShouldReturn200ForCompatibility() throws Exception {
         when(authService.refresh(any())).thenReturn(authResponse());
 
         mockMvc().perform(post("/api/auth/refresh")
@@ -284,13 +284,13 @@ class AuthControllerTest {
     }
 
     @Test
-    void refreshSinTokenDebeRetornar401() throws Exception {
+    void refreshWithoutTokenShouldReturn401() throws Exception {
         mockMvc().perform(post("/api/auth/refresh"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    void logoutConCookiesDebeRetornar204() throws Exception {
+    void logoutWithCookiesShouldReturn204() throws Exception {
         mockMvc().perform(post("/api/auth/logout")
                         .cookie(new jakarta.servlet.http.Cookie("access_token", "access-token"))
                         .cookie(new jakarta.servlet.http.Cookie("refresh_token", "refresh-token")))
@@ -299,7 +299,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void logoutConCookieDebeRetornar204() throws Exception {
+    void logoutWithCookieShouldReturn204() throws Exception {
         mockMvc().perform(post("/api/auth/logout")
                         .cookie(new jakarta.servlet.http.Cookie("access_token", "access-token"))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -313,7 +313,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void logoutSinCookieDebeRetornar204() throws Exception {
+    void logoutWithoutCookieShouldReturn204() throws Exception {
         mockMvc().perform(post("/api/auth/logout")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""

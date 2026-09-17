@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VehicleService {
 
-    private final VehicleRepository vehiculoRepository;
+    private final VehicleRepository vehicleRepository;
 
     /**
      * Returns a paginated list of active vehicles.
@@ -39,8 +39,8 @@ public class VehicleService {
      */
     @Cacheable(value = "vehiculos", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public List<VehicleResponse> listCached(Pageable pageable) {
-        return vehiculoRepository.findByActiveTrue(pageable)
-                .map(this::mapearAResponse)
+        return vehicleRepository.findByActiveTrue(pageable)
+                .map(this::mapToResponse)
                 .getContent();
     }
 
@@ -51,7 +51,7 @@ public class VehicleService {
      */
     public VehicleResponse findById(Long id) {
         Vehicle vehiculo = getActiveVehicle(id);
-        return mapearAResponse(vehiculo);
+        return mapToResponse(vehiculo);
     }
 
     /**
@@ -62,7 +62,7 @@ public class VehicleService {
      */
     @CacheEvict(value = "vehiculos", allEntries = true)
     public VehicleResponse create(VehicleRequest request) {
-        if (vehiculoRepository.existsByPlate(request.plate())) {
+        if (vehicleRepository.existsByPlate(request.plate())) {
             throw new IllegalArgumentException("Ya existe un vehiculo con esa placa");
         }
 
@@ -81,8 +81,8 @@ public class VehicleService {
                 .updatedAt(Instant.now())
                 .build();
 
-        Vehicle vehiculoGuardado = vehiculoRepository.save(vehiculo);
-        return mapearAResponse(vehiculoGuardado);
+        Vehicle vehiculoGuardado = vehicleRepository.save(vehiculo);
+        return mapToResponse(vehiculoGuardado);
     }
 
     /**
@@ -96,7 +96,7 @@ public class VehicleService {
         Vehicle vehiculo = getActiveVehicle(id);
 
         if (!vehiculo.getPlate().equals(request.plate())
-                && vehiculoRepository.existsByPlate(request.plate())) {
+                && vehicleRepository.existsByPlate(request.plate())) {
             throw new IllegalArgumentException("Ya existe un vehiculo con esa placa");
         }
 
@@ -111,8 +111,8 @@ public class VehicleService {
         vehiculo.setStatus(toStatus(request.status()));
         vehiculo.setUpdatedAt(Instant.now());
 
-        Vehicle vehiculoActualizado = vehiculoRepository.save(vehiculo);
-        return mapearAResponse(vehiculoActualizado);
+        Vehicle vehiculoActualizado = vehicleRepository.save(vehiculo);
+        return mapToResponse(vehiculoActualizado);
     }
 
     /**
@@ -125,11 +125,11 @@ public class VehicleService {
         vehiculo.setActive(false);
         vehiculo.setStatus(VehicleStatus.FUERA_DE_SERVICIO);
         vehiculo.setUpdatedAt(Instant.now());
-        vehiculoRepository.save(vehiculo);
+        vehicleRepository.save(vehiculo);
     }
 
     private Vehicle getActiveVehicle(Long id) {
-        return vehiculoRepository.findById(id)
+        return vehicleRepository.findById(id)
                 .filter(Vehicle::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle no encontrado"));
     }
@@ -142,7 +142,7 @@ public class VehicleService {
         }
     }
 
-    private VehicleResponse mapearAResponse(Vehicle vehiculo) {
+    private VehicleResponse mapToResponse(Vehicle vehiculo) {
         return new VehicleResponse(
                 vehiculo.getId(),
                 vehiculo.getPlate(),

@@ -1,0 +1,38 @@
+HTTP/1.1 200
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+Set-Cookie: access_token=<REDACTED-JWT-2026-09-16>; Path=/; Max-Age=3600; Expires=Thu, 17 Sep 2026 01:30:43 GMT; Secure; HttpOnly; SameSite=Strict
+Set-Cookie: refresh_token=<REDACTED-UUID-2026-09-16>; Path=/api/auth; Max-Age=604800; Expires=Thu, 24 Sep 2026 00:30:43 GMT; Secure; HttpOnly; SameSite=Strict
+Content-Type: application/json
+Transfer-Encoding: chunked
+Date: Thu, 17 Sep 2026 00:30:43 GMT
+
+{"name":"Admin SGROAS","email":"admin@sgroas.com","role":"ROLE_ADMIN","expiresIn":3600000}
+
+> **Nota de la sesion (2026-09-16):** captura EN VIVO contra el backend
+> corriendo LOCALMENTE (`./mvnw spring-boot:run`, `localhost:8080`) sobre el
+> codigo YA CORREGIDO (post-renombrado de campos a ingles, post-cierre de
+> P4/P9). El comando ejecutado fue:
+>
+> ```sh
+> curl -s -i -c cookies.txt -X POST http://localhost:8080/api/auth/login \
+>   -H "Content-Type: application/json" \
+>   -d '{"email":"admin@sgroas.com","password":"admin123"}'
+> ```
+>
+> Usuario de prueba: `admin@sgroas.com` / `admin123` (credencial sembrada por
+> Flyway en `V2__seed.sql`, exclusiva de entorno de desarrollo local, NUNCA
+> usada en produccion). El JWT (`access_token`) y el `refresh_token` reales
+> fueron truncados/redactados arriba: NO quedan tokens validos de larga
+> duracion versionados en este archivo. Notese que el body de la respuesta ya
+> usa los campos en ingles `name`/`role` (antes `nombre`/`rol` en la
+> evidencia vieja de `login-response.txt`), confirmando el contrato
+> corregido.

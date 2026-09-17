@@ -36,10 +36,14 @@ public class AuthController {
     private final LoginRateLimiter loginRateLimiter;
     private final JwtService jwtService;
     private final TokenService tokenService;
-    private final UserRepository usuarioRepository;
+    private final UserRepository userRepository;
 
-    @Value("${app.cookie.secure:false}")
-    private boolean cookieSecure;
+    // Nota de auditoria (2026-09-16): existia un @Value("${app.cookie.secure:false}")
+    // que quedo sin usar despues de que las cookies se fijaran con .secure(true)
+    // a fuego mas abajo. Se elimino el campo muerto en lugar de conectarlo,
+    // porque una cookie de sesion sin el flag Secure es un riesgo real si algun
+    // entorno terminara con app.cookie.secure=false por error de configuracion;
+    // Secure siempre activo es la opcion mas segura y no depende de config externa.
 
     @Value("${app.jwt.refresh-expiration-ms:604800000}")
     private long refreshExpirationMs;
@@ -63,11 +67,11 @@ public class AuthController {
         if (token == null || token.isBlank() || tokenService.accessTokenEnBlacklist(token)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        String email = jwtService.extraerEmail(token);
+        String email = jwtService.extractEmail(token);
         if (email == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        User usuario = usuarioRepository.findByEmail(email)
+        User usuario = userRepository.findByEmail(email)
                 .filter(User::getActive)
                 .orElse(null);
         if (usuario == null) {

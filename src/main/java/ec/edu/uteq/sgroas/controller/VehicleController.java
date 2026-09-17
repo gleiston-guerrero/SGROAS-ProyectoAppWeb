@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class VehicleController {
 
-    private final VehicleService vehiculoService;
+    private final VehicleService vehicleService;
 
     /**
      * Recupera la lista paginada de vehículos registrados en el sistema.
@@ -28,7 +28,7 @@ public class VehicleController {
     public ResponseEntity<Page<VehicleResponse>> list(
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(vehiculoService.list(pageable));
+        return ResponseEntity.ok(vehicleService.list(pageable));
     }
 
     /**
@@ -38,7 +38,7 @@ public class VehicleController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<VehicleResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(vehiculoService.findById(id));
+        return ResponseEntity.ok(vehicleService.findById(id));
     }
 
     /**
@@ -50,7 +50,7 @@ public class VehicleController {
     public ResponseEntity<VehicleResponse> create(
             @Valid @RequestBody VehicleRequest request
     ) {
-        VehicleResponse response = vehiculoService.create(request);
+        VehicleResponse response = vehicleService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -65,7 +65,7 @@ public class VehicleController {
             @PathVariable Long id,
             @Valid @RequestBody VehicleRequest request
     ) {
-        return ResponseEntity.ok(vehiculoService.update(id, request));
+        return ResponseEntity.ok(vehicleService.update(id, request));
     }
 
     /**
@@ -75,7 +75,7 @@ public class VehicleController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        vehiculoService.deactivate(id);
+        vehicleService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class RedisConfigTest {
 
     @Test
-    void fabricaYPlantillaSeConstruyenConHostYPuerto() {
+    void factoryAndTemplateAreBuiltWithHostAndPort() {
         RedisConfig config = new RedisConfig();
         ReflectionTestUtils.setField(config, "redisHost", "localhost");
         ReflectionTestUtils.setField(config, "redisPort", 6379);

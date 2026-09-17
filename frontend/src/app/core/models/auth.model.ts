@@ -8,8 +8,8 @@ export interface MensajeResponse {
 }
 
 export interface Sesion {
-  nombre: string;
+  name: string;
   email: string;
-  rol: string;
+  role: string;
   expiresIn: number;
 }

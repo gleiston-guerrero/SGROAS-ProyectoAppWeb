@@ -1,7 +1,7 @@
 package ec.edu.uteq.sgroas.controller;
 
-import ec.edu.uteq.sgroas.dto.VehicleResponse;
-import ec.edu.uteq.sgroas.service.VehicleService;
+import ec.edu.uteq.sgroas.dto.RouteAssignmentResponse;
+import ec.edu.uteq.sgroas.service.RouteAssignmentService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,13 +27,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class VehiculoControllerTest {
+class RouteAssignmentControllerTest {
 
     @Mock
-    private VehicleService vehiculoService;
+    private RouteAssignmentService routeAssignmentService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new VehicleController(vehiculoService))
+        return MockMvcBuilders.standaloneSetup(
+                new RouteAssignmentController(routeAssignmentService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -42,49 +44,48 @@ class VehiculoControllerTest {
                 .build();
     }
 
-    private VehicleResponse responseEjemplo() {
-        return new VehicleResponse(
-                1L, "GTU-001", "Toyota", "Hiace", 2020, 14,
-                "MOT-123", "CHAS-123", "Blanco", "ACTIVO", true,
+    private RouteAssignmentResponse responseEjemplo() {
+        return new RouteAssignmentResponse(
+                1L, 1L, "Carlos Mendoza", 1L, "GTU-001", 1L,
+                "Quito - Guayaquil", LocalDate.now(), LocalDate.now(),
+                LocalDate.now().plusDays(1), "ACTIVA", true,
                 Instant.now(), Instant.now()
         );
     }
 
     @Test
     void listReturns200() throws Exception {
-        when(vehiculoService.list(any()))
+        when(routeAssignmentService.list(any()))
                 .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
 
-        mockMvc().perform(get("/api/vehiculos"))
+        mockMvc().perform(get("/api/asignaciones"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(vehiculoService.findById(1L)).thenReturn(responseEjemplo());
+        when(routeAssignmentService.findById(1L)).thenReturn(responseEjemplo());
 
-        mockMvc().perform(get("/api/vehiculos/1"))
+        mockMvc().perform(get("/api/asignaciones/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.brand").value("Toyota"));
+                .andExpect(jsonPath("$.vehiclePlate").value("GTU-001"));
     }
 
     @Test
     void createReturns201() throws Exception {
-        when(vehiculoService.create(any())).thenReturn(responseEjemplo());
+        when(routeAssignmentService.create(any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(post("/api/vehiculos")
+        mockMvc().perform(post("/api/asignaciones")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "plate": "GTU-001",
-                                  "brand": "Toyota",
-                                  "model": "Hiace",
-                                  "year": 2020,
-                                  "capacity": 14,
-                                  "engineNumber": "MOT-123",
-                                  "chassisNumber": "CHAS-123",
-                                  "color": "Blanco",
-                                  "status": "ACTIVO"
+                                  "driverId": 1,
+                                  "vehicleId": 1,
+                                  "routeId": 1,
+                                  "assignmentDate": "2026-07-30",
+                                  "startDate": "2026-07-30",
+                                  "endDate": "2026-07-31",
+                                  "status": "ACTIVA"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -93,21 +94,19 @@ class VehiculoControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(vehiculoService.update(any(), any())).thenReturn(responseEjemplo());
+        when(routeAssignmentService.update(any(), any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(put("/api/vehiculos/1")
+        mockMvc().perform(put("/api/asignaciones/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "plate": "GTU-001",
-                                  "brand": "Toyota",
-                                  "model": "Hiace",
-                                  "year": 2020,
-                                  "capacity": 14,
-                                  "engineNumber": "MOT-123",
-                                  "chassisNumber": "CHAS-123",
-                                  "color": "Blanco",
-                                  "status": "ACTIVO"
+                                  "driverId": 1,
+                                  "vehicleId": 1,
+                                  "routeId": 1,
+                                  "assignmentDate": "2026-07-30",
+                                  "startDate": "2026-07-30",
+                                  "endDate": "2026-07-31",
+                                  "status": "ACTIVA"
                                 }
                                 """))
                 .andExpect(status().isOk());
@@ -115,7 +114,7 @@ class VehiculoControllerTest {
 
     @Test
     void deactivateReturns204() throws Exception {
-        mockMvc().perform(delete("/api/vehiculos/1"))
+        mockMvc().perform(delete("/api/asignaciones/1"))
                 .andExpect(status().isNoContent());
     }
 }

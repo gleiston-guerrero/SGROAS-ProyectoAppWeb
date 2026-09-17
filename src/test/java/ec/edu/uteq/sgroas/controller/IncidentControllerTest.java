@@ -27,13 +27,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class IncidenteControllerTest {
+class IncidentControllerTest {
 
     @Mock
-    private IncidentService incidenteService;
+    private IncidentService incidentService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new IncidentController(incidenteService))
+        return MockMvcBuilders.standaloneSetup(new IncidentController(incidentService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -53,7 +53,7 @@ class IncidenteControllerTest {
 
     @Test
     void listReturns200() throws Exception {
-        when(incidenteService.list(any()))
+        when(incidentService.list(any()))
                 .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
 
         mockMvc().perform(get("/api/incidentes"))
@@ -62,7 +62,7 @@ class IncidenteControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(incidenteService.findById(1L)).thenReturn(responseEjemplo());
+        when(incidentService.findById(1L)).thenReturn(responseEjemplo());
 
         mockMvc().perform(get("/api/incidentes/1"))
                 .andExpect(status().isOk())
@@ -71,7 +71,7 @@ class IncidenteControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(incidenteService.create(any())).thenReturn(responseEjemplo());
+        when(incidentService.create(any())).thenReturn(responseEjemplo());
 
         mockMvc().perform(post("/api/incidentes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class IncidenteControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(incidenteService.update(any(), any())).thenReturn(responseEjemplo());
+        when(incidentService.update(any(), any())).thenReturn(responseEjemplo());
 
         mockMvc().perform(put("/api/incidentes/1")
                         .contentType(MediaType.APPLICATION_JSON)

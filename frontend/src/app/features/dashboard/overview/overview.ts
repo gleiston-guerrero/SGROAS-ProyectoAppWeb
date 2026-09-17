@@ -47,7 +47,7 @@ export class Overview implements OnInit {
   errorMsg = signal<string | null>(null);
 
   rol = computed(() => this.authService.rolActual());
-  userName = computed(() => this.authService.currentUser()?.nombre ?? '');
+  userName = computed(() => this.authService.currentUser()?.name ?? '');
 
   panel = computed<PanelConfig>(() => {
     switch (this.rol()) {

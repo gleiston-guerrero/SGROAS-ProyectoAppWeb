@@ -23,20 +23,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class ReporteControllerTest {
+class ReportControllerTest {
 
     @Mock
-    private ReportService reporteService;
+    private ReportService reportService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new ReportController(reporteService))
+        return MockMvcBuilders.standaloneSetup(new ReportController(reportService))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .build();
     }
 
     @Test
-    void generalStatisticsDevuelveDatos() throws Exception {
-        when(reporteService.generalStatistics())
+    void generalStatisticsReturnsData() throws Exception {
+        when(reportService.generalStatistics())
                 .thenReturn(List.of(Map.of(
                         "total_conductores", 10L,
                         "total_incidentes", 3L)));
@@ -49,7 +49,7 @@ class ReporteControllerTest {
 
     @Test
     void incidentsBySeverityFiltersByType() throws Exception {
-        when(reporteService.incidentsBySeverity("ROBO")).thenReturn(
+        when(reportService.incidentsBySeverity("ROBO")).thenReturn(
                 List.of(Map.of("gravedad", "ALTA", "total_incidentes", 2L)));
 
         mockMvc().perform(get("/api/reportes/incidentes-por-gravedad").param("tipo", "ROBO"))
@@ -59,7 +59,7 @@ class ReporteControllerTest {
 
     @Test
     void incidentsByRangeWithDates() throws Exception {
-        when(reporteService.incidentsByRange(any(Instant.class), any(Instant.class)))
+        when(reportService.incidentsByRange(any(Instant.class), any(Instant.class)))
                 .thenReturn(List.of(Map.of("incidente_id", 1L, "tipo", "ACCIDENTE")));
 
         mockMvc().perform(get("/api/reportes/incidentes-por-rango")
@@ -71,7 +71,7 @@ class ReporteControllerTest {
 
     @Test
     void licenciasPorVencerUsaDefaultDe30Dias() throws Exception {
-        when(reporteService.licensesExpiring(anyInt()))
+        when(reportService.licensesExpiring(anyInt()))
                 .thenReturn(List.of(Map.of("conductor_id", 1L, "cedula", "1234567890")));
 
         mockMvc().perform(get("/api/reportes/licencias-por-vencer"))
@@ -81,7 +81,7 @@ class ReporteControllerTest {
 
     @Test
     void vehiclesInMaintenanceReturnsList() throws Exception {
-        when(reporteService.vehiclesInMaintenance())
+        when(reportService.vehiclesInMaintenance())
                 .thenReturn(List.of(Map.of("placa", "PCH-1234")));
 
         mockMvc().perform(get("/api/reportes/vehiculos-en-mantenimiento"))
@@ -90,8 +90,8 @@ class ReporteControllerTest {
     }
 
     @Test
-    void rendimientoRutasDevuelveReporte() throws Exception {
-        when(reporteService.routePerformanceReport())
+    void routePerformanceReturnsReport() throws Exception {
+        when(reportService.routePerformanceReport())
                 .thenReturn(List.of(Map.of("ruta_codigo", "R-01", "total_incidentes", 5L)));
 
         mockMvc().perform(get("/api/reportes/rendimiento-rutas"))
@@ -101,7 +101,7 @@ class ReporteControllerTest {
 
     @Test
     void activeAssignmentsReturnsAssignments() throws Exception {
-        when(reporteService.activeAssignmentsByDriver(anyLong()))
+        when(reportService.activeAssignmentsByDriver(anyLong()))
                 .thenReturn(List.of(Map.of("vehiculo_placa", "PCH-5678")));
 
         mockMvc().perform(get("/api/reportes/asignaciones-activas/1"))
@@ -111,7 +111,7 @@ class ReporteControllerTest {
 
     @Test
     void incidentsBySeverityWithoutParameterDoesNotFail() throws Exception {
-        when(reporteService.incidentsBySeverity(nullable(String.class)))
+        when(reportService.incidentsBySeverity(nullable(String.class)))
                 .thenReturn(List.of(Map.of("gravedad", "BAJA", "total_incidentes", 0L)));
 
         mockMvc().perform(get("/api/reportes/incidentes-por-gravedad"))

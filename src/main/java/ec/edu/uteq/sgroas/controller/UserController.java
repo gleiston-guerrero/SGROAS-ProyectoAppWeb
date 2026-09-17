@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserService usuarioService;
+    private final UserService userService;
 
     /**
      * Recupera la lista paginada de usuarios con filtro opcional por texto.
@@ -30,7 +30,7 @@ public class UserController {
             @RequestParam(required = false) String search,
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(usuarioService.list(search, pageable));
+        return ResponseEntity.ok(userService.list(search, pageable));
     }
 
     /**
@@ -40,7 +40,7 @@ public class UserController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.findById(id));
+        return ResponseEntity.ok(userService.findById(id));
     }
 
     /**
@@ -50,7 +50,7 @@ public class UserController {
      */
     @PostMapping
     public ResponseEntity<UserResponse> create(@Valid @RequestBody UserRequest request) {
-        UserResponse response = usuarioService.create(request);
+        UserResponse response = userService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -61,7 +61,7 @@ public class UserController {
      */
     @PostMapping("/{id}/reenviar-activacion")
     public ResponseEntity<Void> resendActivation(@PathVariable Long id) {
-        usuarioService.resendActivationCode(id);
+        userService.resendActivationCode(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -76,7 +76,7 @@ public class UserController {
             @PathVariable Long id,
             @Valid @RequestBody UserRequest request
     ) {
-        return ResponseEntity.ok(usuarioService.update(id, request));
+        return ResponseEntity.ok(userService.update(id, request));
     }
 
     /**
@@ -86,7 +86,7 @@ public class UserController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        usuarioService.deactivate(id);
+        userService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -22,13 +22,13 @@ import static org.mockito.Mockito.when;
 class CustomUserDetailsServiceTest {
 
     @Mock
-    private UserRepository usuarioRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private CustomUserDetailsService customUserDetailsService;
 
     @Test
-    void loadUserByUsernameDebeRetornarUsuario() {
+    void loadUserByUsernameShouldReturnUser() {
         User usuario = User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -39,7 +39,7 @@ class CustomUserDetailsServiceTest {
                 .createdAt(Instant.now())
                 .updatedAt(Instant.now())
                 .build();
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername("admin@sgroas.com");
@@ -51,8 +51,8 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsernameConEmailInexistenteDebeLanzarExcepcion() {
-        when(usuarioRepository.findByEmail("desconocido@sgroas.com"))
+    void loadUserByUsernameWithNonexistentEmailShouldThrowException() {
+        when(userRepository.findByEmail("desconocido@sgroas.com"))
                 .thenReturn(Optional.empty());
 
         assertThrows(UsernameNotFoundException.class,
@@ -60,7 +60,7 @@ class CustomUserDetailsServiceTest {
     }
 
     @Test
-    void loadUserByUsernameConUsuarioInactivoDebeLanzarExcepcion() {
+    void loadUserByUsernameWithInactiveUserShouldThrowException() {
         User inactivo = User.builder()
                 .id(1L)
                 .name("Administrador")
@@ -69,7 +69,7 @@ class CustomUserDetailsServiceTest {
                 .role(Role.ROLE_ADMIN)
                 .active(false)
                 .build();
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(inactivo));
 
         assertThrows(UsernameNotFoundException.class,

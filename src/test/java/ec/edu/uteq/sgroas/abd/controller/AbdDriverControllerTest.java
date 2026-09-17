@@ -1,8 +1,7 @@
 package ec.edu.uteq.sgroas.abd.controller;
 
-import ec.edu.uteq.sgroas.abd.entity.Alert;
-import ec.edu.uteq.sgroas.abd.entity.AbdIncident;
-import ec.edu.uteq.sgroas.abd.repository.AlertRepository;
+import ec.edu.uteq.sgroas.abd.entity.AbdDriver;
+import ec.edu.uteq.sgroas.abd.repository.AbdDriverRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,23 +17,23 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class AlertaAbdControllerTest {
+class AbdDriverControllerTest {
 
     @Mock
-    private AlertRepository alertaRepository;
+    private AbdDriverRepository conductorAbdRepository;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new AbdAlertController(alertaRepository))
+        return MockMvcBuilders.standaloneSetup(new AbdDriverController(conductorAbdRepository))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -44,29 +43,38 @@ class AlertaAbdControllerTest {
                 .build();
     }
 
-    @Test
-    void listWithDateAndIncidentMapsAll() throws Exception {
-        AbdIncident incidente = AbdIncident.builder()
-                .idIncidente(7).tipo("Choque").build();
-        Alert alerta = Alert.builder().idAlerta(1).nivelRiesgo("ALTO")
-                .descripcion("Riesgo alto").fecha(LocalDateTime.of(2026, 8, 1, 10, 0))
-                .incidente(incidente).build();
-        when(alertaRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(alerta)));
-
-        mockMvc().perform(get("/api/abd/alertas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].nivelRiesgo").value("ALTO"))
-                .andExpect(jsonPath("$.content[0].idIncidente").value(7));
+    private AbdDriver conductor() {
+        return AbdDriver.builder().idConductor(1).cedula("1200000001")
+                .nombres("Carlos").licencia("E").build();
     }
 
     @Test
-    void listWithNullsMapsNull() throws Exception {
-        Alert alerta = Alert.builder().idAlerta(2).nivelRiesgo("BAJO")
-                .descripcion("Sin datos").build();
-        when(alertaRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(alerta)));
+    void listWithoutSearchUsesFindAll() throws Exception {
+        when(conductorAbdRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(conductor())));
 
-        mockMvc().perform(get("/api/abd/alertas"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].idAlerta").value(2));
+        mockMvc().perform(get("/api/abd/conductores")).andExpect(status().isOk());
+
+        verify(conductorAbdRepository).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void listBlankUsesFindAll() throws Exception {
+        when(conductorAbdRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
+
+        mockMvc().perform(get("/api/abd/conductores").param("search", "   "))
+                .andExpect(status().isOk());
+
+        verify(conductorAbdRepository).findAll(any(Pageable.class));
+    }
+
+    @Test
+    void listWithSearchUsesSearch() throws Exception {
+        when(conductorAbdRepository.search(eq("carlos"), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(conductor())));
+
+        mockMvc().perform(get("/api/abd/conductores").param("search", " Carlos "))
+                .andExpect(status().isOk());
+
+        verify(conductorAbdRepository).search(eq("carlos"), any(Pageable.class));
     }
 }

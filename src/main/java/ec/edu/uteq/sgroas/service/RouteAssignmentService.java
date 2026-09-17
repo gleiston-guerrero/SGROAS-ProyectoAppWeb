@@ -23,10 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RouteAssignmentService {
 
-    private final RouteAssignmentRepository asignacionRutaRepository;
-    private final DriverRepository conductorRepository;
-    private final VehicleRepository vehiculoRepository;
-    private final RouteRepository rutaRepository;
+    private final RouteAssignmentRepository routeAssignmentRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleRepository vehicleRepository;
+    private final RouteRepository routeRepository;
 
     /**
      * Returns a paginated list of active route assignments.
@@ -35,8 +35,8 @@ public class RouteAssignmentService {
      */
     @Transactional(readOnly = true)
     public Page<RouteAssignmentResponse> list(Pageable pageable) {
-        Page<RouteAssignment> page = asignacionRutaRepository.findByActiveTrue(pageable);
-        List<RouteAssignmentResponse> contenido = page.map(this::mapearAResponse).getContent();
+        Page<RouteAssignment> page = routeAssignmentRepository.findByActiveTrue(pageable);
+        List<RouteAssignmentResponse> contenido = page.map(this::mapToResponse).getContent();
         return new PageImpl<>(contenido, pageable, page.getTotalElements());
     }
 
@@ -48,8 +48,8 @@ public class RouteAssignmentService {
     @Cacheable(value = "asignaciones", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     @Transactional(readOnly = true)
     public List<RouteAssignmentResponse> listCached(Pageable pageable) {
-        return asignacionRutaRepository.findByActiveTrue(pageable)
-                .map(this::mapearAResponse)
+        return routeAssignmentRepository.findByActiveTrue(pageable)
+                .map(this::mapToResponse)
                 .getContent();
     }
 
@@ -61,7 +61,7 @@ public class RouteAssignmentService {
     @Transactional(readOnly = true)
     public RouteAssignmentResponse findById(Long id) {
         RouteAssignment asignacion = getActiveAssignment(id);
-        return mapearAResponse(asignacion);
+        return mapToResponse(asignacion);
     }
 
     /**
@@ -71,15 +71,15 @@ public class RouteAssignmentService {
      */
     @CacheEvict(value = "asignaciones", allEntries = true)
     public RouteAssignmentResponse create(RouteAssignmentRequest request) {
-        Driver conductor = conductorRepository.findById(request.driverId())
+        Driver conductor = driverRepository.findById(request.driverId())
                 .filter(Driver::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Driver no encontrado"));
 
-        Vehicle vehiculo = vehiculoRepository.findById(request.vehicleId())
+        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())
                 .filter(Vehicle::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle no encontrado"));
 
-        Route ruta = rutaRepository.findById(request.routeId())
+        Route ruta = routeRepository.findById(request.routeId())
                 .filter(Route::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Route no encontrada"));
 
@@ -96,8 +96,8 @@ public class RouteAssignmentService {
                 .updatedAt(Instant.now())
                 .build();
 
-        RouteAssignment asignacionGuardada = asignacionRutaRepository.save(asignacion);
-        return mapearAResponse(asignacionGuardada);
+        RouteAssignment asignacionGuardada = routeAssignmentRepository.save(asignacion);
+        return mapToResponse(asignacionGuardada);
     }
 
     /**
@@ -110,15 +110,15 @@ public class RouteAssignmentService {
     public RouteAssignmentResponse update(Long id, RouteAssignmentRequest request) {
         RouteAssignment asignacion = getActiveAssignment(id);
 
-        Driver conductor = conductorRepository.findById(request.driverId())
+        Driver conductor = driverRepository.findById(request.driverId())
                 .filter(Driver::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Driver no encontrado"));
 
-        Vehicle vehiculo = vehiculoRepository.findById(request.vehicleId())
+        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())
                 .filter(Vehicle::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Vehicle no encontrado"));
 
-        Route ruta = rutaRepository.findById(request.routeId())
+        Route ruta = routeRepository.findById(request.routeId())
                 .filter(Route::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Route no encontrada"));
 
@@ -131,8 +131,8 @@ public class RouteAssignmentService {
         asignacion.setStatus(toStatus(request.status()));
         asignacion.setUpdatedAt(Instant.now());
 
-        RouteAssignment asignacionActualizada = asignacionRutaRepository.save(asignacion);
-        return mapearAResponse(asignacionActualizada);
+        RouteAssignment asignacionActualizada = routeAssignmentRepository.save(asignacion);
+        return mapToResponse(asignacionActualizada);
     }
 
     /**
@@ -145,11 +145,11 @@ public class RouteAssignmentService {
         asignacion.setActive(false);
         asignacion.setStatus(AssignmentStatus.CANCELADA);
         asignacion.setUpdatedAt(Instant.now());
-        asignacionRutaRepository.save(asignacion);
+        routeAssignmentRepository.save(asignacion);
     }
 
     private RouteAssignment getActiveAssignment(Long id) {
-        return asignacionRutaRepository.findWithDetalle(id)
+        return routeAssignmentRepository.findWithDetails(id)
                 .filter(RouteAssignment::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Asignacion no encontrada"));
     }
@@ -162,7 +162,7 @@ public class RouteAssignmentService {
         }
     }
 
-    private RouteAssignmentResponse mapearAResponse(RouteAssignment asignacion) {
+    private RouteAssignmentResponse mapToResponse(RouteAssignment asignacion) {
         return new RouteAssignmentResponse(
                 asignacion.getId(),
                 asignacion.getDriver().getId(),

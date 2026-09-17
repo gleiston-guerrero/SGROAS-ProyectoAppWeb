@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ConductorServiceTest {
+class DriverServiceTest {
 
     @Mock
-    private DriverRepository conductorRepository;
+    private DriverRepository driverRepository;
 
     @InjectMocks
-    private DriverService conductorService;
+    private DriverService driverService;
 
     private Driver conductorBase() {
         return Driver.builder()
@@ -90,25 +90,25 @@ class ConductorServiceTest {
                 .updatedAt(Instant.now())
                 .build();
 
-        when(conductorRepository.existsByNationalId("1200000001"))
+        when(driverRepository.existsByNationalId("1200000001"))
                 .thenReturn(false);
-        when(conductorRepository.existsByLicenseNumber("LIC-001-2026"))
+        when(driverRepository.existsByLicenseNumber("LIC-001-2026"))
                 .thenReturn(false);
-        when(conductorRepository.save(any(Driver.class)))
+        when(driverRepository.save(any(Driver.class)))
                 .thenReturn(conductorGuardado);
 
-        DriverResponse response = conductorService.create(request);
+        DriverResponse response = driverService.create(request);
 
         assertNotNull(response);
         assertEquals(1L, response.id());
         assertEquals("Carlos Alberto", response.firstNames());
         assertEquals("1200000001", response.nationalId());
         assertEquals("ACTIVO", response.status());
-        verify(conductorRepository).save(any(Driver.class));
+        verify(driverRepository).save(any(Driver.class));
     }
 
     @Test
-    void createDriverWithDuplicateCedulaThrowsException() {
+    void createDriverWithDuplicateNationalIdThrowsException() {
         DriverRequest request = new DriverRequest(
                 "Carlos Alberto",
                 "Mendoza Vera",
@@ -121,16 +121,16 @@ class ConductorServiceTest {
                 "ACTIVO"
         );
 
-        when(conductorRepository.existsByNationalId("1200000001"))
+        when(driverRepository.existsByNationalId("1200000001"))
                 .thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> conductorService.create(request)
+                () -> driverService.create(request)
         );
 
         assertEquals("Ya existe un conductor con esa cedula", exception.getMessage());
-        verify(conductorRepository, never()).save(any(Driver.class));
+        verify(driverRepository, never()).save(any(Driver.class));
     }
 
     @Test
@@ -151,10 +151,10 @@ class ConductorServiceTest {
                 .updatedAt(Instant.now())
                 .build();
 
-        when(conductorRepository.findById(1L))
+        when(driverRepository.findById(1L))
                 .thenReturn(Optional.of(conductor));
 
-        DriverResponse response = conductorService.findById(1L);
+        DriverResponse response = driverService.findById(1L);
 
         assertNotNull(response);
         assertEquals(1L, response.id());
@@ -166,47 +166,47 @@ class ConductorServiceTest {
     void listWithoutSearchUsesFindByActiveTrue() {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
-        when(conductorRepository.findByActiveTrue(pageable))
+        when(driverRepository.findByActiveTrue(pageable))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
 
-        var pagina = conductorService.list(null, pageable);
+        var pagina = driverService.list(null, pageable);
 
         assertEquals(1, pagina.getTotalElements());
-        verify(conductorRepository).findByActiveTrue(pageable);
-        verify(conductorRepository, never()).searchActive(any(), any());
+        verify(driverRepository).findByActiveTrue(pageable);
+        verify(driverRepository, never()).searchActive(any(), any());
     }
 
     @Test
     void listWithBlankSearchUsesFindByActiveTrue() {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
-        when(conductorRepository.findByActiveTrue(pageable))
+        when(driverRepository.findByActiveTrue(pageable))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
 
-        var pagina = conductorService.list("   ", pageable);
+        var pagina = driverService.list("   ", pageable);
 
         assertEquals(1, pagina.getTotalElements());
-        verify(conductorRepository).findByActiveTrue(pageable);
+        verify(driverRepository).findByActiveTrue(pageable);
     }
 
     @Test
     void listWithSearchUsesSearchActive() {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
-        when(conductorRepository.searchActive("carlos", pageable))
+        when(driverRepository.searchActive("carlos", pageable))
                 .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
 
-        var pagina = conductorService.list("  Carlos ", pageable);
+        var pagina = driverService.list("  Carlos ", pageable);
 
         assertEquals(1, pagina.getTotalElements());
-        verify(conductorRepository).searchActive("carlos", pageable);
-        verify(conductorRepository, never()).findByActiveTrue(pageable);
+        verify(driverRepository).searchActive("carlos", pageable);
+        verify(driverRepository, never()).findByActiveTrue(pageable);
     }
 
     @Test
-    void updateWithDuplicateCedulaThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
-        when(conductorRepository.existsByNationalId("0999999999")).thenReturn(true);
+    void updateWithDuplicateNationalIdThrowsException() {
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.existsByNationalId("0999999999")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
                 "Carlos Alberto", "Mendoza Vera", "0999999999", "LIC-001-2026",
@@ -214,13 +214,13 @@ class ConductorServiceTest {
                 "carlos.mendoza@sgroas.com", "ACTIVO");
 
         assertThrows(IllegalArgumentException.class,
-                () -> conductorService.update(1L, request));
+                () -> driverService.update(1L, request));
     }
 
     @Test
     void updateWithDuplicateLicenseThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
-        when(conductorRepository.existsByLicenseNumber("LIC-999-2026")).thenReturn(true);
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.existsByLicenseNumber("LIC-999-2026")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
                 "Carlos Alberto", "Mendoza Vera", "1200000001", "LIC-999-2026",
@@ -228,51 +228,51 @@ class ConductorServiceTest {
                 "carlos.mendoza@sgroas.com", "ACTIVO");
 
         assertThrows(IllegalArgumentException.class,
-                () -> conductorService.update(1L, request));
+                () -> driverService.update(1L, request));
     }
 
     @Test
     void updateModifiesAndSaves() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
-        when(conductorRepository.save(any(Driver.class))).thenReturn(conductorBase());
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.save(any(Driver.class))).thenReturn(conductorBase());
 
-        DriverResponse response = conductorService.update(1L, requestBase());
+        DriverResponse response = driverService.update(1L, requestBase());
 
         assertEquals(1L, response.id());
         assertEquals("1200000001", response.nationalId());
-        verify(conductorRepository).save(any(Driver.class));
-        verify(conductorRepository, never()).existsByNationalId(any());
-        verify(conductorRepository, never()).existsByLicenseNumber(any());
+        verify(driverRepository).save(any(Driver.class));
+        verify(driverRepository, never()).existsByNationalId(any());
+        verify(driverRepository, never()).existsByLicenseNumber(any());
     }
 
     @Test
     void deactivateMarksInactive() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
 
-        conductorService.deactivate(1L);
+        driverService.deactivate(1L);
 
-        verify(conductorRepository).save(argThat(c ->
+        verify(driverRepository).save(argThat(c ->
                 !c.getActive() && c.getStatus() == DriverStatus.INACTIVO));
     }
 
     @Test
-    void licenciaVencidaDebeMarcarLicenciaPorVencerFalse() {
+    void expiredLicenseShouldMarkLicenseExpiringFalse() {
         Driver vencido = conductorBase();
         vencido.setLicenseExpiry(LocalDate.now().minusDays(5));
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(vencido));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(vencido));
 
-        DriverResponse response = conductorService.findById(1L);
+        DriverResponse response = driverService.findById(1L);
 
         assertFalse(response.licenseExpiring());
     }
 
     @Test
-    void licenciaLejanaDebeMarcarLicenciaPorVencerFalse() {
+    void farLicenseShouldMarkLicenseExpiringFalse() {
         Driver lejana = conductorBase();
         lejana.setLicenseExpiry(LocalDate.now().plusDays(60));
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(lejana));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(lejana));
 
-        DriverResponse response = conductorService.findById(1L);
+        DriverResponse response = driverService.findById(1L);
 
         assertFalse(response.licenseExpiring());
     }

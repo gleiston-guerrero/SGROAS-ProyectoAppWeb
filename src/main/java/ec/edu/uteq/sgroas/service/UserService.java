@@ -18,9 +18,9 @@ import java.time.Instant;
 @RequiredArgsConstructor
 public class UserService {
 
-    private final UserRepository usuarioRepository;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final VerificationCodeService codigoVerificacionService;
+    private final VerificationCodeService verificationCodeService;
     private final EmailService emailService;
 
     /**
@@ -31,9 +31,9 @@ public class UserService {
      */
     public Page<UserResponse> list(String search, Pageable pageable) {
         if (search == null || search.isBlank()) {
-            return usuarioRepository.findByActiveTrue(pageable).map(this::toResponse);
+            return userRepository.findByActiveTrue(pageable).map(this::toResponse);
         }
-        return usuarioRepository.searchActive(search.trim().toLowerCase(), pageable)
+        return userRepository.searchActive(search.trim().toLowerCase(), pageable)
                 .map(this::toResponse);
     }
 
@@ -44,7 +44,7 @@ public class UserService {
      * @throws EntityNotFoundException cuando no existe un usuario con ese identificador
      */
     public UserResponse findById(Long id) {
-        return usuarioRepository.findById(id)
+        return userRepository.findById(id)
                 .map(this::toResponse)
                 .orElseThrow(() -> new EntityNotFoundException("User no encontrado con id: " + id));
     }
@@ -57,7 +57,7 @@ public class UserService {
      * @throws IllegalArgumentException cuando ya existe otro usuario con el mismo correo
      */
     public UserResponse create(UserRequest request) {
-        if (usuarioRepository.existsByEmail(request.email())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("Ya existe un usuario con ese email");
         }
 
@@ -72,7 +72,7 @@ public class UserService {
                 .updatedAt(Instant.now())
                 .build();
 
-        User guardado = usuarioRepository.save(usuario);
+        User guardado = userRepository.save(usuario);
         sendActivationCode(guardado);
 
         return toResponse(guardado);
@@ -86,13 +86,13 @@ public class UserService {
      * @throws IllegalArgumentException cuando la cuenta ya verifico su correo o se pidio un codigo hace menos de un minuto
      */
     public void resendActivationCode(Long id) {
-        User usuario = usuarioRepository.findById(id)
+        User usuario = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User no encontrado con id: " + id));
 
         if (Boolean.TRUE.equals(usuario.getVerified())) {
             throw new IllegalArgumentException("Ese usuario ya verifico su correo");
         }
-        if (!codigoVerificacionService.canResend(usuario.getEmail(),
+        if (!verificationCodeService.canResend(usuario.getEmail(),
                 VerificationCodeService.Type.VERIFICACION)) {
             throw new IllegalArgumentException(
                     "El codigo se envio hace menos de un minuto. Espera antes de reenviar.");
@@ -101,7 +101,7 @@ public class UserService {
     }
 
     private void sendActivationCode(User usuario) {
-        String codigo = codigoVerificacionService.generate(usuario.getEmail(),
+        String codigo = verificationCodeService.generate(usuario.getEmail(),
                 VerificationCodeService.Type.VERIFICACION);
         emailService.sendVerificationCode(usuario.getEmail(), usuario.getName(), codigo);
     }
@@ -115,7 +115,7 @@ public class UserService {
      * @throws EntityNotFoundException cuando no existe un usuario con ese identificador
      */
     public UserResponse update(Long id, UserRequest request) {
-        User usuario = usuarioRepository.findById(id)
+        User usuario = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User no encontrado con id: " + id));
 
         usuario.setName(request.name());
@@ -127,7 +127,7 @@ public class UserService {
             usuario.setPasswordHash(passwordEncoder.encode(request.password()));
         }
 
-        return toResponse(usuarioRepository.save(usuario));
+        return toResponse(userRepository.save(usuario));
     }
 
     /**
@@ -136,11 +136,11 @@ public class UserService {
      * @throws EntityNotFoundException cuando no existe un usuario con ese identificador
      */
     public void deactivate(Long id) {
-        User usuario = usuarioRepository.findById(id)
+        User usuario = userRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("User no encontrado con id: " + id));
         usuario.setActive(false);
         usuario.setUpdatedAt(Instant.now());
-        usuarioRepository.save(usuario);
+        userRepository.save(usuario);
     }
 
     private UserResponse toResponse(User u) {

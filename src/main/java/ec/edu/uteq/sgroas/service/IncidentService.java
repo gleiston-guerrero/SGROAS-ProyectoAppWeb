@@ -20,8 +20,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class IncidentService {
 
-    private final IncidentRepository incidenteRepository;
-    private final RouteAssignmentRepository asignacionRutaRepository;
+    private final IncidentRepository incidentRepository;
+    private final RouteAssignmentRepository routeAssignmentRepository;
 
     /**
      * Returns a paginated list of active incidents.
@@ -40,8 +40,8 @@ public class IncidentService {
      */
     @Cacheable(value = "incidentes", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public List<IncidentResponse> listCached(Pageable pageable) {
-        return incidenteRepository.findByActiveTrue(pageable)
-                .map(this::mapearAResponse)
+        return incidentRepository.findByActiveTrue(pageable)
+                .map(this::mapToResponse)
                 .getContent();
     }
 
@@ -52,7 +52,7 @@ public class IncidentService {
      */
     public IncidentResponse findById(Long id) {
         Incident incidente = getActiveIncident(id);
-        return mapearAResponse(incidente);
+        return mapToResponse(incidente);
     }
 
     /**
@@ -63,7 +63,7 @@ public class IncidentService {
      */
     @CacheEvict(value = "incidentes", allEntries = true)
     public IncidentResponse create(IncidentRequest request) {
-        RouteAssignment asignacion = asignacionRutaRepository.findById(request.assignmentId())
+        RouteAssignment asignacion = routeAssignmentRepository.findById(request.assignmentId())
                 .filter(RouteAssignment::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Asignacion no encontrada"));
 
@@ -81,8 +81,8 @@ public class IncidentService {
                 .updatedAt(Instant.now())
                 .build();
 
-        Incident incidenteGuardado = incidenteRepository.save(incidente);
-        return mapearAResponse(incidenteGuardado);
+        Incident incidenteGuardado = incidentRepository.save(incidente);
+        return mapToResponse(incidenteGuardado);
     }
 
     /**
@@ -95,7 +95,7 @@ public class IncidentService {
     public IncidentResponse update(Long id, IncidentRequest request) {
         Incident incidente = getActiveIncident(id);
 
-        RouteAssignment asignacion = asignacionRutaRepository.findById(request.assignmentId())
+        RouteAssignment asignacion = routeAssignmentRepository.findById(request.assignmentId())
                 .filter(RouteAssignment::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Asignacion no encontrada"));
 
@@ -109,8 +109,8 @@ public class IncidentService {
         incidente.setStatus(toStatus(request.status()));
         incidente.setUpdatedAt(Instant.now());
 
-        Incident incidenteActualizado = incidenteRepository.save(incidente);
-        return mapearAResponse(incidenteActualizado);
+        Incident incidenteActualizado = incidentRepository.save(incidente);
+        return mapToResponse(incidenteActualizado);
     }
 
     /**
@@ -123,11 +123,11 @@ public class IncidentService {
         incidente.setActive(false);
         incidente.setStatus(IncidentStatus.CERRADO);
         incidente.setUpdatedAt(Instant.now());
-        incidenteRepository.save(incidente);
+        incidentRepository.save(incidente);
     }
 
     private Incident getActiveIncident(Long id) {
-        return incidenteRepository.findById(id)
+        return incidentRepository.findById(id)
                 .filter(Incident::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Incident no encontrado"));
     }
@@ -156,7 +156,7 @@ public class IncidentService {
         }
     }
 
-    private IncidentResponse mapearAResponse(Incident incidente) {
+    private IncidentResponse mapToResponse(Incident incidente) {
         return new IncidentResponse(
                 incidente.getId(),
                 incidente.getAssignment().getId(),

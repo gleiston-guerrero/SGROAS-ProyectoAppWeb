@@ -1,16 +1,16 @@
 export interface Usuario {
   id: number;
-  nombre: string;
+  name: string;
   email: string;
-  rol: string;
-  activo: boolean;
-  creadoEn: string;
-  actualizadoEn: string;
+  role: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface UsuarioRequest {
-  nombre: string;
+  name: string;
   email: string;
   password: string;
-  rol: string;
+  role: string;
 }

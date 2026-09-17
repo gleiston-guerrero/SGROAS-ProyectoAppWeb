@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CacheConfigTest {
 
     @Test
-    void cacheManagerSeConstruyeConTtlConfigurado() {
+    void cacheManagerIsBuiltWithConfiguredTtl() {
         CacheConfig config = new CacheConfig();
         ReflectionTestUtils.setField(config, "defaultTtl", 60L);
 

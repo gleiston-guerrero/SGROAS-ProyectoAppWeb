@@ -1,28 +1,28 @@
 export interface Conductor {
   id: number;
-  nombres: string;
-  apellidos: string;
-  cedula: string;
-  numeroLicencia: string;
-  tipoLicencia: string;
-  fechaVencimientoLicencia: string;
-  telefono: string;
+  firstNames: string;
+  lastNames: string;
+  nationalId: string;
+  licenseNumber: string;
+  licenseType: string;
+  licenseExpiry: string;
+  phone: string;
   email: string;
-  estado: string;
-  activo: boolean;
-  licenciaPorVencer: boolean;
-  creadoEn: string;
-  actualizadoEn: string;
+  status: string;
+  active: boolean;
+  licenseExpiring: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface ConductorRequest {
-  nombres: string;
-  apellidos: string;
-  cedula: string;
-  numeroLicencia: string;
-  tipoLicencia: string;
-  fechaVencimientoLicencia: string;
-  telefono: string;
+  firstNames: string;
+  lastNames: string;
+  nationalId: string;
+  licenseNumber: string;
+  licenseType: string;
+  licenseExpiry: string;
+  phone: string;
   email: string;
-  estado: string;
+  status: string;
 }

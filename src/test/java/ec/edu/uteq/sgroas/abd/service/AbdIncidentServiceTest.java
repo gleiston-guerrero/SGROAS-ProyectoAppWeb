@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class IncidenteAbdServiceTest {
+class AbdIncidentServiceTest {
 
     @Mock
     private AbdIncidentRepository incidenteRepository;

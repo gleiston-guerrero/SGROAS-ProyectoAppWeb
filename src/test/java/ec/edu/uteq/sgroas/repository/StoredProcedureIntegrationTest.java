@@ -27,31 +27,31 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class StoredProcedureIntegrationTest {
 
     @Autowired
-    private IncidentRepository incidenteRepository;
+    private IncidentRepository incidentRepository;
 
     @Autowired
-    private DriverRepository conductorRepository;
+    private DriverRepository driverRepository;
 
     @Autowired
-    private VehicleRepository vehiculoRepository;
+    private VehicleRepository vehicleRepository;
 
     @Autowired
-    private RouteRepository rutaRepository;
+    private RouteRepository routeRepository;
 
     @Autowired
-    private RouteAssignmentRepository asignacionRutaRepository;
+    private RouteAssignmentRepository routeAssignmentRepository;
 
     @Test
     @DisplayName("fn_estadisticas_generales via @Procedure")
     void generalStatistics() {
-        List<Object[]> filas = incidenteRepository.generalStatistics();
+        List<Object[]> filas = incidentRepository.generalStatistics();
         assertNotNull(filas);
     }
 
     @Test
     @DisplayName("sp_incidentes_por_gravedad via @Procedure")
     void incidentsBySeverity() {
-        List<Object[]> filas = incidenteRepository.incidentsBySeverity(null);
+        List<Object[]> filas = incidentRepository.incidentsBySeverity(null);
         assertNotNull(filas);
     }
 
@@ -60,35 +60,35 @@ class StoredProcedureIntegrationTest {
     void incidentsByRange() {
         Instant desde = Instant.now().minus(365, ChronoUnit.DAYS);
         Instant hasta = Instant.now().plus(1, ChronoUnit.DAYS);
-        List<Object[]> filas = incidenteRepository.getIncidentsByRange(desde, hasta);
+        List<Object[]> filas = incidentRepository.getIncidentsByRange(desde, hasta);
         assertNotNull(filas);
     }
 
     @Test
     @DisplayName("fn_licencias_por_vencer via @Procedure")
     void licensesExpiring() {
-        List<Object[]> filas = conductorRepository.licensesExpiring(30);
+        List<Object[]> filas = driverRepository.licensesExpiring(30);
         assertNotNull(filas);
     }
 
     @Test
     @DisplayName("sp_vehiculos_en_mantenimiento via @Procedure")
     void vehiclesInMaintenance() {
-        List<Object[]> filas = vehiculoRepository.vehiclesInMaintenance();
+        List<Object[]> filas = vehicleRepository.vehiclesInMaintenance();
         assertNotNull(filas);
     }
 
     @Test
     @DisplayName("sp_reporte_rendimiento_rutas via @Procedure")
     void routePerformance() {
-        List<Object[]> filas = rutaRepository.routePerformanceReport();
+        List<Object[]> filas = routeRepository.routePerformanceReport();
         assertNotNull(filas);
     }
 
     @Test
     @DisplayName("sp_asignaciones_activas_por_conductor via @Procedure")
     void activeAssignments() {
-        List<Object[]> filas = asignacionRutaRepository.activeAssignmentsByDriver(1L);
+        List<Object[]> filas = routeAssignmentRepository.activeAssignmentsByDriver(1L);
         assertNotNull(filas);
     }
 }

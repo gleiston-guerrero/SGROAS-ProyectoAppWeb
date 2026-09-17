@@ -38,14 +38,14 @@
       <tbody>
         @for (c of conductores(); track c.id) {
           <tr>
-            <td>{{ c.cedula }}</td>
-            <td>{{ c.nombres }}</td>
-            <td>{{ c.apellidos }}</td>
-            <td>{{ c.tipoLicencia }} — {{ c.numeroLicencia }}</td>
+            <td>{{ c.nationalId }}</td>
+            <td>{{ c.firstNames }}</td>
+            <td>{{ c.lastNames }}</td>
+            <td>{{ c.licenseType }} — {{ c.licenseNumber }}</td>
             <td>
-              <span class="badge" [class.badge--activo]="c.estado === 'ACTIVO'"
-                    [class.badge--inactivo]="c.estado !== 'ACTIVO'">
-                {{ c.estado }}
+              <span class="badge" [class.badge--activo]="c.status === 'ACTIVO'"
+                    [class.badge--inactivo]="c.status !== 'ACTIVO'">
+                {{ c.status }}
               </span>
             </td>
             @if (puedeEditar) {

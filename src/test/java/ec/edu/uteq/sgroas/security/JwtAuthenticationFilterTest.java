@@ -47,12 +47,12 @@ class JwtAuthenticationFilterTest {
     private JwtAuthenticationFilter filter;
 
     @BeforeEach
-    void limpiarContexto() {
+    void clearContext() {
         SecurityContextHolder.clearContext();
     }
 
     @AfterEach
-    void limpiarContextoFinal() {
+    void clearContextAfterEach() {
         SecurityContextHolder.clearContext();
     }
 
@@ -67,10 +67,10 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void tokenDeCabeceraDebeContinuarCadena() throws Exception {
+    void headerTokenShouldContinueChain() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(customUserDetailsService.loadUserByUsername("admin@sgroas.com"))
                 .thenReturn(new org.springframework.security.core.userdetails.User(
                         "admin@sgroas.com", "hash", java.util.List.of()));
@@ -81,12 +81,12 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void tokenDeCookieDebeContinuarCadena() throws Exception {
+    void cookieTokenShouldContinueChain() throws Exception {
         when(request.getHeader("Authorization")).thenReturn(null);
         when(request.getCookies())
                 .thenReturn(new Cookie[]{new Cookie("access_token", "access-token")});
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(customUserDetailsService.loadUserByUsername("admin@sgroas.com"))
                 .thenReturn(new org.springframework.security.core.userdetails.User(
                         "admin@sgroas.com", "hash", java.util.List.of()));
@@ -97,7 +97,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void tokenEnBlacklistDebeResponderNoAutorizado() throws Exception {
+    void blacklistedTokenShouldRespondUnauthorized() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(true);
 
@@ -108,10 +108,10 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void tokenConEmailNuloDebeContinuarCadena() throws Exception {
+    void tokenWithNullEmailShouldContinueChain() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer access-token");
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn(null);
+        when(jwtService.extractEmail("access-token")).thenReturn(null);
 
         filter.doFilter(request, response, filterChain);
 
@@ -120,7 +120,7 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void tokenValidoDebeEstablecerAutenticacion() throws Exception {
+    void validTokenShouldSetAuthentication() throws Exception {
         User usuario = User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -139,10 +139,10 @@ class JwtAuthenticationFilterTest {
         when(request.getRemoteAddr()).thenReturn("127.0.0.1");
         when(request.getRequestURI()).thenReturn("/api/conductores");
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
-        when(jwtService.extraerEmail("access-token")).thenReturn("admin@sgroas.com");
+        when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(customUserDetailsService.loadUserByUsername("admin@sgroas.com"))
                 .thenReturn(userDetails);
-        when(jwtService.tokenValido("access-token", "admin@sgroas.com")).thenReturn(true);
+        when(jwtService.isTokenValid("access-token", "admin@sgroas.com")).thenReturn(true);
 
         filter.doFilter(request, response, filterChain);
 

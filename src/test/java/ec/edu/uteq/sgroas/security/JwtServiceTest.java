@@ -12,6 +12,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceTest {
 
+    // Nota de auditoria (2026-09-16): este valor de respaldo solo se usa si la
+    // variable de entorno JWT_SECRET no esta definida, unicamente dentro de este
+    // test unitario (nunca en application.properties ni en un perfil real). No
+    // firma tokens reales ni protege datos: JwtService se instancia aqui con
+    // "new JwtService()" y el valor se inyecta por reflection solo para este
+    // test, por lo que no representa un secreto de produccion filtrado.
     private static final String JWT_SECRET =
             System.getenv().getOrDefault("JWT_SECRET",
                     "TEST_ONLY_SECRET_KEY_2026_NOT_FOR_PRODUCTION_MIN_32");
@@ -19,7 +25,7 @@ class JwtServiceTest {
     private JwtService jwtService;
 
     @BeforeEach
-    void configurarJwtService() {
+    void setUpJwtService() {
         jwtService = new JwtService();
         ReflectionTestUtils.setField(jwtService, "jwtSecret", JWT_SECRET);
         ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", 3600000L);
@@ -43,34 +49,34 @@ class JwtServiceTest {
         String token = jwtService.generateToken(usuarioEjemplo());
 
         assertNotNull(token);
-        assertNotNull(jwtService.extraerJti(token));
-        assertEquals("admin@sgroas.com", jwtService.extraerEmail(token));
-        assertNotNull(jwtService.extraerExpiracion(token));
+        assertNotNull(jwtService.extractJti(token));
+        assertEquals("admin@sgroas.com", jwtService.extractEmail(token));
+        assertNotNull(jwtService.extractExpiration(token));
         assertEquals(3600000L, jwtService.getExpirationMs());
-        assertTrue(jwtService.tokenValido(token, "admin@sgroas.com"));
+        assertTrue(jwtService.isTokenValid(token, "admin@sgroas.com"));
     }
 
     @Test
-    void tokenConEmailDistintoDebeSerInvalido() {
+    void tokenWithDifferentEmailShouldBeInvalid() {
         String token = jwtService.generateToken(usuarioEjemplo());
 
-        assertFalse(jwtService.tokenValido(token, "otro@sgroas.com"));
+        assertFalse(jwtService.isTokenValid(token, "otro@sgroas.com"));
     }
 
     @Test
-    void tokenExpiradoDebeSerRechazado() {
+    void expiredTokenShouldBeRejected() {
         ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", -1000L);
 
         String token = jwtService.generateToken(usuarioEjemplo());
 
         assertThrows(io.jsonwebtoken.ExpiredJwtException.class,
-                () -> jwtService.tokenValido(token, "admin@sgroas.com"));
+                () -> jwtService.isTokenValid(token, "admin@sgroas.com"));
     }
 
     @Test
-    void extraerExpiracionDebeSerFutura() {
+    void extractExpirationShouldBeFuture() {
         String token = jwtService.generateToken(usuarioEjemplo());
 
-        assertTrue(jwtService.extraerExpiracion(token).after(new Date()));
+        assertTrue(jwtService.extractExpiration(token).after(new Date()));
     }
 }

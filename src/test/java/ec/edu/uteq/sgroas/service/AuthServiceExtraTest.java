@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceExtraTest {
 
     @Mock
-    private UserRepository usuarioRepository;
+    private UserRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -42,7 +42,7 @@ class AuthServiceExtraTest {
     private TokenService tokenService;
 
     @Mock
-    private VerificationCodeService codigoVerificacionService;
+    private VerificationCodeService verificationCodeService;
 
     @Mock
     private EmailService emailService;
@@ -80,25 +80,25 @@ class AuthServiceExtraTest {
         User usuario = usuarioEjemplo();
         usuario.setActive(false);
         usuario.setVerified(false);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         simularGeneracionTokens(usuario);
 
         AuthResponse response = authService.verifyEmail("admin@sgroas.com", "654321");
 
         assertEquals("access-token-prueba", response.accessToken());
-        verify(codigoVerificacionService).validate("admin@sgroas.com",
+        verify(verificationCodeService).validate("admin@sgroas.com",
                 VerificationCodeService.Type.VERIFICACION, "654321");
-        verify(usuarioRepository).save(argThat(u ->
+        verify(userRepository).save(argThat(u ->
                 Boolean.TRUE.equals(u.getActive()) && Boolean.TRUE.equals(u.getVerified())));
     }
 
     @Test
-    void loginConCorreoNoVerificadoDebeLanzarExcepcion() {
+    void loginWithUnverifiedEmailShouldThrowException() {
         User sinVerificar = usuarioEjemplo();
         sinVerificar.setActive(false);
         sinVerificar.setVerified(false);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(sinVerificar));
         when(passwordEncoder.matches("123456", "password-encriptado")).thenReturn(true);
 
@@ -107,28 +107,28 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void restablecerContrasenaDebeActualizarClave() {
+    void resetPasswordShouldUpdatePassword() {
         User usuario = usuarioEjemplo();
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("nueva-clave-1")).thenReturn("hash-nuevo");
 
         authService.resetPassword("admin@sgroas.com", "111222", "nueva-clave-1");
 
-        verify(codigoVerificacionService).validate("admin@sgroas.com",
+        verify(verificationCodeService).validate("admin@sgroas.com",
                 VerificationCodeService.Type.RESET_PASSWORD, "111222");
-        verify(usuarioRepository).save(argThat(u -> "hash-nuevo".equals(u.getPasswordHash())));
+        verify(userRepository).save(argThat(u -> "hash-nuevo".equals(u.getPasswordHash())));
     }
 
     @Test
-    void reenviarCodigoDebeGenerarYEnviarNuevoCodigo() {
+    void resendCodeShouldGenerateAndSendNewCode() {
         User sinVerificar = usuarioEjemplo();
         sinVerificar.setVerified(false);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(sinVerificar));
-        when(codigoVerificacionService.canResend("admin@sgroas.com",
+        when(verificationCodeService.canResend("admin@sgroas.com",
                 VerificationCodeService.Type.VERIFICACION)).thenReturn(true);
-        when(codigoVerificacionService.generate("admin@sgroas.com",
+        when(verificationCodeService.generate("admin@sgroas.com",
                 VerificationCodeService.Type.VERIFICACION)).thenReturn("999888");
 
         authService.resendVerificationCode("admin@sgroas.com");
@@ -138,10 +138,10 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void reenviarCodigoConCuentaVerificadaNoDebeEnviarNada() {
+    void resendCodeWithVerifiedAccountShouldNotSendAnything() {
         User verificado = usuarioEjemplo();
         verificado.setVerified(true);
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(verificado));
 
         authService.resendVerificationCode("admin@sgroas.com");
@@ -150,13 +150,13 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void solicitarRestablecimientoDebeEnviarCodigo() {
+    void requestPasswordResetShouldSendCode() {
         User usuario = usuarioEjemplo();
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
-        when(codigoVerificacionService.canResend("admin@sgroas.com",
+        when(verificationCodeService.canResend("admin@sgroas.com",
                 VerificationCodeService.Type.RESET_PASSWORD)).thenReturn(true);
-        when(codigoVerificacionService.generate("admin@sgroas.com",
+        when(verificationCodeService.generate("admin@sgroas.com",
                 VerificationCodeService.Type.RESET_PASSWORD)).thenReturn("112233");
 
         authService.requestPasswordReset("admin@sgroas.com");
@@ -165,11 +165,11 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void refreshDebeRotarToken() {
+    void refreshShouldRotateToken() {
         User usuario = usuarioEjemplo();
         when(tokenService.getEmailFromRefreshToken("refresh-token-prueba"))
                 .thenReturn("admin@sgroas.com");
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         simularGeneracionTokens(usuario);
 
@@ -183,12 +183,12 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void refreshConUsuarioInactivoDebeLanzarExcepcion() {
+    void refreshWithInactiveUserShouldThrowException() {
         User inactivo = usuarioEjemplo();
         inactivo.setActive(false);
         when(tokenService.getEmailFromRefreshToken("refresh-token-prueba"))
                 .thenReturn("admin@sgroas.com");
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(inactivo));
 
         assertThrows(BadCredentialsException.class,
@@ -196,10 +196,10 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void refreshConEmailInexistenteDebeLanzarExcepcion() {
+    void refreshWithNonexistentEmailShouldThrowException() {
         when(tokenService.getEmailFromRefreshToken("refresh-token-prueba"))
                 .thenReturn("desconocido@sgroas.com");
-        when(usuarioRepository.findByEmail("desconocido@sgroas.com"))
+        when(userRepository.findByEmail("desconocido@sgroas.com"))
                 .thenReturn(Optional.empty());
 
         assertThrows(BadCredentialsException.class,
@@ -207,7 +207,7 @@ class AuthServiceExtraTest {
     }
 
     @Test
-    void logoutDebeInvalidarTokens() {
+    void logoutShouldInvalidateTokens() {
         authService.logout("access-token-prueba",
                 new RefreshTokenRequest("refresh-token-prueba"));
 

@@ -23,13 +23,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RutaServiceTest {
+class RouteServiceTest {
 
     @Mock
-    private RouteRepository rutaRepository;
+    private RouteRepository routeRepository;
 
     @InjectMocks
-    private RouteService rutaService;
+    private RouteService routeService;
 
     private Route rutaEjemplo() {
         return Route.builder()
@@ -57,10 +57,10 @@ class RutaServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(rutaRepository.findByActiveTrue(pageable))
+        when(routeRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(rutaEjemplo())));
 
-        Page<RouteResponse> pagina = rutaService.list(pageable);
+        Page<RouteResponse> pagina = routeService.list(pageable);
 
         assertEquals(1, pagina.getTotalElements());
         assertEquals("R-001", pagina.getContent().get(0).code());
@@ -68,9 +68,9 @@ class RutaServiceTest {
 
     @Test
     void findByIdReturnsRoute() {
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
 
-        RouteResponse response = rutaService.findById(1L);
+        RouteResponse response = routeService.findById(1L);
 
         assertEquals(1L, response.id());
         assertEquals("Quito", response.origin());
@@ -78,57 +78,57 @@ class RutaServiceTest {
 
     @Test
     void findByIdNonexistentThrowsException() {
-        when(rutaRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> rutaService.findById(99L));
+                () -> routeService.findById(99L));
     }
 
     @Test
     void createSavesAndReturns() {
-        when(rutaRepository.existsByCode("R-001")).thenReturn(false);
-        when(rutaRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
+        when(routeRepository.existsByCode("R-001")).thenReturn(false);
+        when(routeRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
 
-        RouteResponse response = rutaService.create(requestEjemplo());
+        RouteResponse response = routeService.create(requestEjemplo());
 
         assertEquals("R-001", response.code());
-        verify(rutaRepository).save(any(Route.class));
+        verify(routeRepository).save(any(Route.class));
     }
 
     @Test
     void createWithDuplicateCodeThrowsException() {
-        when(rutaRepository.existsByCode("R-001")).thenReturn(true);
+        when(routeRepository.existsByCode("R-001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> rutaService.create(requestEjemplo()));
+                () -> routeService.create(requestEjemplo()));
     }
 
     @Test
     void createWithInvalidStatusThrowsException() {
-        when(rutaRepository.existsByCode("R-001")).thenReturn(false);
+        when(routeRepository.existsByCode("R-001")).thenReturn(false);
         RouteRequest request = new RouteRequest(
                 "R-001", "Quito - Guayaquil", "Quito", "Guayaquil",
                 420.0, 480, "INVALIDO"
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> rutaService.create(request));
+                () -> routeService.create(request));
     }
 
     @Test
     void updateModifiesAndReturns() {
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
-        when(rutaRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
 
-        RouteResponse response = rutaService.update(1L, requestEjemplo());
+        RouteResponse response = routeService.update(1L, requestEjemplo());
 
         assertEquals(1L, response.id());
     }
 
     @Test
     void updateWithDuplicateCodeThrowsException() {
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
-        when(rutaRepository.existsByCode("R-999")).thenReturn(true);
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.existsByCode("R-999")).thenReturn(true);
 
         RouteRequest request = new RouteRequest(
                 "R-999", "Quito - Guayaquil", "Quito", "Guayaquil",
@@ -136,16 +136,16 @@ class RutaServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> rutaService.update(1L, request));
+                () -> routeService.update(1L, request));
     }
 
     @Test
     void deactivateChangesStatus() {
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
 
-        rutaService.deactivate(1L);
+        routeService.deactivate(1L);
 
-        verify(rutaRepository).save(argThat(r ->
+        verify(routeRepository).save(argThat(r ->
                 !r.getActive() && r.getStatus() == RouteStatus.INACTIVA));
     }
 }

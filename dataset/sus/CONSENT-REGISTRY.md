@@ -1,5 +1,12 @@
 # SUS Participant Consent Registry
 
+> **Audit note (2026-09-16):** the "2026-08-15" consent date below is
+> contradicted by the repository's own git history — the P01-P10 evaluation
+> results were already committed on 2026-07-30 (commit `e8d7e2f`), i.e.
+> before this claimed signature date. No independently verifiable signed
+> consent evidence exists in this repository for any participant. See
+> `docs/etica/consentimientos/CONSENT-STATUS.md` for the full reconciliation.
+
 Each participant confirmed informed consent before the evaluation session.
 The consent form is available at `dataset/sus/CONSENT-FORM.md`.
 

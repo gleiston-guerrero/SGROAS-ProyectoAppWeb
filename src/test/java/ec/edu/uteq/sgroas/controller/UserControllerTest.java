@@ -1,7 +1,7 @@
 package ec.edu.uteq.sgroas.controller;
 
-import ec.edu.uteq.sgroas.dto.RouteAssignmentResponse;
-import ec.edu.uteq.sgroas.service.RouteAssignmentService;
+import ec.edu.uteq.sgroas.dto.UserResponse;
+import ec.edu.uteq.sgroas.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -27,14 +26,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class AsignacionRutaControllerTest {
+class UserControllerTest {
 
     @Mock
-    private RouteAssignmentService asignacionRutaService;
+    private UserService userService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(
-                new RouteAssignmentController(asignacionRutaService))
+        return MockMvcBuilders.standaloneSetup(new UserController(userService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -44,48 +42,43 @@ class AsignacionRutaControllerTest {
                 .build();
     }
 
-    private RouteAssignmentResponse responseEjemplo() {
-        return new RouteAssignmentResponse(
-                1L, 1L, "Carlos Mendoza", 1L, "GTU-001", 1L,
-                "Quito - Guayaquil", LocalDate.now(), LocalDate.now(),
-                LocalDate.now().plusDays(1), "ACTIVA", true,
-                Instant.now(), Instant.now()
+    private UserResponse responseEjemplo() {
+        return new UserResponse(
+                1L, "Administrador SGROAS", "admin@sgroas.com",
+                "ROLE_ADMIN", true, Instant.now(), Instant.now()
         );
     }
 
     @Test
     void listReturns200() throws Exception {
-        when(asignacionRutaService.list(any()))
+        when(userService.list(any(), any()))
                 .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
 
-        mockMvc().perform(get("/api/asignaciones"))
+        mockMvc().perform(get("/api/usuarios"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(asignacionRutaService.findById(1L)).thenReturn(responseEjemplo());
+        when(userService.findById(1L)).thenReturn(responseEjemplo());
 
-        mockMvc().perform(get("/api/asignaciones/1"))
+        mockMvc().perform(get("/api/usuarios/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.vehiclePlate").value("GTU-001"));
+                .andExpect(jsonPath("$.email").value("admin@sgroas.com"));
     }
 
     @Test
     void createReturns201() throws Exception {
-        when(asignacionRutaService.create(any())).thenReturn(responseEjemplo());
+        when(userService.create(any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(post("/api/asignaciones")
+        mockMvc().perform(post("/api/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "driverId": 1,
-                                  "vehicleId": 1,
-                                  "routeId": 1,
-                                  "assignmentDate": "2026-07-30",
-                                  "startDate": "2026-07-30",
-                                  "endDate": "2026-07-31",
-                                  "status": "ACTIVA"
+                                  "name": "Administrador SGROAS",
+                                  "email": "admin@sgroas.com",
+                                  "password": "123456",
+                                  "role": "ROLE_ADMIN"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -94,19 +87,16 @@ class AsignacionRutaControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(asignacionRutaService.update(any(), any())).thenReturn(responseEjemplo());
+        when(userService.update(any(), any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(put("/api/asignaciones/1")
+        mockMvc().perform(put("/api/usuarios/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "driverId": 1,
-                                  "vehicleId": 1,
-                                  "routeId": 1,
-                                  "assignmentDate": "2026-07-30",
-                                  "startDate": "2026-07-30",
-                                  "endDate": "2026-07-31",
-                                  "status": "ACTIVA"
+                                  "name": "Administrador SGROAS",
+                                  "email": "admin@sgroas.com",
+                                  "password": "123456",
+                                  "role": "ROLE_ADMIN"
                                 }
                                 """))
                 .andExpect(status().isOk());
@@ -114,7 +104,7 @@ class AsignacionRutaControllerTest {
 
     @Test
     void deactivateReturns204() throws Exception {
-        mockMvc().perform(delete("/api/asignaciones/1"))
+        mockMvc().perform(delete("/api/usuarios/1"))
                 .andExpect(status().isNoContent());
     }
 }

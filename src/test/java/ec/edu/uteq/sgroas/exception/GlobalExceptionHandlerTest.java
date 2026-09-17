@@ -82,7 +82,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void errorGeneralDebeRetornarInternalServerError() {
+    void generalErrorShouldReturnInternalServerError() {
         when(request.getRequestURI()).thenReturn("/api/conductores");
 
         ProblemDetail detail = handler.handleGeneralError(
@@ -93,7 +93,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void emailSinVerificarDebeRetornarForbidden() {
+    void unverifiedEmailShouldReturnForbidden() {
         when(request.getRequestURI()).thenReturn("/api/auth/login");
 
         ProblemDetail detail = handler.handleUnverifiedEmail(
@@ -105,7 +105,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void accesoDenegadoDebeRetornarForbidden() {
+    void accessDeniedShouldReturnForbidden() {
         when(request.getRequestURI()).thenReturn("/api/abd/unidades");
 
         ProblemDetail detail = handler.handleAccessDenied(

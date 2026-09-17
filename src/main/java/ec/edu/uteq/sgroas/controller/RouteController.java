@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RouteController {
 
-    private final RouteService rutaService;
+    private final RouteService routeService;
 
     /**
      * Recupera la lista paginada de rutas registradas en el sistema.
@@ -28,7 +28,7 @@ public class RouteController {
     public ResponseEntity<Page<RouteResponse>> list(
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(rutaService.list(pageable));
+        return ResponseEntity.ok(routeService.list(pageable));
     }
 
     /**
@@ -38,7 +38,7 @@ public class RouteController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<RouteResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(rutaService.findById(id));
+        return ResponseEntity.ok(routeService.findById(id));
     }
 
     /**
@@ -50,7 +50,7 @@ public class RouteController {
     public ResponseEntity<RouteResponse> create(
             @Valid @RequestBody RouteRequest request
     ) {
-        RouteResponse response = rutaService.create(request);
+        RouteResponse response = routeService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -65,7 +65,7 @@ public class RouteController {
             @PathVariable Long id,
             @Valid @RequestBody RouteRequest request
     ) {
-        return ResponseEntity.ok(rutaService.update(id, request));
+        return ResponseEntity.ok(routeService.update(id, request));
     }
 
     /**
@@ -75,7 +75,7 @@ public class RouteController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        rutaService.deactivate(id);
+        routeService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

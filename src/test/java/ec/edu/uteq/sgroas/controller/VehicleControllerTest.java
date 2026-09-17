@@ -1,7 +1,7 @@
 package ec.edu.uteq.sgroas.controller;
 
-import ec.edu.uteq.sgroas.dto.RouteResponse;
-import ec.edu.uteq.sgroas.service.RouteService;
+import ec.edu.uteq.sgroas.dto.VehicleResponse;
+import ec.edu.uteq.sgroas.service.VehicleService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -26,13 +26,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class RutaControllerTest {
+class VehicleControllerTest {
 
     @Mock
-    private RouteService rutaService;
+    private VehicleService vehicleService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new RouteController(rutaService))
+        return MockMvcBuilders.standaloneSetup(new VehicleController(vehicleService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -42,46 +42,49 @@ class RutaControllerTest {
                 .build();
     }
 
-    private RouteResponse responseEjemplo() {
-        return new RouteResponse(
-                1L, "R-001", "Quito - Guayaquil", "Quito", "Guayaquil",
-                420.0, 480, "ACTIVA", true, Instant.now(), Instant.now()
+    private VehicleResponse responseEjemplo() {
+        return new VehicleResponse(
+                1L, "GTU-001", "Toyota", "Hiace", 2020, 14,
+                "MOT-123", "CHAS-123", "Blanco", "ACTIVO", true,
+                Instant.now(), Instant.now()
         );
     }
 
     @Test
     void listReturns200() throws Exception {
-        when(rutaService.list(any()))
+        when(vehicleService.list(any()))
                 .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
 
-        mockMvc().perform(get("/api/rutas"))
+        mockMvc().perform(get("/api/vehiculos"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(rutaService.findById(1L)).thenReturn(responseEjemplo());
+        when(vehicleService.findById(1L)).thenReturn(responseEjemplo());
 
-        mockMvc().perform(get("/api/rutas/1"))
+        mockMvc().perform(get("/api/vehiculos/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("Quito - Guayaquil"));
+                .andExpect(jsonPath("$.brand").value("Toyota"));
     }
 
     @Test
     void createReturns201() throws Exception {
-        when(rutaService.create(any())).thenReturn(responseEjemplo());
+        when(vehicleService.create(any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(post("/api/rutas")
+        mockMvc().perform(post("/api/vehiculos")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "code": "R-001",
-                                  "name": "Quito - Guayaquil",
-                                  "origin": "Quito",
-                                  "destination": "Guayaquil",
-                                  "distanceKm": 420.0,
-                                  "durationMin": 480,
-                                  "status": "ACTIVA"
+                                  "plate": "GTU-001",
+                                  "brand": "Toyota",
+                                  "model": "Hiace",
+                                  "year": 2020,
+                                  "capacity": 14,
+                                  "engineNumber": "MOT-123",
+                                  "chassisNumber": "CHAS-123",
+                                  "color": "Blanco",
+                                  "status": "ACTIVO"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -90,19 +93,21 @@ class RutaControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(rutaService.update(any(), any())).thenReturn(responseEjemplo());
+        when(vehicleService.update(any(), any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(put("/api/rutas/1")
+        mockMvc().perform(put("/api/vehiculos/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "code": "R-001",
-                                  "name": "Quito - Guayaquil",
-                                  "origin": "Quito",
-                                  "destination": "Guayaquil",
-                                  "distanceKm": 420.0,
-                                  "durationMin": 480,
-                                  "status": "ACTIVA"
+                                  "plate": "GTU-001",
+                                  "brand": "Toyota",
+                                  "model": "Hiace",
+                                  "year": 2020,
+                                  "capacity": 14,
+                                  "engineNumber": "MOT-123",
+                                  "chassisNumber": "CHAS-123",
+                                  "color": "Blanco",
+                                  "status": "ACTIVO"
                                 }
                                 """))
                 .andExpect(status().isOk());
@@ -110,7 +115,7 @@ class RutaControllerTest {
 
     @Test
     void deactivateReturns204() throws Exception {
-        mockMvc().perform(delete("/api/rutas/1"))
+        mockMvc().perform(delete("/api/vehiculos/1"))
                 .andExpect(status().isNoContent());
     }
 }

@@ -18,7 +18,7 @@ public interface RouteAssignmentRepository extends JpaRepository<RouteAssignment
     Page<RouteAssignment> findByActiveTrue(Pageable pageable);
 
     @Query("SELECT a FROM RouteAssignment a JOIN FETCH a.driver JOIN FETCH a.vehicle JOIN FETCH a.route WHERE a.id = :id")
-    Optional<RouteAssignment> findWithDetalle(@Param("id") Long id);
+    Optional<RouteAssignment> findWithDetails(@Param("id") Long id);
 
     List<RouteAssignment> findByDriverIdAndActiveTrue(Long driverId);
 

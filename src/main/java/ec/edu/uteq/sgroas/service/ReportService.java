@@ -26,18 +26,18 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ReportService {
 
-    private final IncidentRepository incidenteRepository;
-    private final DriverRepository conductorRepository;
-    private final VehicleRepository vehiculoRepository;
-    private final RouteRepository rutaRepository;
-    private final RouteAssignmentRepository asignacionRutaRepository;
+    private final IncidentRepository incidentRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleRepository vehicleRepository;
+    private final RouteRepository routeRepository;
+    private final RouteAssignmentRepository routeAssignmentRepository;
 
     /**
      * Calcula los conteos globales de conductores, vehiculos, rutas, asignaciones e incidentes.
      * @return lista de filas con los totales y los conteos de registros activos y abiertos
      */
     public List<Map<String, Object>> generalStatistics() {
-        return incidenteRepository.generalStatistics().stream()
+        return incidentRepository.generalStatistics().stream()
                 .map(fila -> mapa(
                         "total_conductores", fila[0],
                         "conductores_activos", fila[1],
@@ -58,7 +58,7 @@ public class ReportService {
      * @return lista de filas con cada gravedad, su total de incidentes y la fecha del ultimo caso
      */
     public List<Map<String, Object>> incidentsBySeverity(String tipo) {
-        return incidenteRepository.incidentsBySeverity(tipo).stream()
+        return incidentRepository.incidentsBySeverity(tipo).stream()
                 .map(fila -> mapa(
                         "gravedad", fila[0],
                         "total_incidentes", fila[1],
@@ -73,7 +73,7 @@ public class ReportService {
      * @return lista de filas con el detalle de cada incidente y sus datos de conductor, vehiculo y ruta
      */
     public List<Map<String, Object>> incidentsByRange(Instant desde, Instant hasta) {
-        return incidenteRepository.getIncidentsByRange(desde, hasta).stream()
+        return incidentRepository.getIncidentsByRange(desde, hasta).stream()
                 .map(fila -> mapa(
                         "incidente_id", fila[0],
                         "tipo", fila[1],
@@ -94,7 +94,7 @@ public class ReportService {
      * @return lista de filas con los datos del conductor, su licencia y su asignacion vigente
      */
     public List<Map<String, Object>> licensesExpiring(Integer dias) {
-        return conductorRepository.licensesExpiring(dias).stream()
+        return driverRepository.licensesExpiring(dias).stream()
                 .map(fila -> mapa(
                         "conductor_id", fila[0],
                         "nombre_completo", fila[1],
@@ -111,7 +111,7 @@ public class ReportService {
      * @return lista de filas con los datos del vehiculo y sus totales de asignaciones e incidentes
      */
     public List<Map<String, Object>> vehiclesInMaintenance() {
-        return vehiculoRepository.vehiclesInMaintenance().stream()
+        return vehicleRepository.vehiclesInMaintenance().stream()
                 .map(fila -> mapa(
                         "vehiculo_id", fila[0],
                         "placa", fila[1],
@@ -128,7 +128,7 @@ public class ReportService {
      * @return lista de filas con los totales de asignaciones e incidentes de cada ruta evaluada
      */
     public List<Map<String, Object>> routePerformanceReport() {
-        return rutaRepository.routePerformanceReport().stream()
+        return routeRepository.routePerformanceReport().stream()
                 .map(fila -> mapa(
                         "ruta_id", fila[0],
                         "ruta_codigo", fila[1],
@@ -149,7 +149,7 @@ public class ReportService {
      * @return lista de filas con cada asignacion activa y los datos de su vehiculo y ruta
      */
     public List<Map<String, Object>> activeAssignmentsByDriver(Long conductorId) {
-        return asignacionRutaRepository.activeAssignmentsByDriver(conductorId).stream()
+        return routeAssignmentRepository.activeAssignmentsByDriver(conductorId).stream()
                 .map(fila -> mapa(
                         "asignacion_id", fila[0],
                         "vehiculo_placa", fila[1],

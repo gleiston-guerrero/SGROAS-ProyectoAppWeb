@@ -1,0 +1,30 @@
+Solicitud (frontend Angular, formulario "Nuevo conductor", capturada via DevTools/Network en la sesion en vivo del 2026-09-16):
+
+POST http://localhost:8080/api/conductores
+Content-Type: application/json
+(cookie de sesion access_token de admin@sgroas.com)
+
+Body enviado por el formulario (ver frontend/src/app/features/conductores/formulario/conductor-formulario.ts):
+{"firstNames":"Prueba Evidencia","lastNames":"Live E2E","nationalId":"1799999991","phone":"","email":"prueba.e2e@sgroas.com","licenseType":"E2","licenseNumber":"LIC-E2E-0001","licenseExpiry":"2030-01-01","status":"ACTIVO"}
+
+Respuesta real (201 Created):
+{"id":60011,"firstNames":"Prueba Evidencia","lastNames":"Live E2E","nationalId":"1799999991","licenseNumber":"LIC-E2E-0001","licenseType":"E2","licenseExpiry":"2030-01-01","phone":"","email":"prueba.e2e@sgroas.com","status":"ACTIVO","active":true,"licenseExpiring":false,"createdAt":"2026-09-17T00:35:14.148183600Z","updatedAt":"2026-09-17T00:35:14.148183600Z"}
+
+Nota: NO hubo error de validacion 400. Antes de la correccion del contrato,
+el frontend enviaba "nombres"/"apellidos"/"cedula" (espanol) mientras el
+backend esperaba "firstNames"/"lastNames"/"nationalId" (ingles), lo que
+producia un 400 Bad Request al dar de alta un conductor desde el formulario.
+Con el codigo actual ambos lados usan los mismos nombres de campo en ingles,
+y la creacion se completo de punta a punta: el listado de conductores paso
+de "Pagina 1 de 6001" a "Pagina 1 de 6002" inmediatamente despues del submit,
+confirmando la insercion real en la base de datos (Postgres local, contenedor
+sgroas-postgres, mismo volumen usado por el resto de la evidencia).
+
+Verificado en vivo con:
+- Backend: Spring Boot corriendo localmente (./mvnw spring-boot:run) contra
+  Postgres 18 y Redis 7 levantados con `docker compose up -d postgres redis`.
+- Frontend: Angular dev server (`npm start`, ng serve) en http://localhost:4200,
+  apuntando a http://localhost:8080/api (frontend/src/environments/environment.development.ts).
+- Navegador automatizado: login con admin@sgroas.com / admin123 (usuario
+  sembrado en V2__seed.sql, solo para desarrollo), navegacion a
+  "Flota Vehicular" -> "+ Nuevo conductor", llenado del formulario y submit.

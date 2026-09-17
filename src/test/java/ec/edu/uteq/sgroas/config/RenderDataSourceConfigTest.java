@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RenderDataSourceConfigTest {
 
     @Test
-    void createDataSourceDebeEnsamblarUrlJdbc() {
+    void createDataSourceShouldAssembleJdbcUrl() {
         HikariDataSource ds = RenderDataSourceConfig.createDataSource(
                 "dpg-ejemplo-a", "5432", "sgroas_db", "sgroas", "secreto");
 

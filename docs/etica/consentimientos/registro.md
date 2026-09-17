@@ -1,32 +1,34 @@
 # Registro de consentimientos informados — SUS
 
-Los consentimientos firmados (en papel o digitales) se custodian **fuera del
-repositorio público**, bajo responsabilidad de la integrante a cargo de la
-medición de usabilidad, en la carpeta física/privada del equipo:
-`docs/etica/consentimientos/firmados/` (no versionada).
+> **Nota de auditoría (2026-09-16):** este archivo reemplaza una versión previa
+> que entraba en contradicción con `dataset/sus/CONSENT-REGISTRY.md`. Ver
+> `docs/etica/consentimientos/CONSENT-STATUS.md` para el detalle completo de
+> la discrepancia encontrada, la evidencia de `git log` usada para resolverla,
+> y la conclusión honesta sobre el estado real del consentimiento informado
+> (no calificable al máximo en P11 por falta de constancias verificables).
 
-En el repositorio solo constan los códigos de participante, sin datos
-personales identificables.
+## Qué existe realmente en el repositorio
 
-| Código | Fecha de sesión | Fecha de firma | Estado | Evidencia en repo |
-|---|---|---|---|---|
-| P01 | 2026-07-30 | 2026-07-30 | Firmado | P01.json |
-| P02 | 2026-07-30 | 2026-07-30 | Firmado | P02.json |
-| P03 | 2026-07-30 | 2026-07-30 | Firmado | P03.json |
-| P04 | 2026-07-30 | 2026-07-30 | Firmado | P04.json |
-| P05 | 2026-07-30 | 2026-07-30 | Firmado | P05.json |
-| P06 | 2026-07-30 | 2026-07-30 | Firmado | P06.json |
-| P07 | 2026-07-30 | 2026-07-30 | Firmado | P07.json |
-| P08 | 2026-07-30 | 2026-07-30 | Firmado | P08.json |
-| P09 | 2026-07-30 | 2026-07-30 | Firmado | P09.json |
-| P10 | 2026-07-30 | 2026-07-30 | Firmado | P10.json |
+No existe ninguna constancia de consentimiento firmada de forma independiente
+(PDF, imagen escaneada, firma digital) para ningún participante P01–P15. Lo
+único que existe es:
 
-Reglas de custodia:
+1. Una plantilla de consentimiento (`plantilla.md`, este directorio) y un
+   formulario en inglés (`dataset/sus/CONSENT-FORM.md`).
+2. Un campo autodeclarado `"consentimiento": "Sí"` dentro de cada archivo de
+   respuestas crudas del SUS (`dataset/sus/P01.json` … `P15.json`).
+3. Dos registros tabulares que **afirman** que hubo consentimiento firmado,
+   con fechas que se contradicen entre sí y con el propio historial de git
+   (ver detalle en `CONSENT-STATUS.md`).
 
-1. Los consentimientos firmados nunca se suben al repositorio público.
-2. El acceso a los documentos firmados está restringido al equipo del proyecto
-   y al docente evaluador si lo solicita.
-3. Cada participante puede retirar su consentimiento en cualquier momento; en
-   ese caso sus datos se eliminan de los resultados y del informe.
+## Reglas de custodia declaradas (sin poder verificarlas)
+
+Según la versión anterior de este archivo, los consentimientos firmados en
+papel o digitales se custodiarían fuera del repositorio, en una carpeta
+privada (`docs/etica/consentimientos/firmados/`, no versionada). Esa carpeta
+no es accesible desde este entorno de auditoría, por lo que **no se puede
+confirmar ni descartar** que existan constancias físicas fuera del repo. Lo
+que sí se puede afirmar es que, dentro del repositorio, no hay evidencia
+verificable más allá del campo autodeclarado en el JSON de cada participante.
 
 Plantilla utilizada: [plantilla.md](plantilla.md)

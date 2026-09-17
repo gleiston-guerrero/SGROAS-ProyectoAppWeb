@@ -77,7 +77,7 @@ export class Shell implements OnInit, OnDestroy {
   }
 
   get initials(): string {
-    const name = this.currentUser?.nombre ?? '';
+    const name = this.currentUser?.name ?? '';
     return name
       .split(' ')
       .map((p) => p[0])

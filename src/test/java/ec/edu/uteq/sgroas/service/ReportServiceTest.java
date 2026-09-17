@@ -22,32 +22,32 @@ import static org.mockito.Mockito.when;
 class ReportServiceTest {
 
     @Mock
-    private IncidentRepository incidenteRepository;
+    private IncidentRepository incidentRepository;
 
     @Mock
-    private DriverRepository conductorRepository;
+    private DriverRepository driverRepository;
 
     @Mock
-    private VehicleRepository vehiculoRepository;
+    private VehicleRepository vehicleRepository;
 
     @Mock
-    private RouteRepository rutaRepository;
+    private RouteRepository routeRepository;
 
     @Mock
-    private RouteAssignmentRepository asignacionRutaRepository;
+    private RouteAssignmentRepository routeAssignmentRepository;
 
     @InjectMocks
-    private ReportService reporteService;
+    private ReportService reportService;
 
     private Object[] filaGeneral() {
         return new Object[] {10L, 8L, 6L, 5L, 4L, 3L, 9L, 7L, 2L, 1L};
     }
 
     @Test
-    void generalStatisticsMapeaLosDiezTotales() {
-        when(incidenteRepository.generalStatistics()).thenReturn(List.<Object[]>of(filaGeneral()));
+    void generalStatisticsMapsAllTenTotals() {
+        when(incidentRepository.generalStatistics()).thenReturn(List.<Object[]>of(filaGeneral()));
 
-        List<Map<String, Object>> resultado = reporteService.generalStatistics();
+        List<Map<String, Object>> resultado = reportService.generalStatistics();
 
         assertEquals(1, resultado.size());
         Map<String, Object> fila = resultado.get(0);
@@ -64,11 +64,11 @@ class ReportServiceTest {
     }
 
     @Test
-    void incidentsBySeverityMapeaGravedadTotalYFecha() {
-        when(incidenteRepository.incidentsBySeverity("ROBO"))
+    void incidentsBySeverityMapsSeverityTotalAndDate() {
+        when(incidentRepository.incidentsBySeverity("ROBO"))
                 .thenReturn(List.<Object[]>of(new Object[] {"ALTA", 2L, "2026-08-01"}));
 
-        List<Map<String, Object>> resultado = reporteService.incidentsBySeverity("ROBO");
+        List<Map<String, Object>> resultado = reportService.incidentsBySeverity("ROBO");
 
         assertEquals("ALTA", resultado.get(0).get("gravedad"));
         assertEquals(2L, resultado.get(0).get("total_incidentes"));
@@ -76,14 +76,14 @@ class ReportServiceTest {
     }
 
     @Test
-    void incidentsByRangeMapeaElDetalleCompleto() {
-        when(incidenteRepository.getIncidentsByRange(Instant.parse("2026-01-01T00:00:00Z"),
+    void incidentsByRangeMapsFullDetail() {
+        when(incidentRepository.getIncidentsByRange(Instant.parse("2026-01-01T00:00:00Z"),
                 Instant.parse("2026-12-31T23:59:59Z")))
                 .thenReturn(List.<Object[]>of(new Object[] {
                         1L, "ACCIDENTE", "ALTA", "REPORTADO", "Colision leve",
                         "2026-08-01", "Km 12", "Carlos Mendoza", "GTU-001", "R-01"}));
 
-        List<Map<String, Object>> resultado = reporteService.incidentsByRange(
+        List<Map<String, Object>> resultado = reportService.incidentsByRange(
                 Instant.parse("2026-01-01T00:00:00Z"), Instant.parse("2026-12-31T23:59:59Z"));
 
         Map<String, Object> fila = resultado.get(0);
@@ -100,13 +100,13 @@ class ReportServiceTest {
     }
 
     @Test
-    void licensesExpiringMapeaLosDatosDeLaLicencia() {
-        when(conductorRepository.licensesExpiring(30))
+    void licensesExpiringMapsLicenseData() {
+        when(driverRepository.licensesExpiring(30))
                 .thenReturn(List.<Object[]>of(new Object[] {
                         1L, "Carlos Mendoza", "1200000001", "LIC-001", "E",
                         "2026-09-30", true}));
 
-        List<Map<String, Object>> resultado = reporteService.licensesExpiring(30);
+        List<Map<String, Object>> resultado = reportService.licensesExpiring(30);
 
         Map<String, Object> fila = resultado.get(0);
         assertEquals(1L, fila.get("conductor_id"));
@@ -119,11 +119,11 @@ class ReportServiceTest {
     }
 
     @Test
-    void vehiclesInMaintenanceMapeaLosConteosAsociados() {
-        when(vehiculoRepository.vehiclesInMaintenance())
+    void vehiclesInMaintenanceMapsAssociatedCounts() {
+        when(vehicleRepository.vehiclesInMaintenance())
                 .thenReturn(List.<Object[]>of(new Object[] {1L, "GTU-001", "Toyota", "Hiace", 2020, 3L, 1L}));
 
-        List<Map<String, Object>> resultado = reporteService.vehiclesInMaintenance();
+        List<Map<String, Object>> resultado = reportService.vehiclesInMaintenance();
 
         Map<String, Object> fila = resultado.get(0);
         assertEquals(1L, fila.get("vehiculo_id"));
@@ -136,12 +136,12 @@ class ReportServiceTest {
     }
 
     @Test
-    void routePerformanceMapeaLosDiezCamposDelReporte() {
-        when(rutaRepository.routePerformanceReport())
+    void routePerformanceMapsAllTenReportFields() {
+        when(routeRepository.routePerformanceReport())
                 .thenReturn(List.<Object[]>of(new Object[] {
                         1L, "R-01", "Quito-Guayaquil", 5L, 2L, 1L, 1L, 0L, 0L, 420.0}));
 
-        List<Map<String, Object>> resultado = reporteService.routePerformanceReport();
+        List<Map<String, Object>> resultado = reportService.routePerformanceReport();
 
         Map<String, Object> fila = resultado.get(0);
         assertEquals(1L, fila.get("ruta_id"));
@@ -157,13 +157,13 @@ class ReportServiceTest {
     }
 
     @Test
-    void activeAssignmentsByDriverMapeaAsignacionVigente() {
-        when(asignacionRutaRepository.activeAssignmentsByDriver(1L))
+    void activeAssignmentsByDriverMapsActiveAssignment() {
+        when(routeAssignmentRepository.activeAssignmentsByDriver(1L))
                 .thenReturn(List.<Object[]>of(new Object[] {
                         1L, "GTU-001", "Toyota", "R-01", "Quito-Guayaquil",
                         "2026-08-01", "2026-08-15"}));
 
-        List<Map<String, Object>> resultado = reporteService.activeAssignmentsByDriver(1L);
+        List<Map<String, Object>> resultado = reportService.activeAssignmentsByDriver(1L);
 
         Map<String, Object> fila = resultado.get(0);
         assertEquals(1L, fila.get("asignacion_id"));

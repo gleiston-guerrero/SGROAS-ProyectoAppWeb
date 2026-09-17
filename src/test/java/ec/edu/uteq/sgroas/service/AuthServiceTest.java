@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     @Mock
-    private UserRepository usuarioRepository;
+    private UserRepository userRepository;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -39,7 +39,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Test
-    void loginCorrectoDebeRetornarTokens() {
+    void loginSuccessShouldReturnTokens() {
         User usuario = User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -51,7 +51,7 @@ class AuthServiceTest {
                 .updatedAt(Instant.now())
                 .build();
 
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("123456", "password-encriptado"))
                 .thenReturn(true);
@@ -74,7 +74,7 @@ class AuthServiceTest {
     }
 
     @Test
-    void loginConPasswordIncorrectoDebeLanzarExcepcion() {
+    void loginWithIncorrectPasswordShouldThrowException() {
         User usuario = User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -86,7 +86,7 @@ class AuthServiceTest {
                 .updatedAt(Instant.now())
                 .build();
 
-        when(usuarioRepository.findByEmail("admin@sgroas.com"))
+        when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("clave-mal", "password-encriptado"))
                 .thenReturn(false);

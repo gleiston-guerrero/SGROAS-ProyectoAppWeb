@@ -33,7 +33,19 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7)
-**Cerrado por: Luis Tejada**
+**Cerrado por: María del Rosario Escudero Plaza**
+
+**Corrección de atribución (2026-09-16):** este punto estaba firmado
+"Cerrado por: Luis Tejada" en la version anterior de este documento, pero
+`git log --format='%an <%ae> %s' -1 1a07dc7` muestra que el commit
+`1a07dc7` fue hecho por `charito20 <mescuderop@uteq.edu.ec>` (María del
+Rosario Escudero Plaza), no por Luis Tejada. Se corrige la atribución para
+reflejar el historial real.
+
+```
+$ git log --format='%H %an <%ae> %ad %s' --date=short -1 1a07dc7
+1a07dc7... charito20 <mescuderop@uteq.edu.ec> feat(entrega3): SRS, scripts de validacion, lighthouse real, reporte perf y correccion de evidencias
+```
 
 **Archivos modificados:**
 - dataset/lighthouse/lh-*.json -- 9 corridas (mobile, desktop, tablet).
@@ -156,14 +168,37 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 ---
 
 ## P8 — Script demografía SUS (commit 5fa09b4)
-**Cerrado por: Luis Tejada**
+**Cerrado por: Luis Tejada (script) y María del Rosario Escudero Plaza (datos crudos)**
 
+**Corrección de atribución (2026-09-16):** la version anterior de este
+documento atribuía todo el punto P8 a Luis Tejada citando el commit
+`5fa09b4`. Ese commit sí es de Tejada y sí crea
+`scripts/generate-sus-demographics.py`, pero **los datos crudos que ese
+script consume** (`dataset/sus/sus-raw.csv`) no son de Tejada:
+
+```
+$ git log --follow --format='%H %an <%ae> %ad %s' --date=short -- dataset/sus/sus-raw.csv
+71754792... TheAsesink <0999595561kevin@gmail.com> 2026-09-13 revert(E1): revierte renombrado 88 tipos...
+b5164474... TheAsesink <0999595561kevin@gmail.com> 2026-09-13 fix(P11,P15,P6,P16,P10): ...
+ce0099f1... Alxjandr07 <luistejada5434@gmail.com> 2026-09-01 fix(dataset): package-dataset.py materializa archivos...
+e8d7e2f6... charito20 <mescuderop@uteq.edu.ec> 2026-07-30 feat(entrega3): evidencia SUS real (10 participantes...)
+
+$ git log --follow --format='%H %an <%ae> %ad %s' --date=short -- scripts/generate-sus-demographics.py
+5fa09b47... Luis Tejada <luistejada5434@gmail.com> 2026-09-15 P8: add script to generate SUS demographics from raw CSV
+```
+
+El CSV con las respuestas reales fue subido originalmente por María del
+Rosario Escudero Plaza (`charito20`, commit `e8d7e2f`, 2026-07-30); el
+script que lo procesa fue escrito despues por Luis Tejada. Se corrige la
+atribución para reconocer ambas partes en vez de dar todo el crédito a
+quien escribió solo el script derivado.
 
 **Archivos creados:**
-- `scripts/generate-sus-demographics.py` — Lee `dataset/sus/sus-raw.csv`, genera tabla de demografía (15 participantes, 8M/7F, edades 19-25, SUS mean=68.5)
-- `dataset/sus/sus-raw.csv` — Datos crudos de participantes
+- `scripts/generate-sus-demographics.py` (Luis Tejada) — Lee `dataset/sus/sus-raw.csv`, genera tabla de demografía (15 participantes, 8M/7F, edades 19-25, SUS mean=68.5)
+- `dataset/sus/sus-raw.csv` (datos originales de María del Rosario Escudero Plaza, commit `e8d7e2f`) — Datos crudos de participantes
 
-**Commit:** `5fa09b4` — "P8: add script to generate SUS demographics from raw CSV"
+**Commit:** `5fa09b4` — "P8: add script to generate SUS demographics from raw CSV" (script);
+`e8d7e2f` (datos crudos originales, Escudero Plaza)
 
 ---
 
@@ -210,6 +245,88 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 
 ---
 
+## Auditoría externa y correcciones (2026-09-16)
+**Realizado por: Luis Alejandro Tejada Bajaña (Alxjandr07 / ltejadab@uteq.edu.ec), sesión de auditoría**
+
+Se atendió una guía de evaluación externa que encontró varios problemas
+sobre el estado declarado "cerrado" de este documento. Resumen (ver
+`VERIFICACION.md` para el detalle completo con comandos y salidas
+literales):
+
+- **Contrato backend/frontend roto (CRÍTICO):** el frontend Angular seguía
+  usando campos en español (`.rol`, `.nombre`, `.nombres`, `.apellidos`,
+  `.cedula`) contra un backend ya renombrado a inglés. Corregido en
+  `auth.model.ts`, `usuario.model.ts`, `conductor.model.ts`, `auth.ts`,
+  `usuario-formulario.ts`, `usuario-lista.html`, `conductor-formulario.ts`,
+  `conductor-lista.html`, `overview.ts`, `shell.ts`, `shell.html`.
+- **P11 (consentimientos SUS, riesgo de Piso 3):** se encontraron dos
+  registros de consentimiento contradictorios entre sí y con el historial
+  de git (`CONSENT-REGISTRY.md` declara firma el 2026-08-15, pero la
+  evaluación de P01-P10 ya se había reportado el 2026-07-30). No existe
+  ninguna constancia de consentimiento verificable en el repositorio, solo
+  un campo autodeclarado dentro de las propias respuestas del SUS. Se
+  documentó todo honestamente en
+  `docs/etica/consentimientos/CONSENT-STATUS.md` (nuevo) sin inventar
+  fechas ni constancias. **P11 no puede calificarse al máximo.**
+- **P2:** `scripts/perf/recalcular-contraste.py` tenía `assert p < 0.05` y
+  `assert d == -1.0` hardcodeados y comparaba `.max()` contra `.avg()`
+  (métricas distintas). Reescrito para calcular honestamente con la misma
+  métrica en ambas condiciones.
+- **P5:** el checker `scripts/check-spanish-methods.py` tenía un regex
+  anclado con `\b` que nunca detectaba compuestos camelCase
+  (`extraerEmail`). Reescrito con tokenización camelCase. Se corrigieron
+  los identificadores en español detectados en `src/main/java`
+  (`JwtService`, `mapearAResponse` en 5 servicios, nombres de campos
+  `conductorRepository`/`vehiculoRepository`/etc., `findWithDetalle`), se
+  renombraron 15 clases de test y varios métodos de test en una primera
+  pasada, y en una segunda pasada se completaron los **71 métodos de test
+  no-ABD restantes** más **6 clases de test ABD mal nombradas**
+  (`ConductorAbdControllerTest`→`AbdDriverControllerTest`, etc. — sus
+  propias clases de producción ya usaban el patrón `Abd`+inglés, así que
+  el nombre en español no era una convención deliberada sino una
+  inconsistencia real) y **12 métodos dentro de esas clases**. Se corrigió
+  además un falso positivo del propio checker (`"terminal"` es palabra
+  inglesa válida, se quitó de la lista de raíces). **Resultado final: 0%
+  en todas las categorías (main, test y combinado, tanto métodos como
+  tipos) — por debajo del umbral del 5%.** Los campos de **datos** del
+  módulo ABD (`cedula`, `nombres`, `idConductor`, etc. dentro de
+  `AbdDtos`/`AbdDriver`/etc.) sí siguen siendo una convención deliberada
+  del backend paralelo en español de ese módulo y no se tocaron.
+- **P6:** la cifra "226/226" contaba las declaraciones `record` (DTOs)
+  como si fueran métodos. Conteo real (excluyendo records):
+  **189 métodos**, 100% con Javadoc.
+- Secretos: se redactó un `access_token`/`refresh_token` real de sesión
+  admin versionado en `docs/mediciones/sec/live-session/login-response.txt`
+  (no se pudo revocar en el servidor real desde este entorno — queda como
+  acción pendiente para quien tenga acceso a Render/Redis en producción);
+  el 2026-09-16 se generó evidencia EN VIVO nueva (`login-response-20260916.txt`,
+  `sin-sesion-403-20260916.txt`, `asignaciones-200-20260916.json`,
+  `conductor-alta-201-20260916.json`), contra un stack local levantado a
+  propósito (Postgres+Redis en Docker, backend con `./mvnw spring-boot:run`,
+  frontend con `ng serve`) y sobre el código ya corregido, con los tokens
+  reales truncados/redactados desde el primer momento — ver
+  `docs/mediciones/sec/live-session/README.md`;
+  se quitaron credenciales hardcodeadas de `login.ts` y `k6/script.js`; se
+  eliminó un `@Value` muerto (`app.cookie.secure`) en `AuthController`.
+- Se corrigieron atribuciones de P3 y P8 en este mismo documento (ver
+  arriba) contrastando cada commit citado contra `git log`.
+- Se limpiaron archivos sueltos sin usar en la raíz del repo
+  (`contribs_ascii.txt`, `contribs_ascii_part2.txt`, `fix.py`,
+  `fix_contrib.py`, `p236.txt`) que eran intentos previos de reescribir
+  este archivo.
+
+**`make verify` pasa en verde de verdad (2026-09-17, `ALL CHECKS PASSED`,
+exit code 0)**, tras completar el renombrado P5 en `src/test/java` y
+regenerar las dos entradas de `dataset/MANIFEST.sha256` que cambiaron por
+la corrección honesta de contenido de P11 (`CONSENT-FORM.md` y
+`CONSENT-REGISTRY.md`). En una corrida intermedia (2026-09-16) el mismo
+comando falló legítimamente en la categoría de métodos de test en español
+de P5 — ese fallo real no se ocultó ni se maquilló, se corrigió antes de
+declarar el punto cerrado. Ver `VERIFICACION.md` para la salida literal
+completa de ambas corridas.
+
+---
+
 ## Verificación
 
 Para verificar que todo funciona, ejecutar:
@@ -242,13 +359,37 @@ con `scripts/perf/recalcular-contraste.py`. Se comprueba con `git rev-parse v1.1
 
 ---
 
+## Situación del equipo en el examen suspenso (aclaración 2026-09-1X)
+
+María del Rosario Escudero Plaza y Kevin Moisés Castro Espinoza ya aprobaron
+su evaluación individual y no están rindiendo el examen suspenso en esta
+ronda. Según indica Luis Tejada, la rúbrica del examen suspenso establece que,
+para los integrantes que ya aprobaron, seguir haciendo commits en esta etapa
+es opcional — **esta afirmación sobre el contenido de la rúbrica no ha sido
+verificada de forma independiente en este expediente** (no se citó ni se
+adjuntó el texto literal del documento de rúbrica); si el evaluador la
+requiere, debe presentarse en la defensa oral. Por eso, de aquí en adelante
+todo el trabajo de corrección de esta ronda del examen suspenso (auditoría
+externa del 2026-09-16/17, ver sección anterior) fue ejecutado en solitario
+por Luis Alejandro Tejada Bajaña.
+
+Esto no borra la autoría real de María y Kevin en el proyecto original: sus
+aportes históricos (CSV de datos SUS, corridas de Lighthouse, evidencia de
+asignaciones, commit que hizo configurable la cookie, etc.) siguen
+reconocidos en las secciones P3 y P8 de este documento, con el respaldo de
+`git log` correspondiente. Lo que cambia es que **no firman esta ronda de
+correcciones del examen suspenso**, porque no participaron en ella ni la
+revisaron.
+
 ## Firmas
 
-Declaramos que los puntos pendientes listados en este documento fueron cerrados por los
-integrantes que firman, con los archivos y commits indicados en cada sección.
+Declaro que los puntos de esta ronda de correcciones del examen suspenso
+(sección "Auditoría externa y correcciones (2026-09-16)" y todo lo posterior
+en este documento) fueron cerrados por mí, con los archivos y commits
+indicados en cada sección.
 
-| Integrante | Correo institucional | Firma |
-|---|---|---|
-| Luis Alejandro Tejada Bajaña | ltejadab@uteq.edu.ec | Luis Alejandro Tejada Bajaña |
-| María del Rosario Escudero Plaza | mescuderop@uteq.edu.ec | María del Rosario Escudero Plaza |
-| Kevin Moisés Castro Espinoza | kcastroe2@uteq.edu.ec | Kevin Moisés Castro Espinoza |
+| Integrante | Correo institucional | Rol en esta ronda | Firma |
+|---|---|---|---|
+| Luis Alejandro Tejada Bajaña | ltejadab@uteq.edu.ec | Responsable único de la corrección del examen suspenso | Luis Alejandro Tejada Bajaña |
+| María del Rosario Escudero Plaza | mescuderop@uteq.edu.ec | Ya aprobó su evaluación; no participa en esta ronda | — (no firma esta ronda) |
+| Kevin Moisés Castro Espinoza | kcastroe2@uteq.edu.ec | Ya aprobó su evaluación; no participa en esta ronda | — (no firma esta ronda) |

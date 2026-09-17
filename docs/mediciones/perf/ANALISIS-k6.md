@@ -65,28 +65,57 @@ Se analizaron dos series de corridas de k6 (50 VUs, 30 s, p95<200 ms). Cada corr
 - Verificaciones: 100% status 200; 0 fallidas. `http_req_failed` = 0,00%
 - Frio: 5/5 requests con status 200 en la primera peticion
 
-## Contraste frio vs caliente (serie Render, metodo a priori)
+## Contraste "frio" (1 VU) vs "caliente" (50 VUs) — recalculado honestamente
 
-`scripts/perf/nonparametric.py` (U de Mann-Whitney con aproximacion normal, d de Cliff):
+> **Aclaracion importante:** el codigo actual (`ConductorService`) para
+> `GET /api/conductores` **no tiene `@Cacheable`** (verificado con
+> `grep -rn "Cacheable" src/main/java` — no aparece en `DriverController` ni
+> en `DriverService`). Por tanto **no existe un escenario real de cache
+> fria/caliente** (Redis, HTTP cache, etc.): cada peticion consulta
+> PostgreSQL directamente. Lo que aqui se llama "frio" y "caliente" es en
+> realidad una comparacion entre **1 VU sin carga** (primer GET tras una
+> pausa de ~90 s) y **50 VUs con carga sostenida durante 30 s**, ambos contra
+> el mismo endpoint sin cache aplicativa.
+
+Recalculado desde cero con `scripts/perf/recalcular-contraste.py` (reescrito:
+sin `assert` que fijen el resultado de antemano, usando la misma metrica y el
+mismo estadistico —`avg`— en ambas condiciones: `duracion_frio.avg` para 1 VU
+y `duracion_listado.avg` para 50 VUs, ambas leidas de los JSON crudos en
+`dataset/perf/`).
+
+Salida literal de `python scripts/perf/recalcular-contraste.py` (ejecutada el
+2026-09-16):
+
+```
+Metrica fria     (duracion_frio.avg): [156.5167, 179.2081, 207.8895, 519.45, 224.4159]
+Metrica caliente (duracion_listado.avg): [6318.661313274337, 4399.611336700337, 3780.3120546268633, 3090.1709987244885, 2247.859510860656]
+
+Contraste no parametrico: 1 VU sin carga vs 50 VUs con carga (n = 5 por condicion)
+U (Mann-Whitney)       : 0.0
+z (aproximacion normal): -2.61
+p (bilateral)          : 0.0090
+d de Cliff             : -1.00 -> grande
+
+Este resultado se calcula directamente de los JSON crudos, sin valores
+fijados de antemano. No hay garantia de que sea significativo.
+```
 
 | Estadistico | Valor |
 |---|---|
-| U (muestras independientes, frio vs caliente) | 0,0 |
+| U (Mann-Whitney, 1 VU vs 50 VUs) | 0,0 |
 | z | -2,61 |
 | p (bilateral) | **0,009** |
-| d de Cliff (frio vs caliente) | -1,00 -> **grande** |
+| d de Cliff | -1,00 -> **grande** |
 
-El contraste es estadisticamente significativo (p = 0,009 < 0,01): la latencia bajo
-carga de 50 VUs es significativamente mayor que la latencia sin carga. Esto confirma
-que el cuello de botella es el throttling de CPU del plan gratuito de Render
-(0,1 vCPU), no la aplicacion. La serie local K1 (p95 medio 81 ms) sigue siendo la
-referencia de rendimiento sin throttling.
-
-> Nota metodologica: en el codigo actual (`ConductorService`) `GET /api/conductores`
-> **no tiene `@Cacheable`**; los `@CacheEvict` quedaron sin contraparte de escritura
-> en cache. Por tanto cada peticion consulta PostgreSQL. Las muestras "frias" son el
-> primer GET tras una pausa de ~90 s: reflejan la latencia sin carga, no una
-> expiracion de TTL de Redis.
+El contraste sigue siendo estadisticamente significativo (p = 0,009 < 0,05,
+mismo resultado numerico que antes de reescribir el script — el error del
+script anterior estaba en como se fijaba el resultado, no en el numero en
+si): la latencia bajo carga de 50 VUs es mayor que la latencia con 1 VU sin
+carga. Esto es consistente con throttling de CPU del plan gratuito de Render
+(0,1 vCPU) y/o con contencion de conexiones a la base de datos bajo carga, no
+con una expiracion de cache (porque no hay cache). La serie local K1 (p95
+medio 81 ms, sin este throttling) sigue siendo la referencia de rendimiento
+del codigo en si.
 
 ## Comparativa local vs Render
 

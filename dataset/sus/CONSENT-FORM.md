@@ -2,7 +2,7 @@
 
 ## Project
 SGROAS — Fleet Transport Management System
-Quintanilla Normal University (UTEQ)
+Universidad Técnica Estatal de Quevedo (UTEQ)
 
 ## Purpose
 You are invited to participate in a usability evaluation of the SGROAS web application.

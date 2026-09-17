@@ -25,16 +25,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class IncidenteServiceTest {
+class IncidentServiceTest {
 
     @Mock
-    private IncidentRepository incidenteRepository;
+    private IncidentRepository incidentRepository;
 
     @Mock
-    private RouteAssignmentRepository asignacionRutaRepository;
+    private RouteAssignmentRepository routeAssignmentRepository;
 
     @InjectMocks
-    private IncidentService incidenteService;
+    private IncidentService incidentService;
 
     private RouteAssignment asignacionEjemplo() {
         Driver conductor = Driver.builder()
@@ -93,10 +93,10 @@ class IncidenteServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(incidenteRepository.findByActiveTrue(pageable))
+        when(incidentRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(incidenteEjemplo())));
 
-        Page<IncidentResponse> pagina = incidenteService.list(pageable);
+        Page<IncidentResponse> pagina = incidentService.list(pageable);
 
         assertEquals(1, pagina.getTotalElements());
         assertEquals("AVERIA_MECANICA", pagina.getContent().get(0).type());
@@ -104,9 +104,9 @@ class IncidenteServiceTest {
 
     @Test
     void findByIdReturnsIncident() {
-        when(incidenteRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
 
-        IncidentResponse response = incidenteService.findById(1L);
+        IncidentResponse response = incidentService.findById(1L);
 
         assertEquals(1L, response.id());
         assertEquals(1L, response.assignmentId());
@@ -114,29 +114,29 @@ class IncidenteServiceTest {
 
     @Test
     void findByIdNonexistentThrowsException() {
-        when(incidenteRepository.findById(99L)).thenReturn(Optional.empty());
+        when(incidentRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> incidenteService.findById(99L));
+                () -> incidentService.findById(99L));
     }
 
     @Test
     void createSavesAndReturns() {
-        when(asignacionRutaRepository.findById(1L))
+        when(routeAssignmentRepository.findById(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
-        when(incidenteRepository.save(any(Incident.class)))
+        when(incidentRepository.save(any(Incident.class)))
                 .thenReturn(incidenteEjemplo());
 
-        IncidentResponse response = incidenteService.create(requestEjemplo());
+        IncidentResponse response = incidentService.create(requestEjemplo());
 
         assertNotNull(response);
         assertEquals("MEDIA", response.severity());
-        verify(incidenteRepository).save(any(Incident.class));
+        verify(incidentRepository).save(any(Incident.class));
     }
 
     @Test
     void createWithNonexistentAssignmentThrowsException() {
-        when(asignacionRutaRepository.findById(99L)).thenReturn(Optional.empty());
+        when(routeAssignmentRepository.findById(99L)).thenReturn(Optional.empty());
 
         IncidentRequest request = new IncidentRequest(
                 99L, "Carlos Mendoza", "AVERIA_MECANICA", "Falla",
@@ -144,12 +144,12 @@ class IncidenteServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> incidenteService.create(request));
+                () -> incidentService.create(request));
     }
 
     @Test
     void createWithInvalidTypeThrowsException() {
-        when(asignacionRutaRepository.findById(1L))
+        when(routeAssignmentRepository.findById(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
 
         IncidentRequest request = new IncidentRequest(
@@ -158,12 +158,12 @@ class IncidenteServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> incidenteService.create(request));
+                () -> incidentService.create(request));
     }
 
     @Test
     void createWithInvalidSeverityThrowsException() {
-        when(asignacionRutaRepository.findById(1L))
+        when(routeAssignmentRepository.findById(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
 
         IncidentRequest request = new IncidentRequest(
@@ -172,12 +172,12 @@ class IncidenteServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> incidenteService.create(request));
+                () -> incidentService.create(request));
     }
 
     @Test
     void createWithInvalidStatusThrowsException() {
-        when(asignacionRutaRepository.findById(1L))
+        when(routeAssignmentRepository.findById(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
 
         IncidentRequest request = new IncidentRequest(
@@ -186,30 +186,30 @@ class IncidenteServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> incidenteService.create(request));
+                () -> incidentService.create(request));
     }
 
     @Test
     void updateModifiesAndReturns() {
-        when(incidenteRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
-        when(asignacionRutaRepository.findById(1L))
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(routeAssignmentRepository.findById(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
-        when(incidenteRepository.save(any(Incident.class)))
+        when(incidentRepository.save(any(Incident.class)))
                 .thenReturn(incidenteEjemplo());
 
-        IncidentResponse response = incidenteService.update(1L, requestEjemplo());
+        IncidentResponse response = incidentService.update(1L, requestEjemplo());
 
         assertEquals(1L, response.id());
-        verify(incidenteRepository).save(any(Incident.class));
+        verify(incidentRepository).save(any(Incident.class));
     }
 
     @Test
     void deactivateChangesStatus() {
-        when(incidenteRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
 
-        incidenteService.deactivate(1L);
+        incidentService.deactivate(1L);
 
-        verify(incidenteRepository).save(argThat(i ->
+        verify(incidentRepository).save(argThat(i ->
                 !i.getActive() && i.getStatus() == IncidentStatus.CERRADO));
     }
 }

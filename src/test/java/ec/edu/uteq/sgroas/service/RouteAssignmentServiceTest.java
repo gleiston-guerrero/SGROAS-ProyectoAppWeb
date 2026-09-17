@@ -26,22 +26,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AsignacionRutaServiceTest {
+class RouteAssignmentServiceTest {
 
     @Mock
-    private RouteAssignmentRepository asignacionRutaRepository;
+    private RouteAssignmentRepository routeAssignmentRepository;
 
     @Mock
-    private DriverRepository conductorRepository;
+    private DriverRepository driverRepository;
 
     @Mock
-    private VehicleRepository vehiculoRepository;
+    private VehicleRepository vehicleRepository;
 
     @Mock
-    private RouteRepository rutaRepository;
+    private RouteRepository routeRepository;
 
     @InjectMocks
-    private RouteAssignmentService asignacionRutaService;
+    private RouteAssignmentService routeAssignmentService;
 
     private Driver conductorEjemplo() {
         return Driver.builder()
@@ -93,10 +93,10 @@ class AsignacionRutaServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(asignacionRutaRepository.findByActiveTrue(pageable))
+        when(routeAssignmentRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(asignacionEjemplo())));
 
-        Page<RouteAssignmentResponse> pagina = asignacionRutaService.list(pageable);
+        Page<RouteAssignmentResponse> pagina = routeAssignmentService.list(pageable);
 
         assertEquals(1, pagina.getTotalElements());
         assertEquals("Carlos Mendoza", pagina.getContent().get(0).driverName());
@@ -106,10 +106,10 @@ class AsignacionRutaServiceTest {
 
     @Test
     void findByIdReturnsAssignment() {
-        when(asignacionRutaRepository.findWithDetalle(1L))
+        when(routeAssignmentRepository.findWithDetails(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
 
-        RouteAssignmentResponse response = asignacionRutaService.findById(1L);
+        RouteAssignmentResponse response = routeAssignmentService.findById(1L);
 
         assertEquals(1L, response.id());
         assertEquals("ACTIVA", response.status());
@@ -117,59 +117,59 @@ class AsignacionRutaServiceTest {
 
     @Test
     void findByIdNonexistentThrowsException() {
-        when(asignacionRutaRepository.findWithDetalle(99L)).thenReturn(Optional.empty());
+        when(routeAssignmentRepository.findWithDetails(99L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> asignacionRutaService.findById(99L));
+                () -> routeAssignmentService.findById(99L));
     }
 
     @Test
     void createSavesAndReturns() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
-        when(asignacionRutaRepository.save(any(RouteAssignment.class)))
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeAssignmentRepository.save(any(RouteAssignment.class)))
                 .thenReturn(asignacionEjemplo());
 
-        RouteAssignmentResponse response = asignacionRutaService.create(requestEjemplo());
+        RouteAssignmentResponse response = routeAssignmentService.create(requestEjemplo());
 
         assertNotNull(response);
         assertEquals(1L, response.id());
-        verify(asignacionRutaRepository).save(any(RouteAssignment.class));
+        verify(routeAssignmentRepository).save(any(RouteAssignment.class));
     }
 
     @Test
     void createWithoutDriverThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.empty());
+        when(driverRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> asignacionRutaService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(requestEjemplo()));
     }
 
     @Test
     void createWithoutVehicleThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.empty());
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> asignacionRutaService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(requestEjemplo()));
     }
 
     @Test
     void createWithoutRouteThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(rutaRepository.findById(1L)).thenReturn(Optional.empty());
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> asignacionRutaService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(requestEjemplo()));
     }
 
     @Test
     void createWithInvalidStatusThrowsException() {
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
 
         RouteAssignmentRequest request = new RouteAssignmentRequest(
                 1L, 1L, 1L, LocalDate.now(), LocalDate.now(),
@@ -177,33 +177,33 @@ class AsignacionRutaServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> asignacionRutaService.create(request));
+                () -> routeAssignmentService.create(request));
     }
 
     @Test
     void updateModifiesAndReturns() {
-        when(asignacionRutaRepository.findWithDetalle(1L))
+        when(routeAssignmentRepository.findWithDetails(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
-        when(conductorRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(rutaRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
-        when(asignacionRutaRepository.save(any(RouteAssignment.class)))
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeAssignmentRepository.save(any(RouteAssignment.class)))
                 .thenReturn(asignacionEjemplo());
 
-        RouteAssignmentResponse response = asignacionRutaService.update(1L, requestEjemplo());
+        RouteAssignmentResponse response = routeAssignmentService.update(1L, requestEjemplo());
 
         assertEquals(1L, response.id());
-        verify(asignacionRutaRepository).save(any(RouteAssignment.class));
+        verify(routeAssignmentRepository).save(any(RouteAssignment.class));
     }
 
     @Test
     void deactivateChangesStatus() {
-        when(asignacionRutaRepository.findWithDetalle(1L))
+        when(routeAssignmentRepository.findWithDetails(1L))
                 .thenReturn(Optional.of(asignacionEjemplo()));
 
-        asignacionRutaService.deactivate(1L);
+        routeAssignmentService.deactivate(1L);
 
-        verify(asignacionRutaRepository).save(argThat(a ->
+        verify(routeAssignmentRepository).save(argThat(a ->
                 !a.getActive() && a.getStatus() == AssignmentStatus.CANCELADA));
     }
 }

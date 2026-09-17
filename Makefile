@@ -96,7 +96,7 @@ verify:
 	@echo "[P2] Checking raw k6 runs (hot x5 + cold x5) reproducible contrast..."
 	@test $$(ls dataset/perf/k0*-run1.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0*-run1.json 2>/dev/null | wc -l) hot runs found"
 	@test $$(ls dataset/perf/k0*-cold.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0*-cold.json 2>/dev/null | wc -l) cold runs found"
-	@python scripts/perf/recalcular-contraste.py > /dev/null 2>&1 && echo "  OK: nonparametric contrast reproducible (nonparametric.py)"
+	@$(PYTHON) scripts/perf/recalcular-contraste.py > /dev/null 2>&1 && echo "  OK: nonparametric contrast reproducible (nonparametric.py)"
 	@echo "[P2] OK"
 	@echo ""
 	@echo "[P4] Checking cookie Secure(true)..."

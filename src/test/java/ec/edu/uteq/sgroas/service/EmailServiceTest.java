@@ -37,7 +37,7 @@ class EmailServiceTest {
     }
 
     @Test
-    void modoConsolaNoDebeLanzarAlEnviarCodigos() {
+    void consoleModeShouldNotThrowWhenSendingCodes() {
         ReflectionTestUtils.setField(service, "host", "");
 
         assertDoesNotThrow(() -> service.sendVerificationCode(

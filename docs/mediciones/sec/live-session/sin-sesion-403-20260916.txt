@@ -1,0 +1,25 @@
+HTTP/1.1 403
+Vary: Origin
+Vary: Access-Control-Request-Method
+Vary: Access-Control-Request-Headers
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 0
+Cache-Control: no-cache, no-store, max-age=0, must-revalidate
+Pragma: no-cache
+Expires: 0
+X-Frame-Options: DENY
+Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'
+Content-Length: 0
+Date: Thu, 17 Sep 2026 00:30:41 GMT
+
+> **Nota de la sesion (2026-09-16):** captura EN VIVO contra el backend local
+> (`localhost:8080`, `./mvnw spring-boot:run`, sin Cloudflare/proxy de por
+> medio esta vez, a diferencia de la evidencia vieja contra Render). Comando:
+>
+> ```sh
+> curl -s -i http://localhost:8080/api/asignaciones
+> ```
+>
+> Sin cookie de sesion, Spring Security rechaza la peticion con 403 antes de
+> llegar al controlador (regla NO incluida en `permitAll` de
+> `SecurityConfig`).

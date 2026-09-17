@@ -33,25 +33,25 @@ public class JwtService {
     }
 
     /**
-     * Crea un token firmado con los datos del usuario para autenticar sus peticiones.
-     * @param usuario entidad con correo, nombre y rol que se guardan en el token
+     * Crea un token firmado con los datos del user para autenticar sus peticiones.
+     * @param user entidad con correo, nombre y rol que se guardan en el token
      * @return token compacto listo para enviar en cabecera o cookie
      */
-    public String generateToken(User usuario) {
-        Date ahora = new Date();
-        Date expiracion = new Date(ahora.getTime() + jwtExpirationMs);
+    public String generateToken(User user) {
+        Date now = new Date();
+        Date expiration = new Date(now.getTime() + jwtExpirationMs);
         String jti = UUID.randomUUID().toString();
 
         return Jwts.builder()
                 .id(jti)
                 .issuer(jwtIssuer)
-                .subject(usuario.getEmail())
+                .subject(user.getEmail())
                 .audience().add(jwtAudience).and()
-                .issuedAt(ahora)
-                .notBefore(ahora)
-                .expiration(expiracion)
-                .claim("nombre", usuario.getName())
-                .claim("rol", usuario.getRole().name())
+                .issuedAt(now)
+                .notBefore(now)
+                .expiration(expiration)
+                .claim("nombre", user.getName())
+                .claim("rol", user.getRole().name())
                 .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
@@ -61,8 +61,8 @@ public class JwtService {
      * @param token texto compacto previamente generado por este servicio
      * @return correo guardado en el asunto del token
      */
-    public String extraerEmail(String token) {
-        return extraerClaim(token, Claims::getSubject);
+    public String extractEmail(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
     /**
@@ -70,8 +70,8 @@ public class JwtService {
      * @param token texto compacto previamente generado por este servicio
      * @return identificador unico asignado al crear el token
      */
-    public String extraerJti(String token) {
-        return extraerClaim(token, Claims::getId);
+    public String extractJti(String token) {
+        return extractClaim(token, Claims::getId);
     }
 
     /**
@@ -79,8 +79,8 @@ public class JwtService {
      * @param token texto compacto previamente generado por este servicio
      * @return fecha a partir de la cual el token deja de aceptarse
      */
-    public Date extraerExpiracion(String token) {
-        return extraerClaim(token, Claims::getExpiration);
+    public Date extractExpiration(String token) {
+        return extractClaim(token, Claims::getExpiration);
     }
 
     /**
@@ -92,21 +92,21 @@ public class JwtService {
     }
 
     /**
-     * Comprueba que un token pertenezca al usuario esperado y siga vigente.
-     * @param token texto compacto a validar con firma y fecha de expiracion
+     * Comprueba que un token pertenezca al user esperado y siga vigente.
+     * @param token texto compacto a validar con firma y fecha de expiration
      * @param email correo esperado del propietario para comparar con el asunto
      * @return verdadero cuando el correo coincide y el token no ha expirado
      */
-    public boolean tokenValido(String token, String email) {
-        String emailToken = extraerEmail(token);
-        return emailToken.equals(email) && !tokenExpirado(token);
+    public boolean isTokenValid(String token, String email) {
+        String tokenEmail = extractEmail(token);
+        return tokenEmail.equals(email) && !isTokenExpired(token);
     }
 
-    private boolean tokenExpirado(String token) {
-        return extraerExpiracion(token).before(new Date());
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
     }
 
-    private <T> T extraerClaim(String token, Function<Claims, T> claimsResolver) {
+    private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }

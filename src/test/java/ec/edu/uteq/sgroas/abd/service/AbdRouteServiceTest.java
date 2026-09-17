@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class RutaAbdServiceTest {
+class AbdRouteServiceTest {
 
     @Mock
     private AbdRouteRepository rutaAbdRepository;
@@ -48,7 +48,7 @@ class RutaAbdServiceTest {
     }
 
     @Test
-    void listWithoutSearchUsesFindAllYBlancoTambien() {
+    void listWithoutSearchUsesFindAllAndBlankToo() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(rutaAbdRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(ruta())));
         when(rutaAbdRepository.countSchedules(1)).thenReturn(0L);

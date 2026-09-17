@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RouteService {
 
-    private final RouteRepository rutaRepository;
+    private final RouteRepository routeRepository;
 
     /**
      * Returns a paginated list of active routes.
@@ -39,8 +39,8 @@ public class RouteService {
      */
     @Cacheable(value = "rutas", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     public List<RouteResponse> listCached(Pageable pageable) {
-        return rutaRepository.findByActiveTrue(pageable)
-                .map(this::mapearAResponse)
+        return routeRepository.findByActiveTrue(pageable)
+                .map(this::mapToResponse)
                 .getContent();
     }
 
@@ -51,7 +51,7 @@ public class RouteService {
      */
     public RouteResponse findById(Long id) {
         Route ruta = getActiveRoute(id);
-        return mapearAResponse(ruta);
+        return mapToResponse(ruta);
     }
 
     /**
@@ -62,7 +62,7 @@ public class RouteService {
      */
     @CacheEvict(value = "rutas", allEntries = true)
     public RouteResponse create(RouteRequest request) {
-        if (rutaRepository.existsByCode(request.code())) {
+        if (routeRepository.existsByCode(request.code())) {
             throw new IllegalArgumentException("Ya existe una ruta con ese codigo");
         }
 
@@ -79,8 +79,8 @@ public class RouteService {
                 .updatedAt(Instant.now())
                 .build();
 
-        Route rutaGuardada = rutaRepository.save(ruta);
-        return mapearAResponse(rutaGuardada);
+        Route rutaGuardada = routeRepository.save(ruta);
+        return mapToResponse(rutaGuardada);
     }
 
     /**
@@ -94,7 +94,7 @@ public class RouteService {
         Route ruta = getActiveRoute(id);
 
         if (!ruta.getCode().equals(request.code())
-                && rutaRepository.existsByCode(request.code())) {
+                && routeRepository.existsByCode(request.code())) {
             throw new IllegalArgumentException("Ya existe una ruta con ese codigo");
         }
 
@@ -107,8 +107,8 @@ public class RouteService {
         ruta.setStatus(toStatus(request.status()));
         ruta.setUpdatedAt(Instant.now());
 
-        Route rutaActualizada = rutaRepository.save(ruta);
-        return mapearAResponse(rutaActualizada);
+        Route rutaActualizada = routeRepository.save(ruta);
+        return mapToResponse(rutaActualizada);
     }
 
     /**
@@ -121,11 +121,11 @@ public class RouteService {
         ruta.setActive(false);
         ruta.setStatus(RouteStatus.INACTIVA);
         ruta.setUpdatedAt(Instant.now());
-        rutaRepository.save(ruta);
+        routeRepository.save(ruta);
     }
 
     private Route getActiveRoute(Long id) {
-        return rutaRepository.findById(id)
+        return routeRepository.findById(id)
                 .filter(Route::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Route no encontrada"));
     }
@@ -138,7 +138,7 @@ public class RouteService {
         }
     }
 
-    private RouteResponse mapearAResponse(Route ruta) {
+    private RouteResponse mapToResponse(Route ruta) {
         return new RouteResponse(
                 ruta.getId(),
                 ruta.getCode(),

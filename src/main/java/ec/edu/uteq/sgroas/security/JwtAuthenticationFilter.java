@@ -71,12 +71,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String email = jwtService.extraerEmail(token);
+        String email = jwtService.extractEmail(token);
 
         if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
 
-                if (jwtService.tokenValido(token, userDetails.getUsername())) {
+                if (jwtService.isTokenValid(token, userDetails.getUsername())) {
                     log.info("REQUEST uri={} ip={} sub={}",
                             request.getRequestURI(),
                             request.getRemoteAddr(),

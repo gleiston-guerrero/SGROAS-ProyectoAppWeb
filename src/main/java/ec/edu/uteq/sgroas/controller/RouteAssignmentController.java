@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RouteAssignmentController {
 
-    private final RouteAssignmentService asignacionRutaService;
+    private final RouteAssignmentService routeAssignmentService;
 
     /**
      * Recupera la lista paginada de asignaciones de rutas registradas en el sistema.
@@ -28,7 +28,7 @@ public class RouteAssignmentController {
     public ResponseEntity<Page<RouteAssignmentResponse>> list(
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(asignacionRutaService.list(pageable));
+        return ResponseEntity.ok(routeAssignmentService.list(pageable));
     }
 
     /**
@@ -38,7 +38,7 @@ public class RouteAssignmentController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<RouteAssignmentResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(asignacionRutaService.findById(id));
+        return ResponseEntity.ok(routeAssignmentService.findById(id));
     }
 
     /**
@@ -50,7 +50,7 @@ public class RouteAssignmentController {
     public ResponseEntity<RouteAssignmentResponse> create(
             @Valid @RequestBody RouteAssignmentRequest request
     ) {
-        RouteAssignmentResponse response = asignacionRutaService.create(request);
+        RouteAssignmentResponse response = routeAssignmentService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -65,7 +65,7 @@ public class RouteAssignmentController {
             @PathVariable Long id,
             @Valid @RequestBody RouteAssignmentRequest request
     ) {
-        return ResponseEntity.ok(asignacionRutaService.update(id, request));
+        return ResponseEntity.ok(routeAssignmentService.update(id, request));
     }
 
     /**
@@ -75,7 +75,7 @@ public class RouteAssignmentController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        asignacionRutaService.deactivate(id);
+        routeAssignmentService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -78,7 +78,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void incidentsByLevelMapeaNivelYTotal() {
+    void incidentsByLevelMapsLevelAndTotal() {
         AbdIncidentRepository.CountByLevel nivel = mock(AbdIncidentRepository.CountByLevel.class);
         when(nivel.getNivel()).thenReturn("ALTO");
         when(nivel.getTotal()).thenReturn(3);
@@ -92,7 +92,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void incidentsByStatusMapeaEstadoYTotal() {
+    void incidentsByStatusMapsStatusAndTotal() {
         AbdIncidentRepository.CountByStatus estado = mock(AbdIncidentRepository.CountByStatus.class);
         when(estado.getEstado()).thenReturn("ATENDIDO");
         when(estado.getTotal()).thenReturn(7);
@@ -106,7 +106,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void unitsByStatusMapeaClaveYTotal() {
+    void unitsByStatusMapsKeyAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
         when(proyeccion.getClave()).thenReturn("OPERATIVA");
         when(proyeccion.getTotal()).thenReturn(4L);
@@ -120,7 +120,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void schedulesByStatusMapeaClaveYTotal() {
+    void schedulesByStatusMapsKeyAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
         when(proyeccion.getClave()).thenReturn("PROGRAMADO");
         when(proyeccion.getTotal()).thenReturn(9L);
@@ -134,7 +134,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void schedulesByMonthMapeaMesYTotal() {
+    void schedulesByMonthMapsMonthAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
         when(proyeccion.getClave()).thenReturn("2026-08");
         when(proyeccion.getTotal()).thenReturn(6L);
@@ -148,7 +148,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void topRoutesMapeaIdDescripcionYTotal() {
+    void topRoutesMapsIdDescriptionAndTotal() {
         TopRouteProjection ruta = mock(TopRouteProjection.class);
         when(ruta.getId()).thenReturn(1);
         when(ruta.getDescripcion()).thenReturn("Quito - Guayaquil");
@@ -164,7 +164,7 @@ class AbdReportServiceTest {
     }
 
     @Test
-    void summaryDevuelveUnResumenNoNuloConColeccionesVacias() {
+    void summaryReturnsNonNullSummaryWithEmptyCollections() {
         when(programacionRepository.count()).thenReturn(0L);
         when(programacionRepository.findByEstadoIgnoreCase(eq("Programado"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());

@@ -76,9 +76,9 @@ class TokenServiceTest {
     }
 
     @Test
-    void agregarAccessTokenABlacklistConExpiracionFutura() {
-        when(jwtService.extraerJti("access-token")).thenReturn("jti-123");
-        when(jwtService.extraerExpiracion("access-token"))
+    void addAccessTokenToBlacklistWithFutureExpiration() {
+        when(jwtService.extractJti("access-token")).thenReturn("jti-123");
+        when(jwtService.extractExpiration("access-token"))
                 .thenReturn(new Date(System.currentTimeMillis() + 3600000L));
 
         tokenService.addAccessTokenToBlacklist("access-token");
@@ -91,9 +91,9 @@ class TokenServiceTest {
     }
 
     @Test
-    void agregarAccessTokenABlacklistExpiradoNoDebeGuardar() {
-        when(jwtService.extraerJti("access-token")).thenReturn("jti-123");
-        when(jwtService.extraerExpiracion("access-token"))
+    void addExpiredAccessTokenToBlacklistShouldNotStore() {
+        when(jwtService.extractJti("access-token")).thenReturn("jti-123");
+        when(jwtService.extractExpiration("access-token"))
                 .thenReturn(new Date(System.currentTimeMillis() - 1000L));
 
         tokenService.addAccessTokenToBlacklist("access-token");
@@ -102,16 +102,16 @@ class TokenServiceTest {
     }
 
     @Test
-    void accessTokenEnBlacklistDebeRetornarTrue() {
-        when(jwtService.extraerJti("access-token")).thenReturn("jti-123");
+    void accessTokenInBlacklistShouldReturnTrue() {
+        when(jwtService.extractJti("access-token")).thenReturn("jti-123");
         when(redisTemplate.hasKey("blacklist:jti-123")).thenReturn(true);
 
         assertTrue(tokenService.accessTokenEnBlacklist("access-token"));
     }
 
     @Test
-    void accessTokenEnBlacklistDebeRetornarFalse() {
-        when(jwtService.extraerJti("access-token")).thenReturn("jti-123");
+    void accessTokenNotInBlacklistShouldReturnFalse() {
+        when(jwtService.extractJti("access-token")).thenReturn("jti-123");
         when(redisTemplate.hasKey("blacklist:jti-123")).thenReturn(false);
 
         assertFalse(tokenService.accessTokenEnBlacklist("access-token"));

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class DriverController {
 
-    private final DriverService conductorService;
+    private final DriverService driverService;
 
     /**
      * Recupera la lista paginada de conductores con filtro opcional por texto.
@@ -30,7 +30,7 @@ public class DriverController {
             @RequestParam(required = false) String search,
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(conductorService.list(search, pageable));
+        return ResponseEntity.ok(driverService.list(search, pageable));
     }
 
     /**
@@ -40,7 +40,7 @@ public class DriverController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<DriverResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(conductorService.findById(id));
+        return ResponseEntity.ok(driverService.findById(id));
     }
 
     /**
@@ -52,7 +52,7 @@ public class DriverController {
     public ResponseEntity<DriverResponse> create(
             @Valid @RequestBody DriverRequest request
     ) {
-        DriverResponse response = conductorService.create(request);
+        DriverResponse response = driverService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -67,7 +67,7 @@ public class DriverController {
             @PathVariable Long id,
             @Valid @RequestBody DriverRequest request
     ) {
-        return ResponseEntity.ok(conductorService.update(id, request));
+        return ResponseEntity.ok(driverService.update(id, request));
     }
 
     /**
@@ -77,7 +77,7 @@ public class DriverController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        conductorService.deactivate(id);
+        driverService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

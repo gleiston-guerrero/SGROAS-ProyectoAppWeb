@@ -1,7 +1,7 @@
 package ec.edu.uteq.sgroas.controller;
 
-import ec.edu.uteq.sgroas.dto.UserResponse;
-import ec.edu.uteq.sgroas.service.UserService;
+import ec.edu.uteq.sgroas.dto.DriverResponse;
+import ec.edu.uteq.sgroas.service.DriverService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -26,13 +27,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
-class UsuarioControllerTest {
+class DriverControllerTest {
 
     @Mock
-    private UserService usuarioService;
+    private DriverService driverService;
 
     private MockMvc mockMvc() {
-        return MockMvcBuilders.standaloneSetup(new UserController(usuarioService))
+        return MockMvcBuilders.standaloneSetup(new DriverController(driverService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(
                         Jackson2ObjectMapperBuilder.json()
@@ -42,43 +43,50 @@ class UsuarioControllerTest {
                 .build();
     }
 
-    private UserResponse responseEjemplo() {
-        return new UserResponse(
-                1L, "Administrador SGROAS", "admin@sgroas.com",
-                "ROLE_ADMIN", true, Instant.now(), Instant.now()
+    private DriverResponse responseEjemplo() {
+        return new DriverResponse(
+                1L, "Carlos Alberto", "Mendoza Vera", "1200000001", "LIC-001-2026",
+                "E", LocalDate.now().plusDays(20), "0988888888",
+                "carlos.mendoza@sgroas.com", "ACTIVO", true, true,
+                Instant.now(), Instant.now()
         );
     }
 
     @Test
     void listReturns200() throws Exception {
-        when(usuarioService.list(any(), any()))
+        when(driverService.list(any(), any()))
                 .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
 
-        mockMvc().perform(get("/api/usuarios"))
+        mockMvc().perform(get("/api/conductores"))
                 .andExpect(status().isOk());
     }
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(usuarioService.findById(1L)).thenReturn(responseEjemplo());
+        when(driverService.findById(1L)).thenReturn(responseEjemplo());
 
-        mockMvc().perform(get("/api/usuarios/1"))
+        mockMvc().perform(get("/api/conductores/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.email").value("admin@sgroas.com"));
+                .andExpect(jsonPath("$.nationalId").value("1200000001"));
     }
 
     @Test
     void createReturns201() throws Exception {
-        when(usuarioService.create(any())).thenReturn(responseEjemplo());
+        when(driverService.create(any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(post("/api/usuarios")
+        mockMvc().perform(post("/api/conductores")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Administrador SGROAS",
-                                  "email": "admin@sgroas.com",
-                                  "password": "123456",
-                                  "role": "ROLE_ADMIN"
+                                  "firstNames": "Carlos Alberto",
+                                  "lastNames": "Mendoza Vera",
+                                  "nationalId": "1200000001",
+                                  "licenseNumber": "LIC-001-2026",
+                                  "licenseType": "E",
+                                  "licenseExpiry": "2026-12-31",
+                                  "phone": "0988888888",
+                                  "email": "carlos.mendoza@sgroas.com",
+                                  "status": "ACTIVO"
                                 }
                                 """))
                 .andExpect(status().isCreated())
@@ -87,16 +95,21 @@ class UsuarioControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(usuarioService.update(any(), any())).thenReturn(responseEjemplo());
+        when(driverService.update(any(), any())).thenReturn(responseEjemplo());
 
-        mockMvc().perform(put("/api/usuarios/1")
+        mockMvc().perform(put("/api/conductores/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
-                                  "name": "Administrador SGROAS",
-                                  "email": "admin@sgroas.com",
-                                  "password": "123456",
-                                  "role": "ROLE_ADMIN"
+                                  "firstNames": "Carlos Alberto",
+                                  "lastNames": "Mendoza Vera",
+                                  "nationalId": "1200000001",
+                                  "licenseNumber": "LIC-001-2026",
+                                  "licenseType": "E",
+                                  "licenseExpiry": "2026-12-31",
+                                  "phone": "0988888888",
+                                  "email": "carlos.mendoza@sgroas.com",
+                                  "status": "ACTIVO"
                                 }
                                 """))
                 .andExpect(status().isOk());
@@ -104,7 +117,7 @@ class UsuarioControllerTest {
 
     @Test
     void deactivateReturns204() throws Exception {
-        mockMvc().perform(delete("/api/usuarios/1"))
+        mockMvc().perform(delete("/api/conductores/1"))
                 .andExpect(status().isNoContent());
     }
 }

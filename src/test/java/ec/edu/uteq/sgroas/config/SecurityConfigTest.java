@@ -36,7 +36,7 @@ class SecurityConfigTest {
     }
 
     @Test
-    void orbitalConOrigenNoPermitidoResponde403() throws Exception {
+    void requestWithDisallowedOriginResponds403() throws Exception {
         mockMvc.perform(get("/api/conductores")
                         .header("Origin", "https://origen-malicioso.example"))
                 .andExpect(status().isForbidden());

@@ -73,7 +73,7 @@ export class Auth {
   }
 
   rolActual(): string | null {
-    const rol = this.currentUser()?.rol;
+    const rol = this.currentUser()?.role;
     return rol ? rol.replace('ROLE_', '') : null;
   }
 

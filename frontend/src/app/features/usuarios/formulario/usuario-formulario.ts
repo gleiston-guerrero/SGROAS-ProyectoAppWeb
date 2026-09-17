@@ -43,9 +43,9 @@ export class UsuarioFormulario implements OnInit {
       this.service.buscarPorId(id).subscribe({
         next: (u) => {
           this.form.patchValue({
-            nombre: u.nombre,
+            nombre: u.name,
             email: u.email,
-            rol: u.rol,
+            rol: u.role,
           });
           this.form.get('password')?.clearValidators();
           this.form.get('password')?.updateValueAndValidity();
@@ -76,7 +76,7 @@ export class UsuarioFormulario implements OnInit {
     this.loading.set(true);
     this.errorMsg.set(null);
     const raw = this.form.getRawValue();
-    const data: any = { nombre: raw.nombre, email: raw.email, rol: raw.rol, password: '' };
+    const data: any = { name: raw.nombre, email: raw.email, role: raw.rol, password: '' };
     const id = this.editId();
 
     if (id) {

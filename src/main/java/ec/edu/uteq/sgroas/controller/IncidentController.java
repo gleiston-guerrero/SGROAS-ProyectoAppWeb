@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class IncidentController {
 
-    private final IncidentService incidenteService;
+    private final IncidentService incidentService;
 
     /**
      * Recupera la lista paginada de incidentes registrados en el sistema.
@@ -28,7 +28,7 @@ public class IncidentController {
     public ResponseEntity<Page<IncidentResponse>> list(
             @PageableDefault(size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.ok(incidenteService.list(pageable));
+        return ResponseEntity.ok(incidentService.list(pageable));
     }
 
     /**
@@ -38,7 +38,7 @@ public class IncidentController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<IncidentResponse> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(incidenteService.findById(id));
+        return ResponseEntity.ok(incidentService.findById(id));
     }
 
     /**
@@ -50,7 +50,7 @@ public class IncidentController {
     public ResponseEntity<IncidentResponse> create(
             @Valid @RequestBody IncidentRequest request
     ) {
-        IncidentResponse response = incidenteService.create(request);
+        IncidentResponse response = incidentService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -65,7 +65,7 @@ public class IncidentController {
             @PathVariable Long id,
             @Valid @RequestBody IncidentRequest request
     ) {
-        return ResponseEntity.ok(incidenteService.update(id, request));
+        return ResponseEntity.ok(incidentService.update(id, request));
     }
 
     /**
@@ -75,7 +75,7 @@ public class IncidentController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
-        incidenteService.deactivate(id);
+        incidentService.deactivate(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class DtoTest {
 
     @Test
-    void errorResponseDebeConservarValores() {
+    void errorResponseShouldPreserveValues() {
         Instant ahora = Instant.now();
         ErrorResponse response = new ErrorResponse(
                 ahora, 400, "Bad Request", "Mensaje", "/api/test",
@@ -35,7 +35,7 @@ class DtoTest {
     }
 
     @Test
-    void emailRequestDebeConservarValores() {
+    void emailRequestShouldPreserveValues() {
         EmailRequest request = new EmailRequest("maria@sgroas.com");
 
         assertEquals("maria@sgroas.com", request.email());
@@ -52,7 +52,7 @@ class DtoTest {
     }
 
     @Test
-    void restablecerContrasenaRequestDebeConservarValores() {
+    void resetPasswordRequestShouldPreserveValues() {
         ResetPasswordRequest request = new ResetPasswordRequest(
                 "maria@sgroas.com", "654321", "nuevaClave1"
         );
@@ -63,7 +63,7 @@ class DtoTest {
     }
 
     @Test
-    void refreshTokenRequestDebeConservarValores() {
+    void refreshTokenRequestShouldPreserveValues() {
         RefreshTokenRequest request = new RefreshTokenRequest("refresh-token");
 
         assertEquals("refresh-token", request.refreshToken());

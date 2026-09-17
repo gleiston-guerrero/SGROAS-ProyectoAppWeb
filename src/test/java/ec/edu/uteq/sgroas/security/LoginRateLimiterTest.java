@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LoginRateLimiterTest {
 
     @Test
-    void ipSinIntentosNoDebeEstarBloqueada() {
+    void ipWithoutAttemptsShouldNotBeBlocked() {
         LoginRateLimiter limiter = new LoginRateLimiter();
 
         assertFalse(limiter.isBlocked("192.168.1.1"));
@@ -47,7 +47,7 @@ class LoginRateLimiterTest {
     }
 
     @Test
-    void bloqueoExpiradoDebeDesbloquear() throws InterruptedException {
+    void expiredLockoutShouldUnblock() throws InterruptedException {
         LoginRateLimiter limiter = new LoginRateLimiter();
         for (int i = 0; i < 6; i++) {
             limiter.recordFailedAttempt("192.168.1.1");

@@ -19,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DriverService {
 
-    private final DriverRepository conductorRepository;
+    private final DriverRepository driverRepository;
 
     /**
      * Returns a paginated list of active drivers, optionally filtered by search text.
@@ -29,10 +29,10 @@ public class DriverService {
      */
     public Page<DriverResponse> list(String search, Pageable pageable) {
         if (search == null || search.isBlank()) {
-            return conductorRepository.findByActiveTrue(pageable).map(this::mapearAResponse);
+            return driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);
         }
-        return conductorRepository.searchActive(search.trim().toLowerCase(), pageable)
-                .map(this::mapearAResponse);
+        return driverRepository.searchActive(search.trim().toLowerCase(), pageable)
+                .map(this::mapToResponse);
     }
 
     /**
@@ -43,7 +43,7 @@ public class DriverService {
      */
     public DriverResponse findById(Long id) {
         Driver conductor = getActiveDriver(id);
-        return mapearAResponse(conductor);
+        return mapToResponse(conductor);
     }
 
     /**
@@ -72,8 +72,8 @@ public class DriverService {
                 .updatedAt(Instant.now())
                 .build();
 
-        Driver conductorGuardado = conductorRepository.save(conductor);
-        return mapearAResponse(conductorGuardado);
+        Driver conductorGuardado = driverRepository.save(conductor);
+        return mapToResponse(conductorGuardado);
     }
 
     /**
@@ -88,12 +88,12 @@ public class DriverService {
         Driver conductor = getActiveDriver(id);
 
         if (!conductor.getNationalId().equals(request.nationalId())
-                && conductorRepository.existsByNationalId(request.nationalId())) {
+                && driverRepository.existsByNationalId(request.nationalId())) {
             throw new IllegalArgumentException("Ya existe un conductor con esa cedula");
         }
 
         if (!conductor.getLicenseNumber().equals(request.licenseNumber())
-                && conductorRepository.existsByLicenseNumber(request.licenseNumber())) {
+                && driverRepository.existsByLicenseNumber(request.licenseNumber())) {
             throw new IllegalArgumentException("Ya existe un conductor con ese numero de licencia");
         }
 
@@ -108,8 +108,8 @@ public class DriverService {
         conductor.setStatus(toStatus(request.status()));
         conductor.setUpdatedAt(Instant.now());
 
-        Driver conductorActualizado = conductorRepository.save(conductor);
-        return mapearAResponse(conductorActualizado);
+        Driver conductorActualizado = driverRepository.save(conductor);
+        return mapToResponse(conductorActualizado);
     }
 
     /**
@@ -122,23 +122,23 @@ public class DriverService {
         conductor.setActive(false);
         conductor.setStatus(DriverStatus.INACTIVO);
         conductor.setUpdatedAt(Instant.now());
-        conductorRepository.save(conductor);
+        driverRepository.save(conductor);
     }
 
     private Driver getActiveDriver(Long id) {
-        return conductorRepository.findById(id)
+        return driverRepository.findById(id)
                 .filter(Driver::getActive)
                 .orElseThrow(() -> new IllegalArgumentException("Driver no encontrado"));
     }
 
     private void validateUniqueNationalId(String nationalId) {
-        if (conductorRepository.existsByNationalId(nationalId)) {
+        if (driverRepository.existsByNationalId(nationalId)) {
             throw new IllegalArgumentException("Ya existe un conductor con esa cedula");
         }
     }
 
     private void validateUniqueLicense(String licenseNumber) {
-        if (conductorRepository.existsByLicenseNumber(licenseNumber)) {
+        if (driverRepository.existsByLicenseNumber(licenseNumber)) {
             throw new IllegalArgumentException("Ya existe un conductor con ese numero de licencia");
         }
     }
@@ -158,7 +158,7 @@ public class DriverService {
         return !licenseExpiry.isBefore(hoy) && !licenseExpiry.isAfter(limite);
     }
 
-    private DriverResponse mapearAResponse(Driver conductor) {
+    private DriverResponse mapToResponse(Driver conductor) {
         return new DriverResponse(
                 conductor.getId(),
                 conductor.getFirstNames(),

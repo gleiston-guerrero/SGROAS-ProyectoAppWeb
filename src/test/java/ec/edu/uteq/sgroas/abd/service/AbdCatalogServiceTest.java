@@ -77,7 +77,7 @@ class AbdCatalogServiceTest {
     }
 
     @Test
-    void findTerminalDevuelveLaEntidadCuandoExiste() {
+    void findTerminalReturnsEntityWhenItExists() {
         Terminal terminal = Terminal.builder().idTerminal(5).nombre("Terminal Guayaquil").build();
         when(terminalRepository.findById(5)).thenReturn(Optional.of(terminal));
 
@@ -85,7 +85,7 @@ class AbdCatalogServiceTest {
     }
 
     @Test
-    void findTerminalLanzaExcepcionCuandoNoExiste() {
+    void findTerminalThrowsExceptionWhenItDoesNotExist() {
         when(terminalRepository.findById(99)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class, () -> abdCatalogoService.findTerminal(99));

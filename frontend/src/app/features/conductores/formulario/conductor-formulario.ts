@@ -51,15 +51,15 @@ export class ConductorFormulario implements OnInit {
       this.service.buscarPorId(id).subscribe({
         next: (c) => {
           this.form.patchValue({
-            nombres: c.nombres,
-            apellidos: c.apellidos,
-            cedula: c.cedula,
-            numeroLicencia: c.numeroLicencia,
-            tipoLicencia: c.tipoLicencia,
-            fechaVencimientoLicencia: c.fechaVencimientoLicencia,
-            telefono: c.telefono,
+            nombres: c.firstNames,
+            apellidos: c.lastNames,
+            cedula: c.nationalId,
+            numeroLicencia: c.licenseNumber,
+            tipoLicencia: c.licenseType,
+            fechaVencimientoLicencia: c.licenseExpiry,
+            telefono: c.phone,
             email: c.email,
-            estado: c.estado,
+            estado: c.status,
           });
           this.loadingData.set(false);
         },
@@ -87,7 +87,18 @@ export class ConductorFormulario implements OnInit {
 
     this.loading.set(true);
     this.errorMsg.set(null);
-    const data = this.form.getRawValue() as any;
+    const raw = this.form.getRawValue();
+    const data: any = {
+      firstNames: raw.nombres,
+      lastNames: raw.apellidos,
+      nationalId: raw.cedula,
+      licenseNumber: raw.numeroLicencia,
+      licenseType: raw.tipoLicencia,
+      licenseExpiry: raw.fechaVencimientoLicencia,
+      phone: raw.telefono,
+      email: raw.email,
+      status: raw.estado,
+    };
     const id = this.editId();
 
     (id ? this.service.actualizar(id, data) : this.service.crear(data)).subscribe({

@@ -23,13 +23,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class VehiculoServiceTest {
+class VehicleServiceTest {
 
     @Mock
-    private VehicleRepository vehiculoRepository;
+    private VehicleRepository vehicleRepository;
 
     @InjectMocks
-    private VehicleService vehiculoService;
+    private VehicleService vehicleService;
 
     private Vehicle vehiculoEjemplo() {
         return Vehicle.builder()
@@ -60,10 +60,10 @@ class VehiculoServiceTest {
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
         Vehicle vehiculo = vehiculoEjemplo();
-        when(vehiculoRepository.findByActiveTrue(pageable))
+        when(vehicleRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(vehiculo)));
 
-        Page<VehicleResponse> pagina = vehiculoService.list(pageable);
+        Page<VehicleResponse> pagina = vehicleService.list(pageable);
 
         assertEquals(1, pagina.getTotalElements());
         assertEquals("GTU-001", pagina.getContent().get(0).plate());
@@ -72,10 +72,10 @@ class VehiculoServiceTest {
 
     @Test
     void findByIdReturnsVehicle() {
-        when(vehiculoRepository.findById(1L))
+        when(vehicleRepository.findById(1L))
                 .thenReturn(Optional.of(vehiculoEjemplo()));
 
-        VehicleResponse response = vehiculoService.findById(1L);
+        VehicleResponse response = vehicleService.findById(1L);
 
         assertNotNull(response);
         assertEquals(1L, response.id());
@@ -84,65 +84,65 @@ class VehiculoServiceTest {
 
     @Test
     void findByIdNonexistentThrowsException() {
-        when(vehiculoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(vehicleRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> vehiculoService.findById(99L));
+                () -> vehicleService.findById(99L));
     }
 
     @Test
     void createSavesAndReturns() {
-        when(vehiculoRepository.existsByPlate("GTU-001")).thenReturn(false);
-        when(vehiculoRepository.save(any(Vehicle.class)))
+        when(vehicleRepository.existsByPlate("GTU-001")).thenReturn(false);
+        when(vehicleRepository.save(any(Vehicle.class)))
                 .thenReturn(vehiculoEjemplo());
 
-        VehicleResponse response = vehiculoService.create(requestEjemplo());
+        VehicleResponse response = vehicleService.create(requestEjemplo());
 
         assertNotNull(response);
         assertEquals("GTU-001", response.plate());
-        verify(vehiculoRepository).save(any(Vehicle.class));
+        verify(vehicleRepository).save(any(Vehicle.class));
     }
 
     @Test
     void createWithDuplicatePlateThrowsException() {
-        when(vehiculoRepository.existsByPlate("GTU-001")).thenReturn(true);
+        when(vehicleRepository.existsByPlate("GTU-001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> vehiculoService.create(requestEjemplo()));
-        verify(vehiculoRepository, never()).save(any(Vehicle.class));
+                () -> vehicleService.create(requestEjemplo()));
+        verify(vehicleRepository, never()).save(any(Vehicle.class));
     }
 
     @Test
     void createWithInvalidStatusThrowsException() {
-        when(vehiculoRepository.existsByPlate("GTU-001")).thenReturn(false);
+        when(vehicleRepository.existsByPlate("GTU-001")).thenReturn(false);
         VehicleRequest request = new VehicleRequest(
                 "GTU-001", "Toyota", "Hiace", 2020, 14,
                 "MOT-123", "CHAS-123", "Blanco", "INVALIDO"
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> vehiculoService.create(request));
+                () -> vehicleService.create(request));
     }
 
     @Test
     void updateModifiesAndReturns() {
-        when(vehiculoRepository.findById(1L))
+        when(vehicleRepository.findById(1L))
                 .thenReturn(Optional.of(vehiculoEjemplo()));
-        when(vehiculoRepository.save(any(Vehicle.class)))
+        when(vehicleRepository.save(any(Vehicle.class)))
                 .thenReturn(vehiculoEjemplo());
 
-        VehicleResponse response = vehiculoService.update(1L, requestEjemplo());
+        VehicleResponse response = vehicleService.update(1L, requestEjemplo());
 
         assertNotNull(response);
         assertEquals(1L, response.id());
-        verify(vehiculoRepository).save(any(Vehicle.class));
+        verify(vehicleRepository).save(any(Vehicle.class));
     }
 
     @Test
     void updateWithDuplicatePlateThrowsException() {
         Vehicle vehiculo = vehiculoEjemplo();
-        when(vehiculoRepository.findById(1L)).thenReturn(Optional.of(vehiculo));
-        when(vehiculoRepository.existsByPlate("GTU-999")).thenReturn(true);
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculo));
+        when(vehicleRepository.existsByPlate("GTU-999")).thenReturn(true);
 
         VehicleRequest request = new VehicleRequest(
                 "GTU-999", "Toyota", "Hiace", 2020, 14,
@@ -150,17 +150,17 @@ class VehiculoServiceTest {
         );
 
         assertThrows(IllegalArgumentException.class,
-                () -> vehiculoService.update(1L, request));
+                () -> vehicleService.update(1L, request));
     }
 
     @Test
     void deactivateChangesStatus() {
-        when(vehiculoRepository.findById(1L))
+        when(vehicleRepository.findById(1L))
                 .thenReturn(Optional.of(vehiculoEjemplo()));
 
-        vehiculoService.deactivate(1L);
+        vehicleService.deactivate(1L);
 
-        verify(vehiculoRepository).save(argThat(v ->
+        verify(vehicleRepository).save(argThat(v ->
                 !v.getActive() && v.getStatus() == VehicleStatus.FUERA_DE_SERVICIO));
     }
 }
