@@ -220,20 +220,52 @@ shell — `lhci assert` tambien lee esa variable como si fuera su propio flag
 y falla con "Invalid values". Correr `collect` y `assert` en pasos separados,
 o en subshells, evita el choque.)
 
+**Actualización 2026-09-17 — VIGENTE: 6 corridas contra el despliegue
+público real** (el criterio de cierre de P3 exige explícitamente "contra
+el despliegue público"; las corridas locales de arriba no lo cumplían al
+pie de la letra). Tras reconectar el servicio de Render al repositorio
+correcto y redesplegar, se corrieron 3 móviles + 3 escritorio directo
+contra `https://sgroas-backend.onrender.com/`:
+
+```
+$ python3 -c "
+import json, glob, os
+for f in sorted(glob.glob('dataset/lighthouse/lh-*-render-20260917-*.json')):
+    d = json.load(open(f, encoding='utf-8'))
+    c = d['categories']
+    print(os.path.basename(f), d['requestedUrl'], {k: round(v['score']*100) for k,v in c.items()})
+"
+lh-desktop-render-20260917-1.json https://sgroas-backend.onrender.com/ {'performance': 95, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+lh-desktop-render-20260917-2.json https://sgroas-backend.onrender.com/ {'performance': 94, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+lh-desktop-render-20260917-3.json https://sgroas-backend.onrender.com/ {'performance': 95, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+lh-mobile-render-20260917-1.json https://sgroas-backend.onrender.com/ {'performance': 88, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+lh-mobile-render-20260917-2.json https://sgroas-backend.onrender.com/ {'performance': 88, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+lh-mobile-render-20260917-3.json https://sgroas-backend.onrender.com/ {'performance': 92, 'accessibility': 91, 'best-practices': 93, 'seo': 90}
+```
+
+Las 6 corridas cumplen los 4 umbrales de `lighthouserc.js`
+(`performance>=0.8`, `accessibility/best-practices/seo>=0.9`). Nota
+técnica: en Windows, `npx @lhci/cli collect` con `numberOfRuns>1` falla
+al limpiar su directorio temporal entre corridas (`EPERM` de Node al
+borrar `%TEMP%\lighthouse.*`) *después* de generar el resultado — se
+corrió con `--numberOfRuns=1` seis veces en pasos separados para evitar
+el crash, sin afectar la validez de cada corrida individual (cada una
+completa su auditoría antes de fallar en el cleanup posterior).
+
 **Archivos:**
+- `dataset/lighthouse/lh-{mobile,desktop}-render-20260917-{1,2,3}.json`
+  (6 corridas, VIGENTES, contra el despliegue público real).
 - `dataset/lighthouse/lh-{mobile,desktop,tablet}-{1,2,3}.json` (9 corridas,
   2026-09-15, contra Render, PRE-corrección de contrato — se conservan por
-  trazabilidad historica, ya NO representan el estado actual del codigo).
+  trazabilidad historica).
 - `dataset/lighthouse/lh-{mobile,desktop}-fresh-20260916-{1,2,3}.json` (6
-  corridas nuevas, 2026-09-16, contra `main`/v1.1.3 local — VIGENTES,
-  reemplazan a las anteriores como evidencia de performance actual).
+  corridas, 2026-09-16, contra `main`/v1.1.3 local — históricas, superadas
+  por las corridas contra Render de arriba).
 - `dataset/lighthouse/lhci-20260730-2115.json` y `-2117.json` (2 corridas
-  locales previas, mismo metodo `serve-gzip.js`, ya vigentes antes de esta
-  ronda).
+  locales previas).
 - `lighthouserc.js` — fix del preset movil invalido.
-- Resumen historico en `dataset/lighthouse/REPORT.md` (no actualizado con las
-  corridas frescas en esta ronda; los scores reales y reproducibles de las
-  corridas frescas quedan documentados arriba).
+- Resumen historico en `dataset/lighthouse/REPORT.md` (no actualizado con
+  las corridas frescas; los scores reales quedan documentados arriba).
 
 ---
 
