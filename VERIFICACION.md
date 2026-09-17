@@ -41,26 +41,62 @@ grep -rEn "spring.datasource.password=([^$]|$)|POSTGRES_PASSWORD|APP_JWT_SECRET|
   | grep -v '\$\{' | grep -v '<ROTATED' | grep -v 'secrets\.' | grep -v 'APP_COOKIE'
 ```
 
-**Salida (2026-09-15):**
+**Salida (2026-09-17, re-verificación tras eliminar el último secreto literal
+de `JwtServiceTest.java`):**
 ```
 1. spring.datasource.password=${SPRING_DATASOURCE_PASSWORD}
    app.jwt.secret=${JWT_SECRET}
 2. SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
    APP_JWT_SECRET: ${JWT_SECRET}
-3. private static final String JWT_SECRET =
-       System.getenv().getOrDefault("JWT_SECRET",
+3. // ("TEST_ONLY_SECRET_KEY_2026..."). Ahora, si JWT_SECRET no esta definida
+   private static final String JWT_SECRET = resolveTestSecret();
+       String fromEnv = System.getenv("JWT_SECRET");
    ReflectionTestUtils.setField(jwtService, "jwtSecret", JWT_SECRET);
-4. SPRING_DATASOURCE_PASSWORD=<ROTATED_DB_PASSWORD>
+4. POSTGRES_PASSWORD=<ROTATED_DB_PASSWORD>
+   SPRING_DATASOURCE_PASSWORD=<ROTATED_DB_PASSWORD>
    APP_JWT_SECRET=<ROTATED_JWT_SECRET_MIN_32_CHARS>
-5. (búsqueda 5: 0 resultados — ninguna contraseña de BD ni JWT secret literal en el
-   árbol; solo `${{...}}`/`${...}`, placeholders `<ROTATED_...>` y credenciales demo
-   de login del README; el CI usa `secrets.CI_POSTGRES_PASSWORD` con `trust` local)
+5. (búsqueda 5: 0 resultados, exit code 1 — ningún secreto literal de BD ni JWT
+   en todo el árbol, incluido el de prueba, que ahora se genera con
+   SecureRandom en memoria en vez de un valor de texto fijo)
 ```
+
+**Rotación real declarada por escrito (2026-09-17, ~19:41 UTC):** el
+responsable del repositorio (Luis Tejada) roto de verdad, en los paneles
+reales de los proveedores:
+
+- **Contraseña de la base de datos** (PostgreSQL gestionado en Supabase,
+  no en el Postgres de Render pese a que `render.yaml` originalmente
+  asumía un Postgres gestionado por Render): reseteada desde el panel de
+  Supabase (Project Settings → Database → Reset database password), y el
+  nuevo valor actualizado en las variables de entorno del servicio
+  `sgroas-backend` en Render.
+- **`APP_JWT_SECRET`**: reemplazado en las variables de entorno de
+  `sgroas-backend` en Render por una clave de 48 bytes generada con
+  `secrets.token_bytes` (Python `secrets`, no un valor predecible),
+  codificada en base64.
+
+**Prueba técnica de que la rotación surtió efecto** (no solo se declaró,
+se verificó contra el sistema real tras el redeploy):
+
+```
+$ curl -s https://sgroas-backend.onrender.com/actuator/health
+{"status":"UP", ... "db":{"status":"UP","details":{"database":"PostgreSQL", ...}}, ...}
+
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}'
+HTTP 200
+```
+
+`db: UP` confirma que el backend logró conectarse a Supabase con la
+contraseña NUEVA (si la rotación hubiera fallado o quedado desincronizada,
+este health check habría fallado). El login `200` confirma que el
+`APP_JWT_SECRET` nuevo firma y valida tokens correctamente de punta a
+punta. Ninguno de los dos valores reales (contraseña de BD ni JWT secret)
+se expone en este documento ni en ningún archivo del repositorio.
 
 **Archivos:** `src/main/resources/application.properties`, `docker-compose.yml`,
 `.env.example`, `src/test/java/ec/edu/uteq/sgroas/security/JwtServiceTest.java`,
-`src/test/resources/application-test.properties`, `.github/workflows/ci.yml`
-(contraseña real rotada en el despliegue y declarada en `.env.example`).
+`src/test/resources/application-test.properties`, `.github/workflows/ci.yml`.
 
 ---
 

@@ -22,6 +22,30 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 
 **Commit:** `ac72f7a` — "P1: remove hardcoded DB password and JWT secret from source"
 
+**Corrección 2026-09-17 (a):** se eliminó el último secreto literal que
+quedaba en el árbol (`TEST_ONLY_SECRET_KEY_2026...` en `JwtServiceTest.java`),
+reemplazado por una clave aleatoria de 32 bytes generada en memoria con
+`SecureRandom` en cada corrida de test — ya no hay ningún texto fijo
+buscable como secreto en todo el repositorio.
+
+**Corrección 2026-09-17 (b) — rotación real declarada por escrito:** Luis
+Tejada rotó de verdad la contraseña de la base de datos (PostgreSQL en
+Supabase) desde el panel de Supabase, y el `APP_JWT_SECRET` desde las
+variables de entorno de Render, aproximadamente a las 19:41 UTC. No se
+expone ningún valor real aquí. Verificación técnica de que la rotación
+surtió efecto (no solo declarada, confirmada contra el sistema real tras
+el redeploy):
+
+```
+$ curl -s https://sgroas-backend.onrender.com/actuator/health
+{"status":"UP", ..., "db":{"status":"UP", ...}}
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}'
+HTTP 200
+```
+
+Ver `VERIFICACION.md` (sección P1) para el detalle completo.
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (commit 51202f5)
