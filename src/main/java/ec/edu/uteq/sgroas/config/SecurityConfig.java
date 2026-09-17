@@ -122,7 +122,9 @@ public class SecurityConfig {
                         .xssProtection(xss -> { })
                         .addHeaderWriter(new StaticHeadersWriter(
                                 "Content-Security-Policy",
-                                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+                                "default-src 'self'; script-src 'self'; "
+                                        + "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+                                        + "font-src 'self' https://fonts.gstatic.com"
                         ))
                 );
 
