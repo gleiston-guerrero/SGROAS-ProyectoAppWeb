@@ -20,7 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RouteService {
 
-    private final RouteRepository rutaRepository;
+    private final RouteRepository routeRepository;
 
     /**
      * Returns a paginated list of active routes.
@@ -39,8 +39,8 @@ public class RouteService {
      */
     @Cacheable(value = &quot;rutas&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
     public List&lt;RouteResponse&gt; listCached(Pageable pageable) {
-<span class="fc" id="L42">        return rutaRepository.findByActiveTrue(pageable)</span>
-<span class="fc" id="L43">                .map(this::mapearAResponse)</span>
+<span class="fc" id="L42">        return routeRepository.findByActiveTrue(pageable)</span>
+<span class="fc" id="L43">                .map(this::mapToResponse)</span>
 <span class="fc" id="L44">                .getContent();</span>
     }
 
@@ -51,7 +51,7 @@ public class RouteService {
      */
     public RouteResponse findById(Long id) {
 <span class="fc" id="L53">        Route ruta = getActiveRoute(id);</span>
-<span class="fc" id="L54">        return mapearAResponse(ruta);</span>
+<span class="fc" id="L54">        return mapToResponse(ruta);</span>
     }
 
     /**
@@ -62,7 +62,7 @@ public class RouteService {
      */
     @CacheEvict(value = &quot;rutas&quot;, allEntries = true)
     public RouteResponse create(RouteRequest request) {
-<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (rutaRepository.existsByCode(request.code())) {</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        if (routeRepository.existsByCode(request.code())) {</span>
 <span class="fc" id="L66">            throw new IllegalArgumentException(&quot;Ya existe una ruta con ese codigo&quot;);</span>
         }
 
@@ -79,8 +79,8 @@ public class RouteService {
 <span class="fc" id="L79">                .updatedAt(Instant.now())</span>
 <span class="fc" id="L80">                .build();</span>
 
-<span class="fc" id="L82">        Route rutaGuardada = rutaRepository.save(ruta);</span>
-<span class="fc" id="L83">        return mapearAResponse(rutaGuardada);</span>
+<span class="fc" id="L82">        Route rutaGuardada = routeRepository.save(ruta);</span>
+<span class="fc" id="L83">        return mapToResponse(rutaGuardada);</span>
     }
 
     /**
@@ -94,7 +94,7 @@ public class RouteService {
 <span class="fc" id="L94">        Route ruta = getActiveRoute(id);</span>
 
 <span class="fc bfc" id="L96" title="All 2 branches covered.">        if (!ruta.getCode().equals(request.code())</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                &amp;&amp; rutaRepository.existsByCode(request.code())) {</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">                &amp;&amp; routeRepository.existsByCode(request.code())) {</span>
 <span class="fc" id="L98">            throw new IllegalArgumentException(&quot;Ya existe una ruta con ese codigo&quot;);</span>
         }
 
@@ -107,8 +107,8 @@ public class RouteService {
 <span class="fc" id="L107">        ruta.setStatus(toStatus(request.status()));</span>
 <span class="fc" id="L108">        ruta.setUpdatedAt(Instant.now());</span>
 
-<span class="fc" id="L110">        Route rutaActualizada = rutaRepository.save(ruta);</span>
-<span class="fc" id="L111">        return mapearAResponse(rutaActualizada);</span>
+<span class="fc" id="L110">        Route rutaActualizada = routeRepository.save(ruta);</span>
+<span class="fc" id="L111">        return mapToResponse(rutaActualizada);</span>
     }
 
     /**
@@ -121,11 +121,11 @@ public class RouteService {
 <span class="fc" id="L121">        ruta.setActive(false);</span>
 <span class="fc" id="L122">        ruta.setStatus(RouteStatus.INACTIVA);</span>
 <span class="fc" id="L123">        ruta.setUpdatedAt(Instant.now());</span>
-<span class="fc" id="L124">        rutaRepository.save(ruta);</span>
+<span class="fc" id="L124">        routeRepository.save(ruta);</span>
 <span class="fc" id="L125">    }</span>
 
     private Route getActiveRoute(Long id) {
-<span class="fc" id="L128">        return rutaRepository.findById(id)</span>
+<span class="fc" id="L128">        return routeRepository.findById(id)</span>
 <span class="fc" id="L129">                .filter(Route::getActive)</span>
 <span class="fc" id="L130">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Route no encontrada&quot;));</span>
     }
@@ -138,7 +138,7 @@ public class RouteService {
         }
     }
 
-    private RouteResponse mapearAResponse(Route ruta) {
+    private RouteResponse mapToResponse(Route ruta) {
 <span class="fc" id="L142">        return new RouteResponse(</span>
 <span class="fc" id="L143">                ruta.getId(),</span>
 <span class="fc" id="L144">                ruta.getCode(),</span>

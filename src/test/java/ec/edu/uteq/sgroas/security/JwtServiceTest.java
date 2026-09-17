@@ -6,21 +6,31 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceTest {
 
-    // Nota de auditoria (2026-09-16): este valor de respaldo solo se usa si la
-    // variable de entorno JWT_SECRET no esta definida, unicamente dentro de este
-    // test unitario (nunca en application.properties ni en un perfil real). No
-    // firma tokens reales ni protege datos: JwtService se instancia aqui con
-    // "new JwtService()" y el valor se inyecta por reflection solo para este
-    // test, por lo que no representa un secreto de produccion filtrado.
-    private static final String JWT_SECRET =
-            System.getenv().getOrDefault("JWT_SECRET",
-                    "TEST_ONLY_SECRET_KEY_2026_NOT_FOR_PRODUCTION_MIN_32");
+    // Corregido 2026-09-17: se elimino el secreto literal de respaldo
+    // ("TEST_ONLY_SECRET_KEY_2026..."). Ahora, si JWT_SECRET no esta definida
+    // en el entorno, se genera una clave aleatoria de 32 bytes en memoria al
+    // cargar la clase -- distinta en cada ejecucion de los tests, nunca
+    // versionada, y suficiente para HS256 (>=256 bits). No queda ningun
+    // secreto de texto plano buscable en el arbol del repositorio.
+    private static final String JWT_SECRET = resolveTestSecret();
+
+    private static String resolveTestSecret() {
+        String fromEnv = System.getenv("JWT_SECRET");
+        if (fromEnv != null && !fromEnv.isBlank()) {
+            return fromEnv;
+        }
+        byte[] random = new byte[32];
+        new SecureRandom().nextBytes(random);
+        return Base64.getEncoder().encodeToString(random);
+    }
 
     private JwtService jwtService;
 
