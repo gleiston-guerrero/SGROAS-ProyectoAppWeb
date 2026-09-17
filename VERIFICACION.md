@@ -1,8 +1,11 @@
-# VERIFICACION — SGROAS Supletorio v1.1.0
+# VERIFICACION — SGROAS Supletorio v1.1.0 / v1.1.1
 
 Fecha original: 2026-09-15
-Commit: 8398462
-Tag: v1.1.0
+Commit citado originalmente: 8398462 (INCORRECTO, ver seccion "Tag v1.1.0"
+mas abajo — corregido 2026-09-17: el tag v1.1.0 en realidad apunta a
+f2fb883)
+Tag evaluado por la guia externa: v1.1.0 (-> f2fb883)
+Tag con las correcciones de esta auditoria: v1.1.1
 
 **Re-auditoria: 2026-09-16.** Todos los comandos de este archivo se
 re-ejecutaron en este working tree en esa fecha y la salida se pego
@@ -809,21 +812,49 @@ integrantes con su correo institucional).
 
 ---
 
-## Tag v1.1.0 (EV-3)
+## Tag v1.1.0 (EV-3) — corrección de un defecto ya señalado por la guía externa
 
-El tag `v1.1.0` apunta a `8398462`, el commit que cierra la cadena de cierre.
-El contenido sustantivo (expediente literal, cero secrets y P2 reproducible) se
-consolidó en `51202f5`; los commits subsiguientes corrigieron el pipeline CI
-(definir `JWT_SECRET` en el paso "Build and test" y publicar la imagen en
-`ghcr.io/<owner>/sgroas` con el owner dinámico), hicieron los checks P5/P6
-portables a Linux, ajustaron cifras en documentos y normalizaron a LF el
-manifiesto `dataset/MANIFEST.sha256` para que `sha256sum -c` dé 283 OK en
-cualquier plataforma. El último commit (el del tag) regenera el manifiesto sobre
-el CSV Jacoco ya normalizado a LF. Se verifica:
+**Este documento decía que `v1.1.0` apunta a `8398462`. Es incorrecto y ya
+había sido señalado por la guía externa en EV-1** ("Declara que la etiqueta
+apunta a `8398462`, pero apunta a `f2fb883`"). Nunca se había corregido
+hasta esta re-verificación (2026-09-17). Salida literal:
+
+```
+$ git rev-parse v1.1.0
+847ee442a69660bf76a841fc5d711b56bf21f9cf
+$ git rev-parse v1.1.0^{commit}
+f2fb8838dbc8762df9b2a8bb1800d77c13ee2368
+$ git log --oneline v1.1.0 -1
+f2fb883 docs(portada): commit final f7b9b72 en portada; PDF re-generado con hash correcto
+$ git log --oneline 8398462 -1
+8398462 fix(P10): regenerar MANIFEST sobre Jacoco CSV normalizado a LF
+```
+
+(`v1.1.0` es un tag anotado: `git rev-parse v1.1.0` da el hash del propio
+objeto tag, `847ee44`; `git rev-parse v1.1.0^{commit}` o
+`git log --oneline v1.1.0 -1` resuelven al commit real, `f2fb883`.)
+
+`8398462` es un commit anterior en la misma cadena de cierre, no el commit
+al que apunta el tag. `v1.1.0` -> `f2fb883` es la versión que evaluó la
+guía externa, con todos los defectos allí descritos.
+
+## Tag v1.1.1 (2026-09-17) — corrige los hallazgos de la auditoría sobre v1.1.0
+
+Apunta al commit con las correcciones de: contrato backend/frontend (P0),
+P2 (script honesto), P5 (0% real en main y test), P6 (248/248 real
+contando interfaces, sin contar `record`), P11 (documentado honestamente,
+riesgo de Piso 3 no resuelto por falta de constancias), secretos
+(redactados/removidos), configuración muerta (`app.cookie.secure`), y
+evidencia en vivo nueva de P4/P9. Se verifica:
 
 ```bash
-git rev-parse v1.1.0
-git log --oneline v1.1.0 -1
+git rev-parse v1.1.1
+git log --oneline v1.1.1 -1
 ```
+
+No se regeneró el PDF de `docs/informe-final/` para esta ronda: su portada
+sigue citando el commit `f7b9b72` de la entrega final original, un hito
+distinto de esta corrección del examen suspenso. Ninguno de los defectos
+señalados por la guía está en el contenido del informe en sí.
 
 URL pública del sistema en la primera pantalla del README: `https://sgroas-backend.onrender.com`.

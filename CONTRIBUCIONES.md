@@ -377,19 +377,53 @@ powershell -ExecutionPolicy Bypass -File scripts/verify-manifest.ps1
 
 ---
 
-## Tag v1.1.0
+## Tag v1.1.0 (histórico, corregido 2026-09-17)
 
-El tag `v1.1.0` apunta a `8398462`, el último commit de la cadena de cierre
-(contenido sustantivo en `51202f5`; los commits posteriores corrigieron el
-pipeline CI definiendo `JWT_SECRET` y el owner dinámico de `ghcr.io`, hicieron
-los checks P5/P6 portables a Linux y regeneraron `dataset/MANIFEST.sha256`
-normalizado a LF para que `sha256sum -c` dé 283 OK en cualquier plataforma);
-incluye traducir los métodos de test al inglés, Javadoc
-226/226 (cifra que resultó estar mal calculada; corregida el 2026-09-16 a
-248/248 real — ver "Auditoría externa y correcciones"), la firma EV-4 con
-correos institucionales, la evidencia de sesión en vivo,
-el expediente literal de verificación y el contraste no paramétrico reproducible
-con `scripts/perf/recalcular-contraste.py`. Se comprueba con `git rev-parse v1.1.0`.
+**Corrección (2026-09-17):** este documento decía que el tag `v1.1.0`
+apuntaba a `8398462` — la guía de evaluación externa ya había señalado esto
+como un defecto de EV-1 ("declara que la etiqueta apunta a `8398462`, pero
+apunta a `f2fb883`"), y nunca se había corregido hasta ahora. Verificado:
+
+```
+$ git rev-parse v1.1.0
+847ee442a69660bf76a841fc5d711b56bf21f9cf
+$ git rev-parse v1.1.0^{commit}
+f2fb8838dbc8762df9b2a8bb1800d77c13ee2368
+$ git log -1 --format='%H %s' 8398462
+8398462d04c675b6ddb3bee8bf8393bbbef5af95 fix(P10): regenerar MANIFEST sobre Jacoco CSV normalizado a LF
+```
+
+El tag `v1.1.0` apunta realmente a `f2fb883` ("docs(portada): commit final
+f7b9b72 en portada; PDF re-generado con hash correcto"), no a `8398462`
+(un commit anterior en la misma cadena). Esta es la versión que evaluó la
+guía externa (`Evaluacion_SGROAS.md`), con los defectos allí descritos:
+contrato backend/frontend roto, P5/P6 mal contados, P11 con riesgo de
+Piso 3, secretos versionados, etc.
+
+## Tag v1.1.1 (2026-09-17) — corrige los hallazgos de la auditoría sobre v1.1.0
+
+Apunta al commit que incluye todas las correcciones descritas en
+"Auditoría externa y correcciones" más abajo: contrato backend/frontend
+reparado, P11 documentado honestamente (sin resolver el riesgo de Piso 3
+por falta de constancias reales), P2 recalculado sin resultados fijados de
+antemano, P5 al 0% real (main y test), P6 al 100% real contando interfaces
+(248/248), secretos redactados/removidos, y evidencia en vivo nueva de
+P4/P9. Se comprueba con:
+
+```
+git rev-parse v1.1.1
+git log --oneline v1.1.1 -1
+```
+
+**No se regeneró el PDF de `docs/informe-final/` ni se cambió su portada**
+(`docs/informe-final/portada.tex` sigue citando el commit `f7b9b72` de la
+entrega final original): esa portada documenta la entrega final del curso,
+un hito distinto de esta ronda de correcciones del examen suspenso, y
+regenerar un PDF de 98 páginas no era necesario para corregir los defectos
+señalados por la guía (que son de código, scripts y expedientes, no de
+contenido del informe). Si el evaluador requiere que la portada del informe
+también cite `v1.1.1`, es un paso pendiente adicional, no incluido en esta
+ronda.
 
 ---
 
