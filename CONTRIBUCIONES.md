@@ -14,7 +14,10 @@ Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, K
 **Archivos modificados:**
 - `src/main/resources/application.properties` — Reemplazado password hardcodeado por `${SPRING_DATASOURCE_PASSWORD}` y `${JWT_SECRET}`
 - `docker-compose.yml` — Todos los secrets ahora usan referencias a variables de entorno
-- `.env.example` — Archivo de ejemplo con placeholders CHANGE_ME
+- `.env.example` — Archivo de ejemplo con placeholders `<ROTATED_...>` (corregido
+  2026-09-17: este documento decía "placeholders CHANGE_ME", que nunca
+  existieron en el archivo real — otro defecto que la guía externa ya había
+  señalado y no se había corregido)
 - `src/test/java/ec/edu/uteq/sgroas/security/JwtServiceTest.java` — JWT_SECRET desde System.getenv() con fallback de test
 
 **Commit:** `ac72f7a` — "P1: remove hardcoded DB password and JWT secret from source"
