@@ -31,13 +31,21 @@ P01–P10, es decir, **la evaluación con esos 10 participantes ya había
 ocurrido el 2026-07-30**.
 
 ```
-$ git log --follow --format='%H %ad %an' --date=short -- dataset/sus/P01.json
-ce0099f1ed27d1ffded45f02fa7ca2c4ab1f9002 2026-09-01 Alxjandr07
-771b48ed9b89f3dd718178d70436c383ad1635b3 2026-08-16 TheAsesink
+$ git log --format='%ad' --date=short --diff-filter=A -- "docs/mediciones/sus/P01.json"
+2026-08-16
+$ git log --format='%H %ad %an %ae %s' --date=short --diff-filter=A -- "docs/mediciones/sus/P11.json"
+351601997ba1b5a6182ab3f5a13cd9b3c08b3403 2026-09-06 charito20 mescuderop@uteq.edu.ec feat(sus): agrega P11-P15 - n=15, media=68.5, IC95% [60.76; 76.24] (guia docente 3.7)
 ```
 
-Los archivos JSON individuales por participante (`P01.json`…`P15.json`,
-incluidos P11–P15) se suben por primera vez el **2026-08-16**.
+**Corrección (2026-09-17):** una versión anterior de este documento decía
+que los archivos `P11.json`…`P15.json` se subían "por primera vez el
+2026-08-16", igual que P01-P10. Ese dato salió de un comando
+`git log --follow` corrido solo sobre `P01.json`, y se generalizó por error
+a P11-P15 sin verificar cada archivo por separado. Verificado ahora
+individualmente: `P01.json`…`P10.json` sí se subieron el **2026-08-16**
+(commits `771b48e` y `2a118b8`), pero `P11.json`…`P15.json` se subieron
+por primera vez el **2026-09-06** (commit `3516019`, autoría de María del
+Rosario Escudero Plaza / `charito20`).
 
 ```
 $ git log --format='%H %ad %an %ae' --date=short -- dataset/sus/CONSENT-REGISTRY.md
@@ -164,7 +172,7 @@ Verificaciones adicionales realizadas:
 | Grupo | Firma de consentimiento | Evaluación real | Consentimiento previo a la evaluación |
 |---|---|---|---|
 | P01–P10 | 2026-07-24 | 2026-07-30 (`e8d7e2f`, ver sección 2) | Sí, 6 días antes |
-| P11–P15 | 2026-07-26 | 2026-08-03 (declarada por el equipo; los archivos `P11.json`–`P15.json` se subieron al repo después, el 2026-08-16) | Sí, 8 días antes |
+| P11–P15 | 2026-07-26 | 2026-08-16 (declarada por el equipo, corregida el 2026-09-17 tras una confusión inicial de fechas; los archivos `P11.json`–`P15.json` se subieron al repo después, el 2026-09-06 — commit `3516019`) | Sí, 21 días antes |
 
 Con esto, los **15 participantes tienen consentimiento informado individual,
 firmado en papel antes de su respectiva evaluación**, con evidencia
@@ -190,7 +198,16 @@ inventada ni una contradicción sin explicar — hay evidencia verificable
 (hash + fecha de firma legible en cada documento) de consentimiento
 individual, previo a la evaluación, para los 15 participantes. La única
 reserva que queda, y que se declara explícitamente, es que la fecha de
-evaluación de P11–P15 (2026-08-03) es una declaración del equipo, no algo
-verificado de forma independiente contra un artefacto externo (a diferencia
-de P01–P10, cuya fecha de evaluación sí está respaldada por un commit de git
-del mismo día en que se generaron los resultados agregados).
+evaluación de P11–P15 (2026-08-16) es una declaración del equipo (corregida
+una vez el 2026-09-17 tras una confusión inicial con otra fecha), no algo
+verificado de forma independiente contra un artefacto externo con esa fecha
+exacta — el primer artefacto de git relacionado con esos datos es el commit
+`3516019` del 2026-09-06, tres semanas después de la evaluación declarada
+(intervalo comparable al de P01-P10, cuyos JSON individuales también se
+subieron semanas después de la evaluación: 30-jul evaluación, 16-ago subida
+de JSON individuales). A diferencia de P01–P10, cuya fecha de evaluación
+(30-jul) sí está respaldada por un commit de git del mismo día
+(`e8d7e2f`), la fecha exacta de evaluación de P11-P15 no tiene ese mismo
+respaldo directo — sí es consistente con toda la cadena de fechas
+(consentimiento 26-jul, subida a git 6-sep), simplemente no está anclada a
+un artefacto externo del día mismo.

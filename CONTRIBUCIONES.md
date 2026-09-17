@@ -197,10 +197,19 @@ $ git log --follow --format='%H %an <%ae> %ad %s' --date=short -- scripts/genera
 ```
 
 El CSV con las respuestas reales fue subido originalmente por María del
-Rosario Escudero Plaza (`charito20`, commit `e8d7e2f`, 2026-07-30); el
-script que lo procesa fue escrito despues por Luis Tejada. Se corrige la
-atribución para reconocer ambas partes en vez de dar todo el crédito a
-quien escribió solo el script derivado.
+Rosario Escudero Plaza (`charito20`, commit `e8d7e2f`, 2026-07-30) con los
+primeros 10 participantes; el script que lo procesa fue escrito despues por
+Luis Tejada. Se corrige la atribución para reconocer ambas partes en vez de
+dar todo el crédito a quien escribió solo el script derivado.
+
+**Adición (2026-09-17):** los datos de P11–P15 (agregados al mismo CSV y a
+los archivos `P11.json`…`P15.json`) también son autoría de María del
+Rosario Escudero Plaza, no de Luis Tejada ni de Kevin Castro:
+
+```
+$ git log --format='%H %ad %an %ae %s' --date=short --diff-filter=A -- "docs/mediciones/sus/P11.json"
+351601997ba1b5a6182ab3f5a13cd9b3c08b3403 2026-09-06 charito20 mescuderop@uteq.edu.ec feat(sus): agrega P11-P15 - n=15, media=68.5, IC95% [60.76; 76.24] (guia docente 3.7)
+```
 
 **Archivos creados:**
 - `scripts/generate-sus-demographics.py` (Luis Tejada) — Lee `dataset/sus/sus-raw.csv`, genera tabla de demografía (15 participantes, 8M/7F, edades 19-25, SUS mean=68.5)
@@ -422,7 +431,7 @@ Apunta al commit final de esta auditoría, que agrega sobre `v1.1.1`:
   cada uno (verificado con `sha256sum` y `hashlib.sha256`, resultados
   idénticos), fecha de firma legible extraída con `pdftotext`: P01–P10
   firmados 2026-07-24 (evaluados 2026-07-30), P11–P15 firmados 2026-07-26
-  (evaluados 2026-08-03, según declaración del equipo). Ambos grupos con
+  (evaluados 2026-08-16, según declaración del equipo). Ambos grupos con
   consentimiento previo a su evaluación. Los documentos originales **no**
   se versionaron (contienen firmas manuscritas); el registro público
   (`dataset/sus/CONSENT-REGISTRY.md`) solo publica el hash de cada uno.

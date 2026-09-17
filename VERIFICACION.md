@@ -1220,8 +1220,24 @@ P15: b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee
 con resultado idéntico. Fecha de firma extraída de cada PDF con
 `pdftotext -layout`: P01–P10 = 2026-07-24, P11–P15 = 2026-07-26 — ambas
 antes de la evaluación real de cada grupo (P01–P10: 2026-07-30, respaldado
-por el commit `e8d7e2f` del mismo día; P11–P15: 2026-08-03, declarado por el
-equipo, sin artefacto de git que lo confirme de forma independiente).
+por el commit `e8d7e2f` del mismo día; P11–P15: 2026-08-16, declarado por
+el equipo — corregido el 2026-09-17 tras una confusión inicial de fechas).
+
+**Corrección de un error propio de esta auditoría (2026-09-17):** una
+versión anterior de este documento generalizó por error que los archivos
+`P11.json`…`P15.json` se habían subido "el 2026-08-16" (extrapolando un
+`git log --follow` corrido solo sobre `P01.json`). Verificado ahora
+individualmente:
+
+```
+$ git log --format='%H %ad %an %ae %s' --date=short --diff-filter=A -- "docs/mediciones/sus/P11.json"
+351601997ba1b5a6182ab3f5a13cd9b3c08b3403 2026-09-06 charito20 mescuderop@uteq.edu.ec feat(sus): agrega P11-P15 - n=15, media=68.5, IC95% [60.76; 76.24] (guia docente 3.7)
+```
+
+`P11.json`…`P15.json` se suben por primera vez el **2026-09-06** (no el
+16-ago, que corresponde solo a `P01.json`…`P10.json`), tres semanas después
+de la evaluación declarada del 16-ago — un intervalo comparable al de
+P01-P10 (evaluados 30-jul, JSON individuales subidos 16-ago).
 
 Los documentos originales **no se subieron al repositorio** (contienen
 firmas manuscritas); el registro público
@@ -1233,8 +1249,9 @@ sección 7.
 fechas contradictorias ni constancias inventadas; hay consentimiento
 individual verificable, previo a la evaluación, para los 15 participantes.
 La única reserva declarada es que la fecha de evaluación de P11–P15
-(2026-08-03) es una declaración del equipo, no confirmada por un artefacto
-de git independiente como sí ocurre con P01–P10.
+(2026-08-16) es una declaración del equipo, no confirmada por un artefacto
+de git del mismo día como sí ocurre con P01–P10 (cuyo commit `e8d7e2f` es
+del día mismo de la evaluación).
 
 ---
 

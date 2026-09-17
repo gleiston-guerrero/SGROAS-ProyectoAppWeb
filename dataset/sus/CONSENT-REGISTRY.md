@@ -30,11 +30,11 @@ document itself.
 | P08  | 20  | Female | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `11891dd8e8a4fd382da0a82ff0cb7db2364a2eee8fc4a6d30754b79758645179` |
 | P09  | 21  | Male   | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `db055bc4c2429933d98d6a6344c35c3e412d33948dcd9e3671a62af3d682e593` |
 | P10  | 19  | Male   | Desktop| Yes     | 2026-07-24 | 2026-07-30   | In-person, paper, scanned | `b0b864109c3665c9430a8b6bab5c7d1cbd22d39ac3759843a56dfdd826d283df` |
-| P11  | 23  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-03   | In-person, paper, scanned | `6113753eb0aa166f95f921acb47996e48ca7327d8a994b37f853a2e1ce451c50` |
-| P12  | 19  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-03   | In-person, paper, scanned | `a9aba08d40926da009928790f26848b4efc4314e8c3a79623969014e5c1c13e4` |
-| P13  | 21  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-03   | In-person, paper, scanned | `322beccf5d42f83d2313d698b84ac4016cb877951981ec7d3431907afbd99881` |
-| P14  | 21  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-03   | In-person, paper, scanned | `341cf1b59d4e3606a051d4ae601581dec1e3c1a0f1bfa817ba160a020462fb44` |
-| P15  | 20  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-03   | In-person, paper, scanned | `b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee` |
+| P11  | 23  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `6113753eb0aa166f95f921acb47996e48ca7327d8a994b37f853a2e1ce451c50` |
+| P12  | 19  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `a9aba08d40926da009928790f26848b4efc4314e8c3a79623969014e5c1c13e4` |
+| P13  | 21  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `322beccf5d42f83d2313d698b84ac4016cb877951981ec7d3431907afbd99881` |
+| P14  | 21  | Male   | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `341cf1b59d4e3606a051d4ae601581dec1e3c1a0f1bfa817ba160a020462fb44` |
+| P15  | 20  | Female | Desktop| Yes     | 2026-07-26 | 2026-08-16   | In-person, paper, scanned | `b7b2677cfc577b65c75fd1e30dace114f9900ec7d1e3d5049f66b793c46012ee` |
 
 All 15 hashes were computed independently with two different tools
 (`sha256sum` and Python's `hashlib.sha256`) against the same 15 files on
@@ -44,5 +44,5 @@ contain a legible signing date matching the table above, extracted with
 `pdftotext -layout`.
 
 All 15 participants provided written informed consent **before** their
-respective evaluation session (P01-P10: 6 days before; P11-P15: 8 days
+respective evaluation session (P01-P10: 6 days before; P11-P15: 21 days
 before).
