@@ -97,7 +97,7 @@ make audit          # pasa si y solo si las 4 guardas responden exit 0
 scripts/test-validators.sh   # imprime PASS/FAIL por caso de exit code
 ```
 
-### Credenciales por defecto
+### Credenciales por defecto (solo entorno LOCAL)
 
 | Usuario | Rol | Contraseña |
 |---|---|---|
@@ -107,6 +107,12 @@ scripts/test-validators.sh   # imprime PASS/FAIL por caso de exit code
 
 > Cada usuario tiene su contraseña propia (no se comparte). Los hashes se
 > generan con `BCryptPasswordEncoder` (strength 10) en `V2__seed.sql`.
+> Estas credenciales son válidas **únicamente** al levantar el proyecto en
+> local con `docker compose` sobre una base de datos propia. La cuenta
+> `admin@sgroas.com` del despliegue público
+> (`https://sgroas-backend.onrender.com`) tiene una contraseña distinta,
+> rotada el 2026-09-18 tras detectarse que aún usaba este valor de seed
+> (ver `VERIFICACION.md`, sección P1).
 
 ## Comprobación de funcionalidades (Bases de Datos Avanzadas - ABD)
 

@@ -98,6 +98,35 @@ este health check habría fallado). El login `200` confirma que el
 punta. Ninguno de los dos valores reales (contraseña de BD ni JWT secret)
 se expone en este documento ni en ningún archivo del repositorio.
 
+**Hallazgo real y corrección adicional (2026-09-18):** la prueba anterior
+rotaba la contraseña de la BD y el JWT secret (infraestructura), pero
+usaba de forma deliberada `admin123` como credencial de la CUENTA de
+aplicación `admin@sgroas.com` para el smoke test — la misma contraseña
+sembrada por Flyway en `V2__seed.sql` para desarrollo local. Eso dejaba la
+cuenta admin real de producción con una contraseña débil y conocida
+públicamente en este mismo repositorio, un hallazgo correcto y grave
+señalado en una auditoría externa. Se corrigió de inmediato: el
+responsable del repositorio cambió la contraseña de `admin@sgroas.com` en
+producción vía el flujo `POST /api/auth/forgot-password` +
+`POST /api/auth/reset-password` (código enviado al correo real del admin,
+sin que la nueva contraseña pase nunca por este asistente ni quede
+registrada en ningún archivo). Verificado en vivo tras el cambio:
+
+```
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}'
+HTTP 401
+```
+
+`admin123` ya NO es válida contra `admin@sgroas.com` en producción. Todos
+los bloques anteriores de este documento que muestran un login `200` con
+`admin123` contra Render (este bloque, y los de las secciones P1/P4/P9 más
+abajo) quedan como evidencia histórica de cuándo se detectó y corrigió el
+problema, no como estado actual del sistema. Las credenciales
+`admin123`/`coord123`/`segur123` de `README.md` y `V2__seed.sql` siguen
+siendo válidas únicamente para el seed de un entorno LOCAL de desarrollo
+(`docker compose up` con una BD propia), nunca para el despliegue público.
+
 **Limitación declarada (2026-09-17):** una re-evaluación externa señaló,
 correctamente, que esta prueba demuestra que la contraseña NUEVA funciona,
 pero no que la VIEJA haya dejado de ser válida — son afirmaciones
