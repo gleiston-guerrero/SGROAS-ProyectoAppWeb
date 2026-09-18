@@ -80,12 +80,16 @@ se verificó contra el sistema real tras el redeploy):
 
 ```
 $ curl -s https://sgroas-backend.onrender.com/actuator/health
-{"status":"UP", ... "db":{"status":"UP","details":{"database":"PostgreSQL", ...}}, ...}
+{"status":"UP","groups":["liveness","readiness"],"components":{"db":{"status":"UP","details":{"database":"PostgreSQL","validationQuery":"isValid()"}},"diskSpace":{"status":"UP","details":{"total":414921494528,"free":68775636992,"threshold":10485760,"path":"/app/.","exists":true}},"livenessState":{"status":"UP"},"ping":{"status":"UP"},"readinessState":{"status":"UP"},"redis":{"status":"UP","details":{"version":"7.2.4"}},"ssl":{"status":"UP","details":{"validChains":[],"invalidChains":[]}}}}
 
 $ curl -s -o /dev/null -w "HTTP %{http_code}\n" -X POST https://sgroas-backend.onrender.com/api/auth/login \
     -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}'
 HTTP 200
 ```
+(Salida re-verificada 2026-09-17, tarde: la versión anterior de este bloque
+tenía la respuesta de `/actuator/health` resumida con "..." en vez de
+literal — un defecto real señalado en una auditoría rigurosa propia. Se
+corrige aquí con la salida completa y actual.)
 
 `db: UP` confirma que el backend logró conectarse a Supabase con la
 contraseña NUEVA (si la rotación hubiera fallado o quedado desincronizada,
@@ -130,7 +134,7 @@ que ya no son explotables:
 ```
 $ TOKEN=$(grep -oE "eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}" dataset/perf/k01-run1.json | head -1)
 $ echo "$TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null
-{"jti":"f063abe3-...","iss":"https://sgroas.uteq.edu.ec","sub":"admin@sgroas.com", ...,"exp":1785370130,"nombre":"Admin SGROAS","rol":"ROLE_ADMIN"}
+{"jti":"f063abe3-125b-483b-9e86-c1a09b462358","iss":"https://sgroas.uteq.edu.ec","sub":"admin@sgroas.com","aud":["sgroas-frontend"],"iat":1785366530,"nbf":1785366530,"exp":1785370130,"nombre":"Admin SGROAS","rol":"ROLE_ADMIN"}
 # exp=1785370130 -> 2026-07-29 (ya vencido: hoy es 2026-09-17)
 
 $ curl -s -o /dev/null -w "HTTP %{http_code}\n" -H "Authorization: Bearer $TOKEN" \
@@ -306,7 +310,7 @@ de commit ni los metadatos del propio JSON. Verificado ahora:
 
 ```
 $ git log --follow --format="%H %ad %an %s" --date=short -1 -- dataset/lighthouse/lh-desktop-1.json
-b516447 2026-09-13 TheAsesink fix(P11,P15,P6,P16,P10): ...
+b516447 2026-09-13 TheAsesink fix(P11,P15,P6,P16,P10): valida trazabilidad CRLF+exit1, dataset 275 arch sha256 OK, cookie HttpOnly sin token JSON, evidencia asignaciones 200
 $ git log --format="%H %ad %an %s" --date=short -- dataset/lighthouse/lh-desktop-1.json | tail -1
 dd6b81d 2026-09-06 charito20 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
 $ python3 -c "import json; d=json.load(open('dataset/lighthouse/lh-desktop-1.json')); print(d['requestedUrl'], d['lighthouseVersion'])"
@@ -549,10 +553,12 @@ rotación de secretos, se repitió el login contra Render y se decodificó
 el payload del JWT (no cifrado, solo firmado):
 
 ```
-{"jti":"...","iss":"https://sgroas-backend.onrender.com","sub":"admin@sgroas.com",
- "aud":["sgroas-frontend"],"iat":...,"nbf":...,"exp":...,
- "name":"Admin SGROAS","role":"ROLE_ADMIN"}
+{"jti":"b7b8434a-dfe0-4aa2-96d2-05bf1188e9f5","iss":"https://sgroas-backend.onrender.com","sub":"admin@sgroas.com","aud":["sgroas-frontend"],"iat":1789698509,"nbf":1789698509,"exp":1789702109,"name":"Admin SGROAS","role":"ROLE_ADMIN"}
 ```
+(Re-verificado 2026-09-17 tarde con un login fresco contra el despliegue
+real: la versión anterior de este bloque tenía varios campos con "..." en
+vez del valor literal, defecto de la misma clase señalado en una
+auditoría rigurosa propia.)
 
 Confirmado: el JWT interno ya usa `name`/`role` en inglés, igual que el
 cuerpo de la respuesta. Guardado (redactado) en
@@ -861,15 +867,40 @@ con `tr -d '\r'`). Para `jacoco/` sí eran divergentes de verdad: la copia
 en `dataset/` seguía siendo la de una corrida anterior a los fixes de hoy.
 Se resincronizó (`dataset/jacoco/` reemplazado por una copia exacta de
 `docs/mediciones/jacoco/`) y se regeneró `MANIFEST.sha256`
-(`scripts/regenerate-manifest.ps1`, 298 entradas). Verificado:
+(`scripts/regenerate-manifest.ps1`, 298 entradas). Verificado, salida
+literal completa (re-corrida 2026-09-17 tarde; la versión anterior de este
+bloque tenía "..." en vez de la salida real, defecto señalado en una
+auditoría rigurosa propia):
 ```
 $ bash scripts/verify.sh
-...
+=== SGROAS Verification ===
+
+[P1] Checking hardcoded secrets...
+  OK
+[P4] Checking cookie Secure(true)...
+  OK (5 .secure(true) calls)
+[P5] Checking Spanish field names in entities...
+  OK - no Spanish fields in entities
+[P7] Checking Spanish captions in informe...
+  OK
+[P10] Verifying MANIFEST.sha256...
+  OK (298 files verified)
+[P11] Checking SUS instrument and consent...
+  dataset/sus/SUS-INSTRUMENT.md exists
+  dataset/sus/CONSENT-FORM.md exists
+  dataset/sus/CONSENT-REGISTRY.md exists
+[P9] Checking Postman collection...
+  9 assignment endpoints found
+
+==========================================
 ALL CHECKS PASSED
-$ make verify
-...
-ALL CHECKS PASSED
+==========================================
 ```
+`make verify` también termina en `ALL CHECKS PASSED` (exit 0); su salida
+literal completa (incluyendo las 298 líneas de `[P10]` archivo por
+archivo) ya está pegada íntegra en la sección "make verify (EV-2)" más
+arriba en este mismo documento — no se repite aquí para no duplicar 298
+líneas, pero es la misma corrida, no un resumen distinto.
 
 **Historial de defectos encontrados y corregidos en `check-javadoc.py`
 (todas las fechas son 2026-09-16, en pasadas sucesivas de re-verificación
@@ -1979,8 +2010,306 @@ OK: Javadoc >= 90%
 [P7] Checking Spanish captions in informe...
 [P7] OK - all figure/table captions in English
 
+(Salida re-verificada 2026-09-17 tarde -- la version anterior de este bloque tenia "(297 archivos verificados, todos OK)" en vez de la lista literal completa, un defecto real de la misma clase senalado en una auditoria rigurosa propia; el conteo tambien estaba desactualizado, ya son 298.)
 [P10] Verifying MANIFEST.sha256...
-(297 archivos verificados, todos OK)
+dataset/DATA-DICTIONARY.md: OK
+dataset/DATA-PROVENANCE.md: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdAlertController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdAlertController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdCatalogController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdCatalogController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdDriverController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdDriverController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdIncidentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdIncidentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdReportController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdReportController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdRouteController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdRouteController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdScheduleController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdScheduleController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdUnitController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/AbdUnitController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.controller/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdIncidentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdIncidentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdRouteRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AbdRouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$AlertResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CatalogsResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CityResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$CountResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ProvinceResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$RolResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ScheduleRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$ScheduleResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$SummaryResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$TerminalResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$TopRouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$UnitRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos$UnitResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/AbdDtos.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.dto/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdCatalogService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdCatalogService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdIncidentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdIncidentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdReportService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdReportService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdRouteService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdRouteService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdScheduleService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdScheduleService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdUnitService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/AbdUnitService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.abd.service/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/CacheConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/CacheConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/OpenApiConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/OpenApiConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RedisConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RedisConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RenderDataSourceConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/RenderDataSourceConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/SecurityConfig.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.config/SecurityConfig.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/AuthController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/AuthController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/DriverController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/DriverController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/IncidentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/IncidentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/ReportController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/ReportController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteAssignmentController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteAssignmentController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/RouteController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/UserController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/UserController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/VehicleController.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.controller/VehicleController.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/AuthResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/AuthResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/DriverResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/EmailRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/EmailRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ErrorResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ErrorResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/IncidentResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/LoginRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/LoginRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RefreshTokenRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RefreshTokenRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ResetPasswordRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/ResetPasswordRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteAssignmentResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/RouteResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/SessionResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/SessionResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/UserResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleResponse.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VehicleResponse.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VerifyEmailRequest.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.dto/VerifyEmailRequest.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/AssignmentStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/AssignmentStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/DriverStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/DriverStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentSeverity.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentSeverity.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentType.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/IncidentType.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/Role.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/Role.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/RouteStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/RouteStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/VehicleStatus.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.entity/VehicleStatus.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/GlobalExceptionHandler.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/GlobalExceptionHandler.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/UnverifiedEmailException.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.exception/UnverifiedEmailException.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/CustomUserDetailsService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/CustomUserDetailsService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtAuthenticationFilter.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtAuthenticationFilter.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/JwtService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/LoginRateLimiter.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.security/LoginRateLimiter.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/AuthService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/AuthService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/DriverService$CachedDriverPage.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/DriverService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/DriverService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/EmailService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/EmailService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/IncidentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/IncidentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/ReportService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/ReportService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteAssignmentService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteAssignmentService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/RouteService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/TokenService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/TokenService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/UserService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/UserService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VehicleService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VehicleService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService$Type.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas.service/VerificationCodeService.java.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/index.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/index.source.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/SgroasApplication.html: OK
+dataset/jacoco/ec.edu.uteq.sgroas/SgroasApplication.java.html: OK
+dataset/jacoco/index.html: OK
+dataset/jacoco/jacoco.csv: OK
+dataset/jacoco/jacoco.xml: OK
+dataset/jacoco/jacoco-resources/branchfc.gif: OK
+dataset/jacoco/jacoco-resources/branchnc.gif: OK
+dataset/jacoco/jacoco-resources/branchpc.gif: OK
+dataset/jacoco/jacoco-resources/bundle.gif: OK
+dataset/jacoco/jacoco-resources/class.gif: OK
+dataset/jacoco/jacoco-resources/down.gif: OK
+dataset/jacoco/jacoco-resources/greenbar.gif: OK
+dataset/jacoco/jacoco-resources/group.gif: OK
+dataset/jacoco/jacoco-resources/method.gif: OK
+dataset/jacoco/jacoco-resources/package.gif: OK
+dataset/jacoco/jacoco-resources/prettify.css: OK
+dataset/jacoco/jacoco-resources/prettify.js: OK
+dataset/jacoco/jacoco-resources/redbar.gif: OK
+dataset/jacoco/jacoco-resources/report.css: OK
+dataset/jacoco/jacoco-resources/report.gif: OK
+dataset/jacoco/jacoco-resources/session.gif: OK
+dataset/jacoco/jacoco-resources/sort.gif: OK
+dataset/jacoco/jacoco-resources/sort.js: OK
+dataset/jacoco/jacoco-resources/source.gif: OK
+dataset/jacoco/jacoco-resources/up.gif: OK
+dataset/jacoco/jacoco-sessions.html: OK
+dataset/lighthouse/lhci-20260730-2115.json: OK
+dataset/lighthouse/lhci-20260730-2117.json: OK
+dataset/lighthouse/lh-desktop-1.json: OK
+dataset/lighthouse/lh-desktop-2.json: OK
+dataset/lighthouse/lh-desktop-3.json: OK
+dataset/lighthouse/lh-desktop-fresh-20260916-1.json: OK
+dataset/lighthouse/lh-desktop-fresh-20260916-2.json: OK
+dataset/lighthouse/lh-desktop-fresh-20260916-3.json: OK
+dataset/lighthouse/lh-desktop-render-20260917-1.json: OK
+dataset/lighthouse/lh-desktop-render-20260917-2.json: OK
+dataset/lighthouse/lh-desktop-render-20260917-3.json: OK
+dataset/lighthouse/lh-mobile-1.json: OK
+dataset/lighthouse/lh-mobile-2.json: OK
+dataset/lighthouse/lh-mobile-3.json: OK
+dataset/lighthouse/lh-mobile-fresh-20260916-1.json: OK
+dataset/lighthouse/lh-mobile-fresh-20260916-2.json: OK
+dataset/lighthouse/lh-mobile-fresh-20260916-3.json: OK
+dataset/lighthouse/lh-mobile-render-20260917-1.json: OK
+dataset/lighthouse/lh-mobile-render-20260917-2.json: OK
+dataset/lighthouse/lh-mobile-render-20260917-3.json: OK
+dataset/lighthouse/lh-tablet-1.json: OK
+dataset/lighthouse/lh-tablet-2.json: OK
+dataset/lighthouse/lh-tablet-3.json: OK
+dataset/lighthouse/REPORT.md: OK
+dataset/lighthouse/RESUMEN.md: OK
+dataset/perf/ANALISIS-BOOTSTRAP.md: OK
+dataset/perf/ANALISIS-k6.md: OK
+dataset/perf/bootstrap.json: OK
+dataset/perf/estadisticas.csv: OK
+dataset/perf/estadisticas.json: OK
+dataset/perf/figuras/fig-error-rate.png: OK
+dataset/perf/figuras/fig-media-ic95.png: OK
+dataset/perf/figuras/fig-p95-por-corrida.png: OK
+dataset/perf/figuras/fig-percentiles-corridas.png: OK
+dataset/perf/k01-run1.json: OK
+dataset/perf/k02-run2.json: OK
+dataset/perf/k03-run3.json: OK
+dataset/perf/k04-cold.json: OK
+dataset/perf/k04-run1.json: OK
+dataset/perf/k05-cold.json: OK
+dataset/perf/k05-run1.json: OK
+dataset/perf/k06-cold.json: OK
+dataset/perf/k06-run1.json: OK
+dataset/perf/k07-cold.json: OK
+dataset/perf/k07-run1.json: OK
+dataset/perf/k08-cold.json: OK
+dataset/perf/k08-run1.json: OK
+dataset/perf/RENDER-REPORT.md: OK
+dataset/perf/REPORT.md: OK
+dataset/README.md: OK
+dataset/sus/ANALISIS-SUS.md: OK
+dataset/sus/CONSENT-FORM.md: OK
+dataset/sus/CONSENT-REGISTRY.md: OK
+dataset/sus/estadisticas-item.json: OK
+dataset/sus/estadisticas-sus.json: OK
+dataset/sus/fig-sus-demografia.png: OK
+dataset/sus/figuras/fig-sus-item-respuestas.png: OK
+dataset/sus/figuras/fig-sus-por-participante.png: OK
+dataset/sus/no-verificados/P11.json: OK
+dataset/sus/no-verificados/P12.json: OK
+dataset/sus/no-verificados/P13.json: OK
+dataset/sus/no-verificados/P14.json: OK
+dataset/sus/no-verificados/P15.json: OK
+dataset/sus/no-verificados/README.md: OK
+dataset/sus/P01.json: OK
+dataset/sus/P02.json: OK
+dataset/sus/P03.json: OK
+dataset/sus/P04.json: OK
+dataset/sus/P05.json: OK
+dataset/sus/P06.json: OK
+dataset/sus/P07.json: OK
+dataset/sus/P08.json: OK
+dataset/sus/P09.json: OK
+dataset/sus/P10.json: OK
+dataset/sus/PARTICIPANTES-NO-INCLUIDOS.md: OK
+dataset/sus/REPORT.md: OK
+dataset/sus/SUS-INSTRUMENT.md: OK
+dataset/sus/sus-raw.csv: OK
+dataset/zap/RESUMEN.md: OK
+dataset/zap/zap.html: OK
+dataset/zap/zap.md: OK
+dataset/zap/zap-baseline-2026-09-06.html: OK
+dataset/zap/zap-baseline-2026-09-06.md: OK
+dataset/zenodo.json: OK
 [P10] OK
 
 [P11] Checking SUS instrument and consent...
@@ -2020,12 +2349,20 @@ $ ./mvnw -q compile test-compile
 (sin salida = BUILD SUCCESS)
 
 $ ./mvnw -q test
-...
 [ERROR] Tests run: 293, Failures: 0, Errors: 16, Skipped: 0
 ```
 Los mismos 16 errores de siempre (`Connection to localhost:5433 refused`
 — no hay Postgres corriendo en este entorno de auditoría), 0 fallos
-nuevos, 277/293 pasan. Confirmado también con `npm run build` en
+nuevos, 277/293 pasan.
+
+**Corrección (2026-09-17 tarde):** la línea `...` de este bloque (antes de
+`[ERROR] Tests run`) era una salida resumida, no literal — defecto de la
+misma clase señalado en una auditoría rigurosa propia. Además, esta
+entrada quedó superada más abajo (sección "P6"): con Docker disponible se
+corrió la suite completa contra PostgreSQL real y los 298 tests pasan sin
+errores (`Tests run: 298, Failures: 0, Errors: 0`), no solo 277/293. Se
+conserva este bloque histórico sin borrar, pero ya no es el estado vigente
+de la suite. Confirmado también con `npm run build` en
 `frontend/` (bundle generado sin errores, mismo warning preexistente de
 tamaño de bundle).
 
