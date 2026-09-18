@@ -524,6 +524,60 @@ mantienen cubren access_token y refresh_token en login, refresh y logout.
   en español y con un JWT/refresh_token reales que quedaron versionados antes
   de ser redactados).
 
+**Hallazgo adicional (2026-09-17 tarde, auditoría rigurosa propia, no es
+uno de los 11 puntos de la guía pero se documenta igual): CSP bloqueaba el
+propio `onload` inline que Angular genera para el CSS.** Verificado en la
+consola del navegador contra el despliegue real:
+
+```
+Executing inline event handler violates the following Content Security
+Policy directive 'script-src 'self''. Either the 'unsafe-inline' keyword,
+a hash ('sha256-...'), or a nonce ('nonce-...') is required to enable
+inline execution. ... The action has been blocked.
+```
+
+Causa real, confirmada inspeccionando el DOM (`document.querySelectorAll('*')`
+filtrando atributos `on*`):
+```
+<link rel="stylesheet" href="styles-KUYJMIDB.css" media="print" onload="this.media='all'">
+```
+Angular CLI (build de producción, optimizador de estilos) inyecta este
+patrón — "inline critical CSS" — para diferir la carga de CSS no crítico:
+el `<link>` se carga con `media="print"` (no bloquea el render) y su
+`onload` inline cambia `media` a `all` cuando termina de cargar. Nuestra
+CSP (`script-src 'self'`, sin `unsafe-inline` ni nonce) bloquea ese
+`onload`, así que la hoja de estilos nunca cambia de `print` a `all`. No
+rompe visualmente la página en la práctica (los estilos igual se aplican
+por cómo Chrome trata `media="print"` en pantalla en este caso concreto),
+pero es un error de consola real y reproducible, no documentado hasta
+ahora.
+
+**Corrección:** se desactivó el "inline critical CSS" de Angular
+(`frontend/angular.json`, configuración `production`:
+`optimization.styles.inlineCritical: false`), lo que hace que Angular
+emita un `<link rel="stylesheet">` normal, sin `onload` inline. Verificado:
+
+```
+$ grep -o '<link[^>]*stylesheet[^>]*>' frontend/dist/sgroas-frontend/browser/index.html
+<link rel="stylesheet" href="styles-KUYJMIDB.css">
+```
+
+Sin errores de CSP en consola tras el cambio (probado localmente con
+`serve-gzip.js` + navegador real). Impacto en rendimiento verificado con
+Lighthouse local antes/después (mismo perfil móvil, mismo umbral,
+`http://localhost:4200/`):
+
+| | Antes (con inlineCritical) | Después (sin inlineCritical) |
+|---|---|---|
+| Performance | 88-89 (corridas `fresh-20260916`) | 87 |
+| Best Practices | 100 | 100 |
+| Accessibility | 91 | 91 |
+| SEO | 90 | 90 |
+
+Diferencia de rendimiento dentro del ruido normal entre corridas (no una
+regresión real). Pendiente: redesplegar a Render para que el fix aplique
+en producción y volver a capturar evidencia en vivo (ver `CONTRIBUCIONES.md`).
+
 **Actualización 2026-09-17 — evidencia vigente contra el despliegue público
 real:** tras reconectar el servicio de Render al repositorio correcto
 (`gleiston-guerrero/...`, antes apuntaba al repo viejo) y forzar un

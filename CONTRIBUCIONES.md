@@ -201,6 +201,23 @@ presentarlos ya como "la evidencia vigente".
 
 **Commit:** `92576cf` — "P4+P5: rename entity fields to English and set cookie secure(true)"
 
+**Actualización (2026-09-17) — hallazgo adicional de una auditoría rigurosa
+propia: CSP bloqueaba el `onload` inline que Angular genera para el CSS:**
+**Cerrado por: Luis Tejada**
+
+No es uno de los 11 puntos de la guía, pero se encontró y se corrige igual.
+La consola del despliegue real mostraba una violación de CSP
+(`script-src 'self'`) sobre `<link ... media="print" onload="this.media='all'">`,
+un patrón que el propio build de producción de Angular inyecta para
+diferir CSS no crítico ("inline critical CSS"). Se desactivó esa
+optimización (`frontend/angular.json`) para que Angular emita un
+`<link rel="stylesheet">` normal sin `onload` inline. Verificado sin
+regresión de rendimiento con Lighthouse local (87 móvil vs 88-89 antes,
+dentro del ruido normal).
+
+**Archivos modificados:**
+- `frontend/angular.json` — `configurations.production.optimization.styles.inlineCritical: false`.
+
 ---
 
 ## P5 — Renombramiento de campos entidades (commit c09f981)
