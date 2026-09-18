@@ -84,7 +84,7 @@ class AbdUnitServiceTest {
 
     @Test
     void createWithNullStatusUsesActiveByDefault() {
-        when(unidadRepository.existsByPlacaIgnoreCase("ABC-1234")).thenReturn(false);
+        when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
         when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(false);
         when(unidadRepository.save(any(Unit.class))).thenReturn(unidadEjemplo());
 
@@ -96,7 +96,7 @@ class AbdUnitServiceTest {
 
     @Test
     void createWithDuplicatePlateFails() {
-        when(unidadRepository.existsByPlacaIgnoreCase("ABC-1234")).thenReturn(true);
+        when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> service.create(requestEjemplo("Activo")));
         verify(unidadRepository, never()).save(any());
@@ -104,7 +104,7 @@ class AbdUnitServiceTest {
 
     @Test
     void createWithDuplicateDiskFails() {
-        when(unidadRepository.existsByPlacaIgnoreCase("ABC-1234")).thenReturn(false);
+        when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
         when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> service.create(requestEjemplo("Activo")));
@@ -119,7 +119,7 @@ class AbdUnitServiceTest {
         AbdDtos.UnitResponse r = service.update(1, requestEjemplo(null));
 
         assertEquals("Activo", r.estado());
-        verify(unidadRepository, never()).existsByPlacaIgnoreCase(any());
+        verify(unidadRepository, never()).existsByLicensePlateIgnoreCase(any());
     }
 
     @Test
@@ -128,7 +128,7 @@ class AbdUnitServiceTest {
         actual.setPlaca("XYZ-9999");
         actual.setNumeroDisco("009");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
-        when(unidadRepository.existsByPlacaIgnoreCase("ABC-1234")).thenReturn(false);
+        when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
         when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(false);
         when(unidadRepository.save(any(Unit.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -142,7 +142,7 @@ class AbdUnitServiceTest {
         Unit actual = unidadEjemplo();
         actual.setPlaca("OTRA-0000");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
-        when(unidadRepository.existsByPlacaIgnoreCase("ABC-1234")).thenReturn(true);
+        when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> service.update(1, requestEjemplo("Activo")));
     }

@@ -500,17 +500,60 @@ ningún nivel (cuerpo HTTP, cookie, ni JWT).
 python3 scripts/check-spanish-methods.py
 ```
 
-**Salida final (2026-09-17, segunda pasada — todas las categorias OK):**
+**Salida final (2026-09-17, tercera pasada, tras corregir un segundo bug real
+del propio checker — ver nota de abajo):**
 ```
-[OK] Metodos en src/main: 0/226 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/main: 0/131 en espanol (0.00%, umbral 5%)
-[OK] Metodos en src/test: 0/293 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/test: 0/42 en espanol (0.00%, umbral 5%)
-[OK] Metodos combinados (main+test): 0/519 en espanol (0.00%, umbral 5%)
-[OK] Tipos combinados (main+test): 0/173 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/main: 0/476 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/132 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/298 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/774 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/177 en espanol (0.00%, umbral 5%)
 
 OK: todas las categorias por debajo del umbral del 5%
 ```
+
+**Nota de auditoria (2026-09-17) — segundo bug real del checker, encontrado
+por una re-evaluación externa y confirmado con una mutación:** el
+`METHOD_PATTERN` exigía la palabra literal `public` o `protected` al
+**inicio** de la línea. En una interfaz Java, un método es público
+implícito (no se escribe la palabra), así que **ningún método de interfaz
+se escaneaba jamás** — incluyendo todos los métodos derivados de Spring
+Data (`findByXIgnoreCase`, `existsByX`, getters de proyecciones). Prueba de
+la mutación (antes de corregir el regex): se agregó un método `private
+obtenerAlgo()` y otro `public` multilínea a una clase de `src/main`, y el
+checker siguió reportando 0/227 sin inmutarse — ni el privado ni el público
+multilínea entraban al conteo. Se corrigió haciendo opcional el modificador
+`public|protected` en el regex (con un filtro de palabras clave de Java
+para no confundir `if`/`for`/`while` con nombres de método), lo que subió
+el total real de métodos escaneados en `src/main` de 226 a 476 (se estaban
+ignorando 250 métodos, casi el doble).
+
+Con el checker ya corregido, aparecieron 8 métodos reales en español,
+todos en el subsistema nativo `src/main/java/ec/edu/uteq/sgroas/abd/`
+(mapea 1:1 contra columnas nativas en español del esquema RLS de
+PostgreSQL): `findByEstadoIgnoreCase` (×3, en `AbdIncidentRepository`,
+`ScheduleRepository`, `UnitRepository`), `existsByPlacaIgnoreCase`,
+`existsByTerminalOrigenIdTerminalAndTerminalDestinoIdTerminal`,
+`CountByStatus.getEstado()`, `CountProjection.getClave()`,
+`TopRouteProjection.getDescripcion()`. Se renombraron a
+`findByStatusIgnoreCase`, `existsByLicensePlateIgnoreCase`,
+`existsByOriginAndDestinationTerminal`, `getStatus()`, `getLabel()`,
+`getDescription()` respectivamente, reemplazando los métodos derivados por
+convención (que exigen que el nombre coincida con el campo de la entidad)
+por `@Query` explícitas — así el nombre del método en Java puede ser
+inglés sin tener que renombrar el campo `estado`/`placa` de la entidad
+(que seguiría rompiendo el mapeo JPA/RLS nativo en español si se tocara).
+Se decidió deliberadamente NO renombrar los campos de entidad ni los DTOs
+de este módulo: esos no son "nombres de métodos" per la definición literal
+de este punto en la guía, y sí son consumidos como claves JSON por el
+frontend Angular contra el despliegue real (`/api/abd/*`), la evidencia
+mejor calificada de todo el proyecto (P4/P9) — tocarlos sin necesidad
+hubiera sido puro riesgo sin beneficio de nota.
+
+Verificación de que nada se rompió: `./mvnw compile` limpio, y
+`./mvnw test -Dtest=AbdIncidentServiceTest,AbdReportServiceTest,AbdUnitServiceTest,AbdCatalogServiceTest,AbdRouteServiceTest,AbdScheduleServiceTest,AbdAlertControllerTest,AbdDriverControllerTest`
+con las 8 clases de test del módulo en verde.
 
 (Salida intermedia previa, 2026-09-16, tras la primera pasada que dejó
 `src/main` al 0% pero `src/test` aún en 28.33%/11.90%, se conserva más

@@ -14,11 +14,12 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
 
     /**
      * Consulta las programaciones con el estado dado de forma paginada sin distinguir mayusculas.
-     * @param estado estado de la programacion a filtrar.
+     * @param status estado de la programacion a filtrar.
      * @param pageable configuracion de paginacion y ordenamiento.
      * @return pagina con las programaciones del estado indicado.
      */
-    Page<Schedule> findByEstadoIgnoreCase(String estado, Pageable pageable);
+    @Query("SELECT p FROM Schedule p WHERE LOWER(p.estado) = LOWER(:status)")
+    Page<Schedule> findByStatusIgnoreCase(@Param("status") String status, Pageable pageable);
 
     /**
      * Consulta las programaciones con filtros opcionales de estado, conductor, ruta y rango de fechas.
@@ -50,7 +51,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
      * Consulta el conteo de programaciones agrupadas por estado.
      * @return lista con el total por cada estado.
      */
-    @Query(value = "SELECT estado AS clave, COUNT(*) AS total FROM programacion GROUP BY estado ORDER BY total DESC",
+    @Query(value = "SELECT estado AS label, COUNT(*) AS total FROM programacion GROUP BY estado ORDER BY total DESC",
            nativeQuery = true)
     List<CountProjection> countByStatus();
 
@@ -59,11 +60,11 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
      * @return lista con el total por cada mes.
      */
     @Query(value = """
-            SELECT TO_CHAR(fecha, 'YYYY-MM') AS clave, COUNT(*) AS total
+            SELECT TO_CHAR(fecha, 'YYYY-MM') AS label, COUNT(*) AS total
             FROM programacion
             WHERE fecha >= CURRENT_DATE - INTERVAL '180 days'
             GROUP BY TO_CHAR(fecha, 'YYYY-MM')
-            ORDER BY clave
+            ORDER BY label
             """,
            nativeQuery = true)
     List<CountProjection> countByMonth();

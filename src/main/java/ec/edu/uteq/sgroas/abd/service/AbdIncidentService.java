@@ -47,7 +47,7 @@ public class AbdIncidentService {
         }
         Page<AbdIncident> page;
         if (estadoFiltro != null) {
-            page = incidenteRepository.findByEstadoIgnoreCase(estadoFiltro, pageable);
+            page = incidenteRepository.findByStatusIgnoreCase(estadoFiltro, pageable);
         } else {
             page = incidenteRepository.findByNivelSugeridoIgnoreCase(nivelFiltro, pageable);
         }

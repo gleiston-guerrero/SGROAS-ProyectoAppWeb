@@ -48,15 +48,15 @@ class CacheRedisSerializationTest {
                 "carlos@sgroas.com", "ACTIVO", true, false, Instant.now(), Instant.now());
     }
 
-    private ObjectMapper mapperSinFix() {
+    private ObjectMapper mapperWithoutFix() {
         return JsonMapper.builder()
                 .addModule(new JavaTimeModule())
                 .findAndAddModules()
                 .build();
     }
 
-    private ObjectMapper mapperConFix() {
-        ObjectMapper mapper = mapperSinFix();
+    private ObjectMapper mapperWithFix() {
+        ObjectMapper mapper = mapperWithoutFix();
         var validator = BasicPolymorphicTypeValidator.builder()
                 .allowIfSubType("ec.edu.uteq.sgroas.")
                 .allowIfSubType("java.util.")
@@ -68,9 +68,9 @@ class CacheRedisSerializationTest {
     }
 
     @Test
-    void sinFix_cachedDriverPageVuelveComoMapGenerico_noComoElTipoReal() {
+    void withoutFix_cachedDriverPageComesBackAsGenericMap_notAsRealType() {
         Jackson2JsonRedisSerializer<Object> serializer =
-                new Jackson2JsonRedisSerializer<>(mapperSinFix(), Object.class);
+                new Jackson2JsonRedisSerializer<>(mapperWithoutFix(), Object.class);
         CachedDriverPage cached = new CachedDriverPage(List.of(sampleDriver()), 1);
 
         byte[] bytes = serializer.serialize(cached);
@@ -82,9 +82,9 @@ class CacheRedisSerializationTest {
     }
 
     @Test
-    void conFix_pageImplSigueSinPoderReconstruirse() {
+    void withFix_pageImplStillCannotBeReconstructed() {
         Jackson2JsonRedisSerializer<Object> serializer =
-                new Jackson2JsonRedisSerializer<>(mapperConFix(), Object.class);
+                new Jackson2JsonRedisSerializer<>(mapperWithFix(), Object.class);
         Page<DriverResponse> page = new PageImpl<>(List.of(sampleDriver()), PageRequest.of(0, 10), 1);
 
         byte[] bytes = serializer.serialize(page);
@@ -94,9 +94,9 @@ class CacheRedisSerializationTest {
     }
 
     @Test
-    void conFix_cachedDriverPageRoundTripsComoElTipoReal() {
+    void withFix_cachedDriverPageRoundTripsAsRealType() {
         Jackson2JsonRedisSerializer<Object> serializer =
-                new Jackson2JsonRedisSerializer<>(mapperConFix(), Object.class);
+                new Jackson2JsonRedisSerializer<>(mapperWithFix(), Object.class);
         CachedDriverPage cached = new CachedDriverPage(List.of(sampleDriver()), 1);
 
         byte[] bytes = serializer.serialize(cached);

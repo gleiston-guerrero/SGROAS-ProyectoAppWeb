@@ -105,7 +105,7 @@ public class AbdUnitService {
 
     private void validateUniqueness(String placa, String numeroDisco, Integer idExcluir) {
         if (idExcluir == null) {
-            if (unidadRepository.existsByPlacaIgnoreCase(placa)) {
+            if (unidadRepository.existsByLicensePlateIgnoreCase(placa)) {
                 throw new IllegalArgumentException("Ya existe una unidad con la placa " + placa);
             }
             if (unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {
@@ -117,7 +117,7 @@ public class AbdUnitService {
                 .orElseThrow(() -> new IllegalArgumentException("Unit no encontrada: " + idExcluir));
         boolean cambioPlaca = !actual.getPlaca().equalsIgnoreCase(placa);
         boolean cambioDisco = !actual.getNumeroDisco().equalsIgnoreCase(numeroDisco);
-        if (cambioPlaca && unidadRepository.existsByPlacaIgnoreCase(placa)) {
+        if (cambioPlaca && unidadRepository.existsByLicensePlateIgnoreCase(placa)) {
             throw new IllegalArgumentException("Ya existe una unidad con la placa " + placa);
         }
         if (cambioDisco && unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {

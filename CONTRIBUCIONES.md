@@ -257,6 +257,59 @@ despliegue real).
 
 ---
 
+**Actualización (2026-09-17) — segundo bug real del checker + 8 métodos
+reales que se le escapaban:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló que `check-spanish-methods.py` "está
+construido de forma que no puede fallar: no hay mutación que lo haga salir
+con error". Se confirmó con una mutación propia: el regex exigía la palabra
+literal `public`/`protected` al inicio de la línea, pero en una interfaz
+Java el método es público implícito (no se escribe la palabra), así que
+ningún método de repositorio Spring Data se escaneaba jamás. Con el regex
+corregido, el total real de métodos escaneados en `src/main` subió de 226
+a 476, y aparecieron 8 métodos reales en español, todos en
+`src/main/java/ec/edu/uteq/sgroas/abd/` (el subsistema nativo de RLS, que
+mapea 1:1 contra columnas en español del esquema de PostgreSQL).
+
+**Archivos modificados:**
+- `scripts/check-spanish-methods.py` — modificador `public|protected` ahora
+  opcional en `METHOD_PATTERN`, con lista de palabras clave de Java
+  excluidas para no confundir `if`/`for`/`while` con nombres de método.
+- `src/main/java/ec/edu/uteq/sgroas/abd/repository/AbdIncidentRepository.java`,
+  `ScheduleRepository.java`, `UnitRepository.java` — `findByEstadoIgnoreCase`
+  → `findByStatusIgnoreCase` (convertido de query derivada por convención a
+  `@Query` explícita, porque el campo de entidad `estado` no se renombró).
+- `UnitRepository.java` — `existsByPlacaIgnoreCase` → `existsByLicensePlateIgnoreCase`.
+- `AbdRouteRepository.java` — `existsByTerminalOrigenIdTerminalAndTerminalDestinoIdTerminal`
+  → `existsByOriginAndDestinationTerminal` (método sin llamadores, pero se
+  corrigió igual); alias nativo `AS descripcion` → `AS description` en `topRoutes()`.
+- `AbdIncidentRepository.CountByStatus.getEstado()` → `getStatus()`.
+- `CountProjection.getClave()` → `getLabel()` (alias nativo `AS clave` →
+  `AS label` en `ScheduleRepository`/`UnitRepository`).
+- `TopRouteProjection.getDescripcion()` → `getDescription()`.
+- `AbdIncidentService`, `AbdReportService`, `AbdUnitService` — llamadores
+  actualizados a los nuevos nombres.
+- Tests correspondientes en `src/test/java/ec/edu/uteq/sgroas/abd/service/`.
+
+Se decidió NO renombrar los campos de entidad (`estado`, `placa`, etc.) ni
+los DTOs de `abd/`: el criterio literal de la guía es sobre nombres de
+método y de tipo, no de campo, y esos campos se exponen como claves JSON
+al frontend Angular contra el despliegue real — la evidencia mejor
+calificada de todo el proyecto (P4/P9).
+
+**Verificación final:**
+```
+$ python3 scripts/check-spanish-methods.py
+[OK] Metodos en src/main: 0/476 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/132 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/298 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+```
+`./mvnw compile` limpio; las 8 clases de test del módulo `abd/` en verde.
+
+---
+
 ## P6 — Javadoc >= 90% (commit d2b88b7)
 **Cerrado por: Luis Tejada**
 

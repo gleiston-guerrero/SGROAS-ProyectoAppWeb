@@ -13,11 +13,12 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
 
     /**
      * Consulta los incidentes con el estado dado de forma paginada sin distinguir mayusculas.
-     * @param estado estado del incidente a filtrar.
+     * @param status estado del incidente a filtrar.
      * @param pageable configuracion de paginacion y ordenamiento.
      * @return pagina con los incidentes del estado indicado.
      */
-    Page<AbdIncident> findByEstadoIgnoreCase(String estado, Pageable pageable);
+    @Query("SELECT i FROM AbdIncident i WHERE LOWER(i.estado) = LOWER(:status)")
+    Page<AbdIncident> findByStatusIgnoreCase(@Param("status") String status, Pageable pageable);
 
     /**
      * Consulta los incidentes con el nivel sugerido dado de forma paginada sin distinguir mayusculas.
@@ -66,7 +67,7 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
      * @return lista con el total por cada estado.
      */
     @Query("""
-            select i.estado as estado, count(i) as total
+            select i.estado as status, count(i) as total
             from AbdIncident i
             group by i.estado
             """)
@@ -97,7 +98,7 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
          * Obtiene el estado del grupo.
          * @return estado de los incidentes.
          */
-        String getEstado();
+        String getStatus();
 
         /**
          * Obtiene el total de incidentes del estado.

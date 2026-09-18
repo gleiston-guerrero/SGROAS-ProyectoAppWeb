@@ -71,7 +71,7 @@ class AbdIncidentServiceTest {
     @Test
     void listOnlyStatusUsesFindByStatus() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(incidenteRepository.findByEstadoIgnoreCase(eq("reportado"), eq(pageable)))
+        when(incidenteRepository.findByStatusIgnoreCase(eq("reportado"), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(incidente("BAJO"))));
 
         assertEquals(1, service.list("Reportado", null, null, pageable).getTotalElements());

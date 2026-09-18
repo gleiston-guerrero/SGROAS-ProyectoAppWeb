@@ -13,18 +13,20 @@ public interface UnitRepository extends JpaRepository<Unit, Integer> {
 
     /**
      * Consulta las unidades con el estado dado de forma paginada sin distinguir mayusculas.
-     * @param estado estado de la unidad a filtrar.
+     * @param status estado de la unidad a filtrar.
      * @param pageable configuracion de paginacion y ordenamiento.
      * @return pagina con las unidades del estado indicado.
      */
-    Page<Unit> findByEstadoIgnoreCase(String estado, Pageable pageable);
+    @Query("SELECT u FROM Unit u WHERE LOWER(u.estado) = LOWER(:status)")
+    Page<Unit> findByStatusIgnoreCase(@Param("status") String status, Pageable pageable);
 
     /**
      * Consulta si existe una unidad con la placa dada sin distinguir mayusculas.
-     * @param placa placa a verificar.
+     * @param licensePlate placa a verificar.
      * @return verdadero si existe una unidad con esa placa.
      */
-    boolean existsByPlacaIgnoreCase(String placa);
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Unit u WHERE LOWER(u.placa) = LOWER(:licensePlate)")
+    boolean existsByLicensePlateIgnoreCase(@Param("licensePlate") String licensePlate);
 
     /**
      * Consulta si existe una unidad con el numero de disco dado sin distinguir mayusculas.
@@ -56,7 +58,7 @@ public interface UnitRepository extends JpaRepository<Unit, Integer> {
      * Consulta el conteo de unidades agrupadas por estado.
      * @return lista con el total por cada estado.
      */
-    @Query(value = "SELECT estado AS clave, COUNT(*) AS total FROM unidad GROUP BY estado ORDER BY total DESC",
+    @Query(value = "SELECT estado AS label, COUNT(*) AS total FROM unidad GROUP BY estado ORDER BY total DESC",
            nativeQuery = true)
     List<CountProjection> countByStatus();
 }

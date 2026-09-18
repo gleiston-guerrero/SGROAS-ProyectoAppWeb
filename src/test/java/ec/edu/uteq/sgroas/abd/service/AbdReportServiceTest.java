@@ -54,14 +54,14 @@ class AbdReportServiceTest {
     @Test
     void summaryConsolidaLosTotalesYLasActivas() {
         when(programacionRepository.count()).thenReturn(50L);
-        when(programacionRepository.findByEstadoIgnoreCase(eq("Programado"), any(PageRequest.class)))
+        when(programacionRepository.findByStatusIgnoreCase(eq("Programado"), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new Schedule()), PageRequest.of(0, 1), 3));
         when(incidenteRepository.count()).thenReturn(20L);
         when(incidenteRepository.findByNivelSugeridoIgnoreCase(eq("ALTO"), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new AbdIncident()), PageRequest.of(0, 1), 2));
         when(alertaRepository.count()).thenReturn(5L);
         when(unidadRepository.count()).thenReturn(12L);
-        when(unidadRepository.findByEstadoIgnoreCase(eq("En Mantenimiento"), any(PageRequest.class)))
+        when(unidadRepository.findByStatusIgnoreCase(eq("En Mantenimiento"), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new Unit()), PageRequest.of(0, 1), 1));
         when(rutaAbdRepository.count()).thenReturn(8L);
 
@@ -94,7 +94,7 @@ class AbdReportServiceTest {
     @Test
     void incidentsByStatusMapsStatusAndTotal() {
         AbdIncidentRepository.CountByStatus estado = mock(AbdIncidentRepository.CountByStatus.class);
-        when(estado.getEstado()).thenReturn("ATENDIDO");
+        when(estado.getStatus()).thenReturn("ATENDIDO");
         when(estado.getTotal()).thenReturn(7);
         when(incidenteRepository.countByStatus()).thenReturn(List.of(estado));
 
@@ -108,7 +108,7 @@ class AbdReportServiceTest {
     @Test
     void unitsByStatusMapsKeyAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
-        when(proyeccion.getClave()).thenReturn("OPERATIVA");
+        when(proyeccion.getLabel()).thenReturn("OPERATIVA");
         when(proyeccion.getTotal()).thenReturn(4L);
         when(unidadRepository.countByStatus()).thenReturn(List.of(proyeccion));
 
@@ -122,7 +122,7 @@ class AbdReportServiceTest {
     @Test
     void schedulesByStatusMapsKeyAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
-        when(proyeccion.getClave()).thenReturn("PROGRAMADO");
+        when(proyeccion.getLabel()).thenReturn("PROGRAMADO");
         when(proyeccion.getTotal()).thenReturn(9L);
         when(programacionRepository.countByStatus()).thenReturn(List.of(proyeccion));
 
@@ -136,7 +136,7 @@ class AbdReportServiceTest {
     @Test
     void schedulesByMonthMapsMonthAndTotal() {
         CountProjection proyeccion = mock(CountProjection.class);
-        when(proyeccion.getClave()).thenReturn("2026-08");
+        when(proyeccion.getLabel()).thenReturn("2026-08");
         when(proyeccion.getTotal()).thenReturn(6L);
         when(programacionRepository.countByMonth()).thenReturn(List.of(proyeccion));
 
@@ -151,7 +151,7 @@ class AbdReportServiceTest {
     void topRoutesMapsIdDescriptionAndTotal() {
         TopRouteProjection ruta = mock(TopRouteProjection.class);
         when(ruta.getId()).thenReturn(1);
-        when(ruta.getDescripcion()).thenReturn("Quito - Guayaquil");
+        when(ruta.getDescription()).thenReturn("Quito - Guayaquil");
         when(ruta.getTotal()).thenReturn(11L);
         when(rutaAbdRepository.topRoutes()).thenReturn(List.of(ruta));
 
@@ -166,14 +166,14 @@ class AbdReportServiceTest {
     @Test
     void summaryReturnsNonNullSummaryWithEmptyCollections() {
         when(programacionRepository.count()).thenReturn(0L);
-        when(programacionRepository.findByEstadoIgnoreCase(eq("Programado"), any(PageRequest.class)))
+        when(programacionRepository.findByStatusIgnoreCase(eq("Programado"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(incidenteRepository.count()).thenReturn(0L);
         when(incidenteRepository.findByNivelSugeridoIgnoreCase(eq("ALTO"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(alertaRepository.count()).thenReturn(0L);
         when(unidadRepository.count()).thenReturn(0L);
-        when(unidadRepository.findByEstadoIgnoreCase(eq("En Mantenimiento"), any(PageRequest.class)))
+        when(unidadRepository.findByStatusIgnoreCase(eq("En Mantenimiento"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(rutaAbdRepository.count()).thenReturn(0L);
 

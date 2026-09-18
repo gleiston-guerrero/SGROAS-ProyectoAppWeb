@@ -87,9 +87,13 @@ EXCEPCIONES = {
 }
 
 METHOD_PATTERN = re.compile(
-    r"^\s*(public|protected)\s+((static|final|synchronized|abstract)\s+)*[\w<>, \.\?\[\]]+\s+(\w+)\s*\(",
+    r"^\s*(public|protected)?\s*((static|final|synchronized|abstract|default)\s+)*[\w<>, \.\?\[\]]+\s+(\w+)\s*\(",
     re.IGNORECASE,
 )
+_JAVA_KEYWORDS_NOT_METHODS = {
+    "if", "for", "while", "switch", "catch", "return", "new", "synchronized",
+    "else", "do", "throw", "assert",
+}
 TYPE_PATTERN = re.compile(
     r"^\s*(public|protected)?\s*(static\s+)?(final\s+)?(abstract\s+)?"
     r"(class|interface|enum|record)\s+(\w+)",
@@ -124,7 +128,7 @@ def _scan_main(main_dir):
         rel = os.path.relpath(path, ROOT)
         for i, line in enumerate(lines):
             m = METHOD_PATTERN.match(line)
-            if m:
+            if m and m.group(4) not in _JAVA_KEYWORDS_NOT_METHODS:
                 methods_total += 1
                 name = m.group(4)
                 if is_spanish(name, MAIN_RE):

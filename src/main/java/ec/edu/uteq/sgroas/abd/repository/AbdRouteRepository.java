@@ -13,11 +13,16 @@ public interface AbdRouteRepository extends JpaRepository<AbdRoute, Integer> {
 
     /**
      * Consulta si existe una ruta con el terminal de origen y destino dados.
-     * @param idOrigen identificador del terminal de origen.
-     * @param idDestino identificador del terminal de destino.
+     * @param originId identificador del terminal de origen.
+     * @param destinationId identificador del terminal de destino.
      * @return verdadero si existe la ruta con ese origen y destino.
      */
-    boolean existsByTerminalOrigenIdTerminalAndTerminalDestinoIdTerminal(Integer idOrigen, Integer idDestino);
+    @Query("""
+            SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END FROM AbdRoute r
+            WHERE r.terminalOrigen.idTerminal = :originId AND r.terminalDestino.idTerminal = :destinationId
+            """)
+    boolean existsByOriginAndDestinationTerminal(@Param("originId") Integer originId,
+                                                  @Param("destinationId") Integer destinationId);
 
     /**
      * Consulta el total de programaciones de una ruta.
@@ -51,7 +56,7 @@ public interface AbdRouteRepository extends JpaRepository<AbdRoute, Integer> {
      */
     @Query(value = """
             SELECT r.id_ruta AS id,
-                   t1.nombre || ' -> ' || t2.nombre AS descripcion,
+                   t1.nombre || ' -> ' || t2.nombre AS description,
                    COUNT(p.id_programacion) AS total
             FROM programacion p
             JOIN ruta r ON r.id_ruta = p.id_ruta

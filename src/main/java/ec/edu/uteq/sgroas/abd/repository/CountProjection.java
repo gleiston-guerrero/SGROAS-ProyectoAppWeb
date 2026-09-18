@@ -8,7 +8,7 @@ public interface CountProjection {
      * Obtiene la clave del grupo contado.
      * @return clave del grupo.
      */
-    String getClave();
+    String getLabel();
 
     /**
      * Obtiene el total de elementos del grupo.

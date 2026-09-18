@@ -27,14 +27,14 @@ public class AbdReportService {
      */
     public AbdDtos.SummaryResponse summary() {
         long totalProgramaciones = programacionRepository.count();
-        long programacionesActivas = programacionRepository.findByEstadoIgnoreCase("Programado",
+        long programacionesActivas = programacionRepository.findByStatusIgnoreCase("Programado",
                 org.springframework.data.domain.PageRequest.of(0, 1)).getTotalElements();
         long totalIncidentes = incidenteRepository.count();
         long incidentesAlto = incidenteRepository.findByNivelSugeridoIgnoreCase("ALTO",
                 org.springframework.data.domain.PageRequest.of(0, 1)).getTotalElements();
         long totalAlertas = alertaRepository.count();
         long totalUnidades = unidadRepository.count();
-        long unidadesMantenimiento = unidadRepository.findByEstadoIgnoreCase("En Mantenimiento",
+        long unidadesMantenimiento = unidadRepository.findByStatusIgnoreCase("En Mantenimiento",
                 org.springframework.data.domain.PageRequest.of(0, 1)).getTotalElements();
         long totalRutas = rutaAbdRepository.count();
 
@@ -62,7 +62,7 @@ public class AbdReportService {
      */
     public java.util.List<AbdDtos.CountResponse> incidentsByStatus() {
         return incidenteRepository.countByStatus().stream()
-                .map(f -> new AbdDtos.CountResponse(f.getEstado(), f.getTotal()))
+                .map(f -> new AbdDtos.CountResponse(f.getStatus(), f.getTotal()))
                 .toList();
     }
 
@@ -72,7 +72,7 @@ public class AbdReportService {
      */
     public java.util.List<AbdDtos.CountResponse> unitsByStatus() {
         return unidadRepository.countByStatus().stream()
-                .map(f -> new AbdDtos.CountResponse(f.getClave(), f.getTotal()))
+                .map(f -> new AbdDtos.CountResponse(f.getLabel(), f.getTotal()))
                 .toList();
     }
 
@@ -82,7 +82,7 @@ public class AbdReportService {
      */
     public java.util.List<AbdDtos.CountResponse> schedulesByStatus() {
         return programacionRepository.countByStatus().stream()
-                .map(f -> new AbdDtos.CountResponse(f.getClave(), f.getTotal()))
+                .map(f -> new AbdDtos.CountResponse(f.getLabel(), f.getTotal()))
                 .toList();
     }
 
@@ -92,7 +92,7 @@ public class AbdReportService {
      */
     public java.util.List<AbdDtos.CountResponse> schedulesByMonth() {
         return programacionRepository.countByMonth().stream()
-                .map(f -> new AbdDtos.CountResponse(f.getClave(), f.getTotal()))
+                .map(f -> new AbdDtos.CountResponse(f.getLabel(), f.getTotal()))
                 .toList();
     }
 
@@ -102,7 +102,7 @@ public class AbdReportService {
      */
     public java.util.List<AbdDtos.TopRouteResponse> topRoutes() {
         return rutaAbdRepository.topRoutes().stream()
-                .map(f -> new AbdDtos.TopRouteResponse(f.getId(), f.getDescripcion(), f.getTotal()))
+                .map(f -> new AbdDtos.TopRouteResponse(f.getId(), f.getDescription(), f.getTotal()))
                 .toList();
     }
 }

@@ -14,7 +14,7 @@ public interface TopRouteProjection {
      * Obtiene la descripcion de la ruta con origen y destino.
      * @return descripcion de la ruta.
      */
-    String getDescripcion();
+    String getDescription();
 
     /**
      * Obtiene el total de programaciones de la ruta.
