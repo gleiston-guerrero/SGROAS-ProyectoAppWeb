@@ -125,6 +125,47 @@ recompilado (97 páginas, 0 errores). Detalle completo en
 
 ---
 
+**Actualización (2026-09-18) — contraste frío/caliente de caché real, con
+metodología corregida:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló, correctamente, que el contraste
+frío/caliente de las 13 corridas versionadas (k01-k08) no era válido: son
+del 6-sep, antes del fix de `@Cacheable` de arriba (no medían caché real,
+algo ya reconocido en `VERIFICACION.md`), y además comparaban perfiles de
+carga distintos (`k6/cold.js` con 1 usuario/1 iteración contra
+`k6/script.js` con 50 usuarios/30s). El informe (`cap8-evaluacion.tex`)
+también presentaba un p95 local (173.13ms) como si fuera "caché caliente"
+sin aclarar que el p95 real contra Render con carga es de 4.3-11.4s.
+
+**Archivos modificados:**
+- `k6/cache-contrast.js` (nuevo) -- 1 solo usuario, misma corrida
+  secuencial para frío y caliente: la 1ª petición usa una clave de caché
+  nunca antes solicitada (miss real), las 10 siguientes repiten la misma
+  clave (hits reales).
+- `docs/mediciones/perf/k09-cache-contrast.json` y
+  `dataset/perf/k09-cache-contrast.json` (nuevos) -- corrida real contra
+  producción, ejecutada por el responsable del repositorio con la
+  contraseña real (nunca compartida con este asistente): frío
+  514.75ms (n=1), caliente mediana 191.59ms / p95 504.77ms (n=10).
+- `docs/informe-final/capitulos/cap8-evaluacion.tex` -- párrafo nuevo con
+  el contraste K9 y la tabla de síntesis corregida (dos filas separadas:
+  p95 local 173.13ms=Sí, p95 Render caché caliente 504.77ms=**No**, en
+  vez de una sola fila que mezclaba ambas).
+- `README.md` -- conteo de páginas del informe actualizado (97→98).
+
+**Resultado honesto:** la caché sí reduce la latencia típica (mediana
+514.75ms → 191.59ms, -63%, medido con el mismo usuario y el mismo perfil
+de carga), pero el p95 en caliente (504.77ms) sigue sin cumplir el umbral
+de 200ms en el plan gratuito de Render -- la variabilidad de red/CPU de
+ese plan domina sobre el ahorro de Redis vs. PostgreSQL. Verificado que
+`docs/informe-final/main.pdf` recompila limpio (98 páginas, 0 errores) y
+que el JSON de la corrida no versiona ningún secreto (el JWT de sesión
+que traía `setup_data.token` se eliminó antes de comitear). Detalle
+completo en `VERIFICACION.md`, sección P2.
+
+---
+
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
 **Cerrado por: María del Rosario Escudero Plaza (corridas 1) y Luis Alejandro Tejada Bajaña (perfil tableta)**
 

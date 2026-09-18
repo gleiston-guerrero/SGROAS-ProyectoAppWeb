@@ -395,6 +395,67 @@ Tests run: 299, Failures: 0, Errors: 0, Skipped: 0
 - `src/test/java/ec/edu/uteq/sgroas/config/CacheRedisSerializationTest.java`
   — nueva prueba para `CachedIncidentPage`.
 
+**Actualización 2026-09-18 — contraste frío/caliente real, con
+metodología corregida:** una re-evaluación externa señaló, correctamente,
+tres problemas reales en el contraste anterior: (1) las 13 corridas
+versionadas (k01–k08) son del 6-sep, ANTES del fix de auto-invocación de
+`@Cacheable` de más arriba, así que ninguna midió caché real (ya se
+reconocía esto explícitamente en este documento); (2) el contraste
+comparaba `k6/cold.js` (1 usuario, 1 iteración) contra `k6/script.js` (50
+usuarios, 30s) — perfiles de carga distintos, no comparables; (3) el
+informe (`cap8-evaluacion.tex`, tabla de síntesis) presentaba 173.13ms
+como si fuera "p95 caché caliente" sin aclarar que es una corrida LOCAL,
+cuando el p95 real contra Render (con carga) es de 4.3–11.4s.
+
+Se corrigieron los tres problemas de raíz, no solo el texto:
+
+1. **Nuevo script `k6/cache-contrast.js`**: mismo usuario (1 VU), misma
+   corrida secuencial, para frío Y caliente — sin mezclar perfiles de
+   carga. La primera petición usa una clave de caché (`page=0&size=7`)
+   garantizada nunca solicitada antes por ninguna otra corrida → miss
+   real. Las 10 siguientes, contra la misma clave, ya con el caché
+   activo → hits reales.
+2. **Corrida real contra producción** (2026-09-18, después del fix de
+   `@Cacheable`), ejecutada por el responsable del repositorio con la
+   contraseña real de producción (nunca vista por este asistente):
+   ```
+   $ k6 run --summary-export=... -e K6_LOGIN_PASSWORD=*** \
+       -e BASE_URL=https://sgroas-backend.onrender.com k6/cache-contrast.js
+   duracion_fria      : avg=514.75ms med=514.75ms min=514.75ms max=514.75ms p(95)=514.75ms  (n=1, miss real)
+   duracion_caliente  : avg=249.89ms med=191.59ms min=162.08ms max=721.00ms p(95)=504.77ms  (n=10, hits reales)
+   checks.........................: 100.00% 11 out of 11
+   http_req_failed.................: 0.00%   0 out of 12
+   ```
+   Guardado en `docs/mediciones/perf/k09-cache-contrast.json` y
+   `dataset/perf/k09-cache-contrast.json` (el JSON original traía un JWT
+   de sesión real en `setup_data.token`, vigente por 1 hora desde su
+   emisión; se eliminó ese campo antes de versionar el archivo — no queda
+   ningún secreto en el repositorio).
+3. **Tabla de síntesis del informe corregida** (`cap8-evaluacion.tex`):
+   ahora tiene dos filas separadas — "p95 < 200ms (local, sin
+   throttling)" = 173.13ms = Sí, y "p95 < 200ms (Render, caché caliente,
+   mismo usuario)" = 504.77ms = **No** — en vez de una sola fila que
+   mezclaba ambas cosas bajo una sola etiqueta "caché caliente".
+
+**Interpretación honesta:** la caché sí reduce la latencia típica
+(mediana 514.75ms → 191.59ms, -63%), un efecto real medido con el mismo
+usuario y el mismo perfil de carga en ambas condiciones — esto es
+evidencia genuina de que `@Cacheable` funciona en producción, algo que
+nunca se había medido hasta ahora. Pero el p95 en caliente (504.77ms)
+sigue sin cumplir el umbral de 200ms: en el plan gratuito de Render la
+variabilidad de red/CPU domina sobre el ahorro de consultar Redis en vez
+de PostgreSQL. La caché ayuda, pero no es suficiente por sí sola para
+cumplir el umbral de rendimiento en ese entorno — eso se declara así,
+sin maquillar el resultado.
+
+Verificado que el informe sigue compilando limpio tras el cambio:
+```
+$ cd docs/informe-final && pdflatex main && biber main && pdflatex main && pdflatex main
+Output written on main.pdf (98 pages, 1259723 bytes).
+```
+(0 errores, 0 referencias sin resolver; sube de 97 a 98 páginas por la
+fila nueva de la tabla y el párrafo de contraste K9.)
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)

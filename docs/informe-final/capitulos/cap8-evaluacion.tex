@@ -45,16 +45,50 @@ ejecutó con la URL pública disponible (K3).
 cinco corridas adicionales contra \texttt{https://sgroas-backend.onrender.com}
 (\texttt{docs/mediciones/perf/k04-run1.json}--\texttt{k08-run1.json}), cinco muestras
 frías (\texttt{k04-cold.json}--\texttt{k08-cold.json}) y el contraste no paramétrico
-(\texttt{RENDER-REPORT.md}). La media de avg por corrida caliente es
-\textbf{3967.32\,ms} (DT 1539.20, IC\,95\,\% [2056.46; 5878.19]) y la media fría es
-\textbf{257.50\,ms}. El p95 caliente va de 4.3\,s a 11.4\,s; el plan gratuito de
-Render (0.1\,vCPU) no cumple el umbral $p95 < 200$\,ms. La diferencia de orden de
-magnitud corresponde al throttling de CPU del plan gratuito y al almacenamiento
-local de Render \cite{jiang2015}. El contraste Mann-Whitney frío vs.\ caliente
-arroja $U = 0.0$, $p = 0.009$ y $d$ de Cliff $= -1.00$ (efecto grande), confirmando
-que la latencia bajo carga es significativamente mayor que sin carga. La serie
-local K1 (p95 medio 81\,ms) sigue siendo la referencia de rendimiento sin
-throttling.
+(\texttt{RENDER-REPORT.md}). Estas cinco corridas (50 VUs) se ejecutaron el
+6 de septiembre, antes de corregirse un bug de auto-invocación de Spring AOP
+que impedía que \texttt{@Cacheable} se activara en ningún servicio (ver
+capítulo de implementación); no miden caché real. La media de avg por
+corrida caliente es \textbf{3967.32\,ms} (DT 1539.20, IC\,95\,\%
+[2056.46; 5878.19]) y la media fría es \textbf{257.50\,ms}. El p95 caliente
+va de 4.3\,s a 11.4\,s; el plan gratuito de Render (0.1\,vCPU) no cumple el
+umbral $p95 < 200$\,ms. La diferencia de orden de magnitud corresponde al
+throttling de CPU del plan gratuito y al almacenamiento local de Render
+\cite{jiang2015}. El contraste Mann-Whitney frío vs.\ caliente arroja
+$U = 0.0$, $p = 0.009$ y $d$ de Cliff $= -1.00$ (efecto grande), pero mide
+sobre todo el arranque en frío de la instancia gratuita de Render, no el
+efecto de la caché de aplicación. La serie local K1 (p95 medio 81\,ms) sigue
+siendo la referencia de rendimiento sin throttling.
+
+\textbf{Contraste frío/caliente de caché, con metodología corregida
+(K9):} el contraste anterior comparaba perfiles de carga distintos (1
+usuario/1 iteración frío vs.\ 50 usuarios/30\,s caliente), una comparación
+no válida señalada en una auditoría externa. Corregido con
+\texttt{k6/cache-contrast.js}: 1 solo usuario, misma corrida secuencial,
+contra la URL pública ya con el fix de caché aplicado. La primera petición
+(clave de caché nunca solicitada antes) es el \emph{miss} real; las diez
+siguientes, contra la misma clave, son \emph{hits} reales
+(\texttt{docs/mediciones/perf/k09-cache-contrast.json}, 2026-09-18):
+
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Condición & Mediana & p95 & Máx \\
+\midrule
+Frío (miss, n=1) & 514.75\,ms & 514.75\,ms & 514.75\,ms \\
+Caliente (hit, n=10) & 191.59\,ms & 504.77\,ms & 721.00\,ms \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+La caché reduce la latencia típica (mediana) en un 63\,\% (514.75\,ms
+$\rightarrow$ 191.59\,ms), un efecto real y medido con el mismo usuario y el
+mismo perfil de carga en ambas condiciones. Sin embargo, el p95 en caliente
+(504.77\,ms) sigue sin cumplir el umbral de 200\,ms: en el plan gratuito de
+Render la variabilidad de red/CPU domina sobre el ahorro de consultar Redis
+en vez de PostgreSQL, así que la caché no basta por sí sola para cumplir el
+umbral de rendimiento en ese entorno. El umbral sí se cumple en el entorno
+local sin throttling (serie K1).
 
 \section{Seguridad (Bloque C.2) — RQ2}
 \label{sec:sec}
@@ -176,7 +210,8 @@ La Tabla~\ref{tab:sintesis} resume el cumplimiento por bloque.
 \toprule
 Bloque & Indicador & Valor & Cumple \\
 \midrule
-C.1 Rendimiento & p95 $<$ 200\,ms (cache caliente) & 173.13\,ms & Sí \\
+C.1 Rendimiento & p95 $<$ 200\,ms (local, sin throttling) & 173.13\,ms & Sí \\
+C.1 Rendimiento & p95 $<$ 200\,ms (Render, caché caliente, mismo usuario) & 504.77\,ms & No \\
 C.1 Rendimiento & error rate $<$ 1\,\% & 0\,\% & Sí \\
 C.2 Seguridad & SQL dinámico / A01--A09 & 0 violaciones & Sí \\
 C.3 Usabilidad & SUS $\ge$ 70 & 63.0 & Marginal \\
