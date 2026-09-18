@@ -49,8 +49,33 @@ Ver `VERIFICACION.md` (sección P1) para el detalle completo.
 **Limitación declarada (2026-09-17):** esta prueba confirma que la
 contraseña NUEVA funciona; no prueba que la vieja ya no sirva, y no se
 puede cerrar esa brecha sin violar la regla de no manipular credenciales
-reales de producción en este expediente. Detalle completo en
-`VERIFICACION.md` (sección P1).
+reales de producción en este expediente.
+
+**Cerrada (2026-09-18):** una re-evaluación externa señaló, con razón,
+que el propio expediente de arriba muestra un login `200` real contra
+Render con `admin123` -- la cuenta de administrador de producción seguía
+usando la contraseña de seed de desarrollo. Se corrigió: el responsable
+del repositorio cambió la contraseña real de `admin@sgroas.com` en
+producción vía `POST /api/auth/forgot-password` +
+`POST /api/auth/reset-password` (código enviado al correo real, la
+contraseña nueva nunca vista por este asistente). Verificado en vivo que
+la vieja ya NO sirve:
+```
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}'
+HTTP 401
+```
+Esto cierra la brecha que la limitación anterior dejaba abierta: ya no
+solo se confirma que la contraseña nueva funciona, también que la vieja
+(la que aparecía expuesta en el árbol) fue efectivamente invalidada.
+Detalle completo en `VERIFICACION.md` (sección P1).
+
+**Corrección adicional (2026-09-18) — orden rota del paso 5:** la misma
+re-evaluación señaló que el comando de búsqueda de secretos literales
+del paso 5 fallaba con `grep: Unmatched \{` y nunca llegaba a ejecutar
+la búsqueda real. Corregido usando `grep -F` (cadena literal) en vez de
+`grep -v` con un patrón regex mal escapado. Detalle y comando corregido
+en `VERIFICACION.md` (sección P1).
 
 ---
 

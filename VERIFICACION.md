@@ -38,7 +38,7 @@ grep -n "ROTATED" .env.example
 # 5. Búsqueda de la contraseña de BD / JWT secret literales (≠ demo de login, ≠ ${...})
 grep -rEn "spring.datasource.password=([^$]|$)|POSTGRES_PASSWORD|APP_JWT_SECRET|app.jwt.secret" \
   src docker-compose.yml .env.example k6 .github 2>/dev/null \
-  | grep -v '\$\{' | grep -v '<ROTATED' | grep -v 'secrets\.' | grep -v 'APP_COOKIE'
+  | grep -vF '${' | grep -vF '<ROTATED' | grep -vF 'secrets.' | grep -vF 'APP_COOKIE'
 ```
 
 **Salida (2026-09-17, re-verificación tras eliminar el último secreto literal
@@ -59,6 +59,26 @@ de `JwtServiceTest.java`):**
    en todo el árbol, incluido el de prueba, que ahora se genera con
    SecureRandom en memoria en vez de un valor de texto fijo)
 ```
+
+**Corrección real (2026-09-18) — el comando del paso 5 estaba roto,
+señalado por una re-evaluación externa:** la versión anterior usaba
+`grep -v '\$\{'` (regex extendida escapando `\{`), que en este `grep`
+(GNU grep, modo básico para el patrón de `-v`) interpreta `\{` como el
+inicio de una expresión de intervalo (`\{n,m\}`) y falla con
+`grep: Unmatched \{` — el comando nunca llegaba a ejecutar la búsqueda
+real, por eso "no encontraba nada": no es que no hubiera secretos, es
+que el comando no corría. Corregido usando `grep -F` (cadena literal,
+sin interpretar como regex) para las cuatro exclusiones. Re-ejecutado
+ahora mismo:
+```
+$ grep -rEn "spring.datasource.password=([^$]|$)|POSTGRES_PASSWORD|APP_JWT_SECRET|app.jwt.secret" \
+    src docker-compose.yml .env.example k6 .github 2>/dev/null \
+    | grep -vF '${' | grep -vF '<ROTATED' | grep -vF 'secrets.' | grep -vF 'APP_COOKIE'
+(sin salida, exit code 1 -- 0 lineas, ningun secreto literal encontrado)
+```
+Corre sin error y el resultado es el mismo que se declaraba (0
+resultados), pero ahora es porque el comando de verdad se ejecutó y no
+encontró nada, no porque fallara silenciosamente.
 
 **Rotación real declarada por escrito (2026-09-17, ~19:41 UTC):** el
 responsable del repositorio (Luis Tejada) roto de verdad, en los paneles
