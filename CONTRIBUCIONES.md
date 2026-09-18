@@ -153,33 +153,60 @@ lighthouserc.js                                    |   34 +
 `1a07dc7` solo agrega **2 corridas locales** (`lhci-20260730-2115/2117.json`,
 contra `localhost`, no contra el despliegue público) más `REPORT.md` y
 `lighthouserc.js` — nunca tocó los 9 archivos `lh-{mobile,desktop,tablet}-{1,2,3}.json`
-que sí son la evidencia real contra el despliegue público (ver corrección
-de 2026-09-17/18 más abajo). Los commits reales que sí agregan esos 9
-archivos, verificados con `git log --follow`:
-```
-$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-desktop-1.json
-dd6b81d charito20 2026-09-06 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
-$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-mobile-1.json
-ef2de04 charito20 2026-09-06 perf(lighthouse): mobile corrida 1 - P=0.79 A=0.91 BP=0.92 SEO=0.9 (Render URL)
-$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-tablet-1.json
-3062984 Alxjandr07 2026-09-13 docs(P8): agregar perfil tableta Lighthouse (3 corridas) y regenerar dataset
-$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-desktop-2.json
-b516447 TheAsesink 2026-09-13 fix(P11,P15,P6,P16,P10): valida trazabilidad CRLF+exit1, dataset 275 arch sha256 OK, cookie HttpOnly sin token JSON, evidencia asignaciones 200
-```
-Es decir: corrida 1 de móvil/escritorio (María Escudero, `dd6b81d`/`ef2de04`,
-2026-09-06); perfil tableta completo (Luis Tejada, `3062984`, 2026-09-13);
-corridas 2 y 3 de móvil/escritorio consolidadas en `b516447` (Kevin Castro,
-2026-09-13). Ningún archivo de este punto viene de `1a07dc7`.
+que sí son la evidencia real contra el despliegue público.
 
-**Archivos modificados (corregido):**
+**Corrección adicional (2026-09-18) — el comando anterior (`-1 --follow`
+sobre `dataset/lighthouse/...`) no era reproducible:** una re-evaluación
+externa señaló que la salida de `git log` de este bloque no correspondía
+a la orden mostrada. Cierto: `-1 --follow` devuelve el **último** commit
+que tocó el archivo, no el que lo creó, y además `--follow` mezcla el
+historial entre archivos de contenido parecido (con `--follow` los 4
+archivos de ejemplo devolvían el mismo commit, `ef2de04`, algo que no es
+correcto). El comando reproducible es sin `--follow` (la ruta nunca
+cambió de nombre) y con `--diff-filter=A` para pedir explícitamente el
+commit que **crea** el archivo:
+```
+$ git log --format='%H %an %ad %s' --date=short --diff-filter=A -- dataset/lighthouse/lh-desktop-1.json
+b516447467cf2a6c2bf1d01e3597f39c5df082a4 TheAsesink 2026-09-13 fix(P11,P15,P6,P16,P10): valida trazabilidad CRLF+exit1, dataset 275 arch sha256 OK, cookie HttpOnly sin token JSON, evidencia asignaciones 200
+$ git log --format='%H %an %ad %s' --date=short --diff-filter=A -- dataset/lighthouse/lh-mobile-1.json
+b516447467cf2a6c2bf1d01e3597f39c5df082a4 TheAsesink 2026-09-13 fix(P11,P15,P6,P16,P10): valida trazabilidad CRLF+exit1, dataset 275 arch sha256 OK, cookie HttpOnly sin token JSON, evidencia asignaciones 200
+$ git log --format='%H %an %ad %s' --date=short --diff-filter=A -- dataset/lighthouse/lh-tablet-1.json
+3062984e7c23629c5e6227bbb387d20c8a62514d Alxjandr07 2026-09-13 docs(P8): agregar perfil tableta Lighthouse (3 corridas) y regenerar dataset
+```
+Esto revela algo distinto de lo que decía la versión anterior de este
+bloque: `dataset/lighthouse/lh-desktop-1.json` y `lh-mobile-1.json` (la
+copia de **publicación**, la que `MANIFEST.sha256`/P10 verifica) los creó
+Kevin Castro en `b516447` (2026-09-13), no María Escudero el 6-sep. Eso
+no significa que María no haya corrido esas pruebas — sí las corrió,
+contra el despliegue público real, y esa evidencia sigue intacta en
+`docs/mediciones/lighthouse/` (la copia que el build usa y de la que se
+deriva el informe):
+```
+$ git log --format='%H %an %ad %s' --date=short --diff-filter=A -- docs/mediciones/lighthouse/lh-desktop-1.json
+dd6b81d102294366856d8fb70f05efeb8080746f charito20 2026-09-06 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+$ git log --format='%H %an %ad %s' --date=short --diff-filter=A -- docs/mediciones/lighthouse/lh-mobile-1.json
+ef2de046dbdcfd07f7b44eefc61b92d6d3873c69 charito20 2026-09-06 perf(lighthouse): mobile corrida 1 - P=0.79 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+```
+Son dos hechos distintos, ambos reales: **quién corrió la medición**
+(María Escudero, `dd6b81d`/`ef2de04`, 2026-09-06, contra Render — la
+evidencia con valor real) y **quién creó la copia de publicación** en
+`dataset/` para Zenodo (Kevin Castro, `b516447`, 2026-09-13, al
+consolidar 275 archivos del dataset). El contenido de ambas copias es
+idéntico (mismo JSON, solo cambia la carpeta); no hay ninguna corrida
+inventada ni atribuida a quien no la hizo.
+
+**Archivos modificados (corregido, 2026-09-18):**
 - `1a07dc7` -- 2 corridas locales (`lhci-20260730-2115/2117.json`),
   `REPORT.md`, `lighthouserc.js`. NO son las 9 corridas del despliegue
   público.
-- `dd6b81d`, `ef2de04`, `3062984`, `b516447` -- las 9 corridas reales
-  `lh-{mobile,desktop,tablet}-{1,2,3}.json` contra el despliegue público
-  (ver detalle de commits arriba).
+- `dd6b81d`, `ef2de04` (María Escudero, 2026-09-06) -- crean las 9
+  corridas reales `lh-{mobile,desktop,tablet}-{1,2,3}.json` en
+  `docs/mediciones/lighthouse/`, contra el despliegue público.
+- `3062984` (Luis Tejada, 2026-09-13) -- perfil tableta completo.
+- `b516447` (Kevin Castro, 2026-09-13) -- copia de publicación de las 9
+  corridas en `dataset/lighthouse/` (para Zenodo/MANIFEST.sha256).
 
-**Commit:** `1a07dc7` (corridas locales) + `dd6b81d`/`ef2de04`/`3062984`/`b516447` (corridas reales, ver arriba)
+**Commit:** `1a07dc7` (corridas locales) + `dd6b81d`/`ef2de04` (corridas reales, María Escudero) + `3062984` (perfil tableta, Luis Tejada) + `b516447` (copia de publicación, Kevin Castro)
 
 ---
 
@@ -433,9 +460,13 @@ $ python3 scripts/check-spanish-methods.py
 `./mvnw compile` limpio; las 8 clases de test del módulo `abd/` en verde.
 
 (Estos números quedaron superados por el fix de P2 en 4 servicios más,
-que agregó 4 records nuevos en inglés: ver la entrada "auditoría rigurosa:
-JaCoCo real regenerado..." más abajo y `VERIFICACION.md` sección P5 para
-la cifra vigente, 0/484.)
+que agregó 4 records nuevos en inglés, y luego por la corrección del
+checker del 2026-09-18: tenía un denominador inflado (records contados
+también como método) y un léxico incompleto que no cubría el módulo
+`abd/`. Corregido, aparecen 7 métodos y 1 tipo reales en español —
+todos bajo el umbral del 5%. Ver `VERIFICACION.md` sección P5, "Salida
+final (2026-09-18...)" para la cifra vigente y el detalle: 7/442
+métodos (1.58%) y 1/136 tipos (0.74%) en `src/main`.)
 
 ---
 

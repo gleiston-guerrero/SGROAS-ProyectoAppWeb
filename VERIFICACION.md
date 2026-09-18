@@ -738,21 +738,66 @@ ningún nivel (cuerpo HTTP, cookie, ni JWT).
 python3 scripts/check-spanish-methods.py
 ```
 
-**Salida final (2026-09-18, re-verificada tras el fix de P2 en 4 servicios
-más, que agregó 4 records nuevos — ver nota de abajo):**
+**Salida final (2026-09-18, tercer bug real del checker, encontrado por
+otra re-evaluación externa y corregido — ver nota de abajo):**
 ```
-[OK] Metodos en src/main: 0/484 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/main: 7/442 en espanol (1.58%, umbral 5%)
+    src\main\java\ec\edu\uteq\sgroas\abd\repository\AbdIncidentRepository.java:29: findByNivelSugeridoIgnoreCase
+    src\main\java\ec\edu\uteq\sgroas\abd\repository\AbdIncidentRepository.java:84: getNivel
+    src\main\java\ec\edu\uteq\sgroas\abd\repository\CityRepository.java:15: findByProvinciaIdProvinciaOrderByIdCiudadAsc
+    src\main\java\ec\edu\uteq\sgroas\abd\repository\TerminalRepository.java:15: findByCiudadIdCiudadOrderByIdTerminalAsc
+    src\main\java\ec\edu\uteq\sgroas\abd\repository\UnitRepository.java:36: existsByNumeroDiscoIgnoreCase
+    src\main\java\ec\edu\uteq\sgroas\controller\AuthController.java:242: aSesion
+    src\main\java\ec\edu\uteq\sgroas\service\ReportService.java:164: mapa
+[OK] Tipos en src/main: 1/136 en espanol (0.74%, umbral 5%)
+    src\main\java\ec\edu\uteq\sgroas\abd\dto\AbdDtos.java:54: RolResponse
 [OK] Metodos en src/test: 0/299 en espanol (0.00%, umbral 5%)
 [OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
-[OK] Metodos combinados (main+test): 0/783 en espanol (0.00%, umbral 5%)
-[OK] Tipos combinados (main+test): 0/181 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 7/741 en espanol (0.94%, umbral 5%)
+[OK] Tipos combinados (main+test): 1/181 en espanol (0.55%, umbral 5%)
 
 OK: todas las categorias por debajo del umbral del 5%
 ```
-(Salida anterior, 2026-09-17: 476/132/298/45/774/177 — subió por los 4
-records `CachedXPage` nuevos del fix de P2, todos con nombres en inglés,
-así que el porcentaje se mantiene en 0.00%.)
+
+**Nota de auditoria (2026-09-18) — tercer bug real del checker, esta vez
+en dos direcciones a la vez:** una re-evaluación externa señaló,
+correctamente, que el "0/484 (0.00%)" declarado no se podía reproducir de
+forma creíble. Investigado a fondo, había dos defectos reales
+combinados:
+
+1. **Denominador inflado:** `METHOD_PATTERN` (con `public|protected`
+   opcional desde el fix anterior) también casaba con declaraciones de
+   `record` — `public record Foo(Integer x)` quedaba contado dos veces,
+   una vez como tipo (correcto) y otra vez como si `Foo` fuera el nombre
+   de un método (incorrecto, con la lista de componentes del record como
+   si fueran sus argumentos). Con 42 records en `src/main`, esto inflaba
+   el denominador de métodos de 442 reales a 484. Corregido: si una línea
+   ya casó con `TYPE_PATTERN`, se cuenta solo como tipo y no se evalúa
+   también contra `METHOD_PATTERN`.
+2. **Léxico incompleto:** `SPANISH_ROOTS` se escribió antes de que
+   existiera el módulo `abd/` (Bases de Datos Avanzadas, con su propio
+   esquema nativo en español), y nunca se actualizó. Búsqueda manual
+   confirmó identificadores reales en español en nombres de método/tipo
+   que el checker no podía detectar por no estar en su lista: `mapa`,
+   `nivel`, `provincia`, `ciudad`, `rol`, `sesion`, `sugerido`, `disco`,
+   `numero`. Se agregaron esas 9 raíces a `SPANISH_ROOTS`.
+
+Con ambos defectos corregidos, aparecen 7 métodos y 1 tipo reales en
+español en `src/main` (listados arriba), todos en el mismo subsistema
+nativo `abd/` ya documentado más abajo (mapeo 1:1 contra columnas
+nativas en español del esquema RLS de PostgreSQL) o casos puntuales
+nuevos (`aSesion` en `AuthController`, `mapa` en `ReportService`,
+`RolResponse` en `AbdDtos`). El resultado sigue siendo **OK** (1.58%
+metodos / 0.74% tipos en `src/main`, ambos muy por debajo del umbral del
+5%), pero ahora es un porcentaje bajo y reproducible, no un falso 0.00%
+por denominador inflado y léxico incompleto. No se renombraron estos 8 identificadores adicionales en
+esta pasada (a diferencia de los 8 de la nota de 2026-09-17 abajo, que sí
+se renombraron): son hallazgos nuevos de esta misma revisión, quedan como
+trabajo pendiente documentado, no maquillado.
+
+(Salida anterior, 2026-09-17: 476/132/298/45/774/177 declarados como
+"0.00%" en las cuatro categorías — ese "0.00%" ya no se sostiene por las
+razones de arriba.)
 
 **Nota de auditoria (2026-09-17) — segundo bug real del checker, encontrado
 por una re-evaluación externa y confirmado con una mutación:** el
@@ -951,6 +996,14 @@ inglés — eso era una inconsistencia, no un diseño.
 
 Todas las categorías, en `src/main`, `src/test` y combinadas, están ahora
 al **0.00%**, muy por debajo del umbral del 5%.
+
+> **Nota (2026-09-18):** esta tabla es un registro histórico de esa
+> segunda pasada (16-sep), no el estado final. El "0.00%" de la última
+> columna dejó de sostenerse: el checker tenía un denominador inflado
+> (records contados dos veces) y un léxico incompleto (faltaban raíces
+> del módulo `abd/`). Corregido y con números reales y reproducibles —
+> ver la sección "Salida final (2026-09-18...)" más arriba, que es la
+> vigente.
 
 ---
 

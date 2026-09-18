@@ -32,6 +32,14 @@ SPANISH_ROOTS = [
     "apellido", "cedula", "placa", "marca", "modelo", "anio", "capacidad",
     "codigo", "descripcion", "gravedad", "origen", "destino", "distancia",
     "duracion", "color", "motor", "chasis", "fecha", "contrasena",
+    # Anadidos tras auditoria externa (2026-09-18): el lexico original se
+    # escribio antes del modulo abd/ (Bases de Datos Avanzadas) y no cubria
+    # sus nombres, lo que dejaba pasar identificadores reales en espanol
+    # sin detectar (mapa, nivel, provincia, ciudad, rol, sesion, sugerido,
+    # disco, numero -- confirmados presentes en nombres de metodo/tipo de
+    # src/main/java, no solo en variables locales).
+    "mapa", "nivel", "provincia", "ciudad", "rol", "sesion", "sugerido",
+    "disco", "numero",
 ]
 
 SPANISH_TEST_EXTRA = [
@@ -127,20 +135,27 @@ def _scan_main(main_dir):
             lines = fh.readlines()
         rel = os.path.relpath(path, ROOT)
         for i, line in enumerate(lines):
+            t = TYPE_PATTERN.match(line)
+            if t:
+                # Una declaracion de record (p.ej. "public record Foo(Integer x)")
+                # tambien casa con METHOD_PATTERN (el nombre del record queda
+                # como si fuera un nombre de metodo, con la lista de
+                # componentes como si fueran sus argumentos). Se cuenta UNA
+                # sola vez, como tipo, nunca ademas como metodo -- si no, el
+                # denominador de metodos queda inflado con nombres de tipos
+                # duplicados y el porcentaje real de nombres en espanol queda
+                # diluido de forma artificial.
+                types_total += 1
+                name = t.group(6)
+                if is_spanish(name, MAIN_RE):
+                    types_bad.append(f"{rel}:{i + 1}: {name}")
+                continue
             m = METHOD_PATTERN.match(line)
             if m and m.group(4) not in _JAVA_KEYWORDS_NOT_METHODS:
                 methods_total += 1
                 name = m.group(4)
                 if is_spanish(name, MAIN_RE):
                     methods_bad.append(f"{rel}:{i + 1}: {name}")
-            t = TYPE_PATTERN.match(line)
-            if t and t.group(5) != "record" or (t and t.group(5) == "record"):
-                pass
-            if t:
-                types_total += 1
-                name = t.group(6)
-                if is_spanish(name, MAIN_RE):
-                    types_bad.append(f"{rel}:{i + 1}: {name}")
     return methods_total, methods_bad, types_total, types_bad
 
 
