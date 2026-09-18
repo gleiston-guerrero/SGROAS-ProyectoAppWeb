@@ -226,6 +226,52 @@ directamente desde las corridas crudas; resultados en `docs/mediciones/perf/ANAL
 `src/test/java/ec/edu/uteq/sgroas/service/DriverServiceCachingTest.java` —
 prueba de que el caché se activa de verdad.
 
+**Actualización 2026-09-17 — hallazgo real confirmado y corregido: `@Cacheable`
+sobre `Page` con serializador de Redis rompía en producción.** Un hallazgo de
+una re-evaluación externa señaló que anotar con `@Cacheable` un método que
+devuelve `Page<DriverResponse>`, con `Jackson2JsonRedisSerializer` configurado
+en `CacheConfig`, rompería en cuanto la caché se activara de verdad contra
+Redis. Se verificó sin necesidad de levantar Redis (el serializador de
+Jackson es exactamente lo que convierte a/desde bytes; Redis solo los
+almacena) en `CacheRedisSerializationTest`:
+
+```
+$ ./mvnw test -Dtest=CacheRedisSerializationTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+```
+
+El hallazgo era real y más grave de lo que parecía a primera vista:
+
+1. `sinFix_cachedDriverPageVuelveComoMapGenerico_noComoElTipoReal`: con el
+   `ObjectMapper` que `CacheConfig` tenía ANTES de este fix (sin
+   `activateDefaultTyping`), `Jackson2JsonRedisSerializer.deserialize()`
+   **nunca** reconstruye el tipo real cacheado, ni `Page` ni un DTO simple —
+   devuelve un `LinkedHashMap` genérico, sin lanzar ninguna excepción. Es
+   peor que un crash: falla en silencio, y cualquier código que intente
+   llamar a un método propio del tipo real (`.getContent()`, `.content()`)
+   sobre ese valor revienta con `ClassCastException`/`NoSuchMethodError` en
+   el segundo hit de caché (el primero, sin caché, nunca lo expone).
+2. `conFix_pageImplSigueSinPoderReconstruirse`: incluso arreglando el
+   `ObjectMapper` para que sí incruste el tipo real (`activateDefaultTyping`
+   restringido a `ec.edu.uteq.sgroas.*`, `java.util.*`, `java.time.*` y
+   `java.lang.*`, para no habilitar deserialización polimórfica insegura
+   sobre clases arbitrarias), `PageImpl` sigue sin poder reconstruirse:
+   Jackson no tiene ningún constructor que pueda usar para esa clase
+   (`Cannot construct instance of PageImpl ... no Creators`). `Page` no es
+   cacheable directamente con Jackson vía Redis, sin importar cómo se
+   configure el mapper.
+3. `conFix_cachedDriverPageRoundTripsComoElTipoReal`: con el mapper
+   corregido, un DTO simple (`record`) sí sobrevive el ciclo completo.
+
+**Corrección aplicada:**
+`src/main/java/ec/edu/uteq/sgroas/config/CacheConfig.java` — se activó
+`activateDefaultTyping` sobre el `ObjectMapper` usado por el serializador de
+Redis. `src/main/java/ec/edu/uteq/sgroas/service/DriverService.java` —
+`listActiveCached` ya NO devuelve `Page<DriverResponse>`: devuelve un nuevo
+record `CachedDriverPage(List<DriverResponse> content, long totalElements)`,
+serializable/deserializable de verdad, y `list()` reconstruye el `Page` real
+(`new PageImpl<>(...)`) fuera de la ruta cacheada, después de leer del caché.
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)

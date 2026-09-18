@@ -43,7 +43,9 @@ public class DriverService {
      */
     public Page<DriverResponse> list(String search, Pageable pageable) {
         if (search == null || search.isBlank()) {
-            return self.getObject().listActiveCached(pageable);
+            CachedDriverPage cached = self.getObject().listActiveCached(pageable);
+            return new org.springframework.data.domain.PageImpl<>(
+                    cached.content(), pageable, cached.totalElements());
         }
         return driverRepository.searchActive(search.trim().toLowerCase(), pageable)
                 .map(this::mapToResponse);
@@ -54,12 +56,22 @@ public class DriverService {
      * number and size. Evicted on create/update/delete (see the
      * {@code @CacheEvict} methods below), so a cache hit is only ever
      * served between writes.
+     * <p>Returns {@link CachedDriverPage}, not {@code Page<DriverResponse>}:
+     * {@code PageImpl} has no usable constructor for Jackson, so caching it
+     * directly through {@code Jackson2JsonRedisSerializer} throws
+     * {@code InvalidDefinitionException} on the very first read-back from
+     * Redis (verified in {@code CacheRedisSerializationTest}). A plain
+     * record round-trips correctly.
      * @param pageable pagination and sorting configuration.
-     * @return page of driver response records.
+     * @return content and total count for the requested page.
      */
     @Cacheable(value = "conductores", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
-    public Page<DriverResponse> listActiveCached(Pageable pageable) {
-        return driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+    public CachedDriverPage listActiveCached(Pageable pageable) {
+        Page<DriverResponse> page = driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+        return new CachedDriverPage(page.getContent(), page.getTotalElements());
+    }
+
+    public record CachedDriverPage(List<DriverResponse> content, long totalElements) {
     }
 
     /**

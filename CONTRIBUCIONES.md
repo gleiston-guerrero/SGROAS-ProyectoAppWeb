@@ -59,6 +59,30 @@ Ver `VERIFICACION.md` (sección P1) para el detalle completo.
 
 ---
 
+**Actualización (2026-09-17) — corrige defecto real de `@Cacheable` + Redis + `Page`:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló que `@Cacheable` sobre un método que
+devuelve `Page<DriverResponse>`, con el serializador de Redis configurado
+en `CacheConfig`, rompería en producción en cuanto la caché se activara.
+Se verificó real (sin necesitar Redis levantado, el serializador de Jackson
+es lo que convierte a bytes) en `CacheRedisSerializationTest`: sin arreglar
+el `ObjectMapper`, cualquier valor cacheado vuelve como `LinkedHashMap`
+genérico en silencio, sin excepción; y `PageImpl` no tiene un constructor
+que Jackson pueda usar para reconstruirlo, ni siquiera arreglando el mapper.
+
+**Archivos modificados:**
+- `src/main/java/ec/edu/uteq/sgroas/config/CacheConfig.java` -- activa
+  `activateDefaultTyping` en el `ObjectMapper` del serializador de Redis.
+- `src/main/java/ec/edu/uteq/sgroas/service/DriverService.java` --
+  `listActiveCached` ya no devuelve `Page<DriverResponse>` (no cacheable),
+  devuelve el nuevo record `CachedDriverPage`; `list()` reconstruye el
+  `Page` real fuera de la ruta cacheada.
+- `src/test/java/ec/edu/uteq/sgroas/config/CacheRedisSerializationTest.java`
+  (nuevo) -- prueba el defecto y la corrección con el serializador real.
+
+---
+
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7)
 **Cerrado por: María del Rosario Escudero Plaza**
 

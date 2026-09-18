@@ -35,6 +35,26 @@ public class CacheConfig {
                 .findAndAddModules()
                 .build();
 
+        // Sin esto, Jackson2JsonRedisSerializer<Object> deserializa cualquier
+        // valor cacheado como un LinkedHashMap generico en vez del tipo real
+        // (Page, records de DTO, etc.): no lanza excepcion, simplemente
+        // devuelve el tipo equivocado en el segundo hit de cache (verificado
+        // en CacheRedisSerializationTest). activateDefaultTyping incrusta el
+        // nombre de la clase real en el JSON para que la reconstruya bien,
+        // restringido a los paquetes propios de la app para no habilitar
+        // deserializacion polimorfica insegura sobre clases arbitrarias.
+        var validator = com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("ec.edu.uteq.sgroas.")
+                .allowIfSubType("java.util.")
+                .allowIfSubType("java.time.")
+                .allowIfSubType("java.lang.")
+                .build();
+        mapper.activateDefaultTyping(
+                validator,
+                ObjectMapper.DefaultTyping.EVERYTHING,
+                com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+        );
+
         Jackson2JsonRedisSerializer<Object> serializer =
                 new Jackson2JsonRedisSerializer<>(mapper, Object.class);
 
