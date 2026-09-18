@@ -643,8 +643,20 @@ Lighthouse local antes/después (mismo perfil móvil, mismo umbral,
 | SEO | 90 | 90 |
 
 Diferencia de rendimiento dentro del ruido normal entre corridas (no una
-regresión real). Pendiente: redesplegar a Render para que el fix aplique
-en producción y volver a capturar evidencia en vivo (ver `CONTRIBUCIONES.md`).
+regresión real).
+
+**Confirmado en producción (2026-09-18):** el auto-deploy de Render
+(webhook GitHub→Render) se había quedado atascado en un commit 11 commits
+atrás (`bb5a931`), sin desplegar nada de esta auditoría hasta ese punto —
+un hallazgo de infraestructura real, no relacionado con el código. Se
+disparó un "Manual Deploy" desde el dashboard de Render y, tras
+completarse, se verificó en vivo:
+```
+$ [en la consola del navegador contra https://sgroas-backend.onrender.com]
+document.querySelectorAll('*') filtrando atributos on* -> []
+```
+Sin `onload` inline, sin violación de CSP en consola. `dataset/README.md`
+/`README.md` no requieren cambios (la URL pública es la misma).
 
 **Actualización 2026-09-17 — evidencia vigente contra el despliegue público
 real:** tras reconectar el servicio de Render al repositorio correcto
@@ -1279,6 +1291,23 @@ $ curl -s -i -X POST http://localhost:8080/api/auth/login -H "Content-Type: appl
 $ curl -s -i -b cookies.txt http://localhost:8080/api/asignaciones
 200 — 8 elementos, campos en inglés (driverName, vehiclePlate, routeName, assignmentDate, ...)
 ```
+
+**Re-verificación en vivo (2026-09-18, tras el fix de P2 de la sección
+anterior — el bug de paginación afectaba exactamente este endpoint):**
+```
+$ curl -s -c cookies.txt -X POST https://sgroas-backend.onrender.com/api/auth/login \
+    -H "Content-Type: application/json" -d '{"email":"admin@sgroas.com","password":"admin123"}' \
+    -o /dev/null -w "login HTTP %{http_code}\n"
+login HTTP 200
+$ curl -s -b cookies.txt "https://sgroas-backend.onrender.com/api/asignaciones?page=0&size=3" \
+    | python3 -c "import json,sys; d=json.load(sys.stdin); print('totalElements:', d['totalElements'], 'totalPages:', d['totalPages'], 'numberOfElements:', d['numberOfElements'])"
+totalElements: 8 totalPages: 3 numberOfElements: 3
+```
+`totalElements` (8) ya no coincide con `numberOfElements` (3, el tamaño de
+la página pedida) — antes del fix, `contenido.size()` habría devuelto `3`
+para ambos campos. Confirmado también para `/api/incidentes` (6/2/3),
+`/api/rutas` (5/2/3) y `/api/vehiculos` (5/2/3): los cuatro endpoints
+responden con el total real, no con el tamaño de la página actual.
 
 **Evidencia VIGENTE (2026-09-17, en vivo, contra el despliegue público real):**
 tras reconectar el servicio de Render al repositorio correcto y forzar un
