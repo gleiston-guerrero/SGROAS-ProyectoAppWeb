@@ -85,7 +85,7 @@ class AbdUnitServiceTest {
     @Test
     void createWithNullStatusUsesActiveByDefault() {
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
-        when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(false);
+        when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(false);
         when(unidadRepository.save(any(Unit.class))).thenReturn(unidadEjemplo());
 
         AbdDtos.UnitResponse r = service.create(requestEjemplo(null));
@@ -105,7 +105,7 @@ class AbdUnitServiceTest {
     @Test
     void createWithDuplicateDiskFails() {
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
-        when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(true);
+        when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> service.create(requestEjemplo("Activo")));
     }
@@ -129,7 +129,7 @@ class AbdUnitServiceTest {
         actual.setNumeroDisco("009");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
-        when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(false);
+        when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(false);
         when(unidadRepository.save(any(Unit.class))).thenAnswer(i -> i.getArgument(0));
 
         AbdDtos.UnitResponse r = service.update(1, requestEjemplo("Inactivo"));
@@ -152,7 +152,7 @@ class AbdUnitServiceTest {
         Unit actual = unidadEjemplo();
         actual.setNumeroDisco("009");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
-        when(unidadRepository.existsByNumeroDiscoIgnoreCase("001")).thenReturn(true);
+        when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class, () -> service.update(1, requestEjemplo("Activo")));
     }

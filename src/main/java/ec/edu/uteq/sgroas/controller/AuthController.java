@@ -118,7 +118,7 @@ public class AuthController {
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))
                     .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))
-                    .body(aSesion(response));
+                    .body(toSessionResponse(response));
         } catch (Exception e) {
             loginRateLimiter.recordFailedAttempt(ip);
             throw e;
@@ -147,7 +147,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))
                 .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))
-                .body(aSesion(response));
+                .body(toSessionResponse(response));
     }
 
     /**
@@ -163,7 +163,7 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))
                 .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))
-                .body(aSesion(response));
+                .body(toSessionResponse(response));
     }
 
     /**
@@ -239,7 +239,7 @@ public class AuthController {
                 .build();
     }
 
-    private SessionResponse aSesion(AuthResponse response) {
+    private SessionResponse toSessionResponse(AuthResponse response) {
         return new SessionResponse(
                 response.name(),
                 response.email(),

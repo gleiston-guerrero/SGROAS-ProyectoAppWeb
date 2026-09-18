@@ -49,7 +49,7 @@ public class AbdIncidentService {
 <span class="fc bfc" id="L49" title="All 2 branches covered.">        if (estadoFiltro != null) {</span>
 <span class="fc" id="L50">            page = incidenteRepository.findByStatusIgnoreCase(estadoFiltro, pageable);</span>
         } else {
-<span class="fc" id="L52">            page = incidenteRepository.findByNivelSugeridoIgnoreCase(nivelFiltro, pageable);</span>
+<span class="fc" id="L52">            page = incidenteRepository.findBySuggestedLevelIgnoreCase(nivelFiltro, pageable);</span>
         }
 <span class="fc" id="L54">        return page.map(this::aResponse);</span>
     }

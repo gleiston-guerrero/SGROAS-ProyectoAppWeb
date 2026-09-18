@@ -24,13 +24,13 @@ class SecurityConfigTest {
     }
 
     @Test
-    void healthEndPointEsPublico() throws Exception {
+    void healthEndPointIsPublic() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void apiDocsEsPublico() throws Exception {
+    void apiDocsIsPublic() throws Exception {
         mockMvc.perform(get("/api/docs"))
                 .andExpect(status().isOk());
     }
@@ -44,28 +44,28 @@ class SecurityConfigTest {
 
     @Test
     @WithMockUser(username = "coordinador@sgroas.com", roles = {"COORDINADOR"})
-    void coordinadorPuedeAccederAReportes() throws Exception {
+    void coordinatorCanAccessReports() throws Exception {
         mockMvc.perform(get("/api/reportes/rendimiento-rutas"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(username = "seguridad@sgroas.com", roles = {"SEGURIDAD"})
-    void seguridadNoPuedeAccederAReportes() throws Exception {
+    void securityRoleCannotAccessReports() throws Exception {
         mockMvc.perform(get("/api/reportes/rendimiento-rutas"))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     @WithMockUser(username = "admin@sgroas.com", roles = {"ADMIN"})
-    void adminPuedeAccederAUsuarios() throws Exception {
+    void adminCanAccessUsers() throws Exception {
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isOk());
     }
 
     @Test
     @WithMockUser(username = "coordinador@sgroas.com", roles = {"COORDINADOR"})
-    void coordinadorNoPuedeAccederAUsuarios() throws Exception {
+    void coordinatorCannotAccessUsers() throws Exception {
         mockMvc.perform(get("/api/usuarios"))
                 .andExpect(status().isForbidden());
     }

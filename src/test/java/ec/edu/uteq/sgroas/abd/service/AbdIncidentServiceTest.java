@@ -80,7 +80,7 @@ class AbdIncidentServiceTest {
     @Test
     void listOnlyLevelUsesFindByLevel() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(incidenteRepository.findByNivelSugeridoIgnoreCase(eq("alto"), eq(pageable)))
+        when(incidenteRepository.findBySuggestedLevelIgnoreCase(eq("alto"), eq(pageable)))
                 .thenReturn(new PageImpl<>(List.of(incidente("ALTO"))));
 
         assertEquals(1, service.list(null, "ALTO", null, pageable).getTotalElements());

@@ -118,7 +118,7 @@ public class AuthController {
 <span class="fc" id="L118">            return ResponseEntity.ok()</span>
 <span class="fc" id="L119">                    .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
 <span class="fc" id="L120">                    .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L121">                    .body(aSesion(response));</span>
+<span class="fc" id="L121">                    .body(toSessionResponse(response));</span>
 <span class="fc" id="L122">        } catch (Exception e) {</span>
 <span class="fc" id="L123">            loginRateLimiter.recordFailedAttempt(ip);</span>
 <span class="fc" id="L124">            throw e;</span>
@@ -147,7 +147,7 @@ public class AuthController {
 <span class="fc" id="L147">        return ResponseEntity.ok()</span>
 <span class="fc" id="L148">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
 <span class="fc" id="L149">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L150">                .body(aSesion(response));</span>
+<span class="fc" id="L150">                .body(toSessionResponse(response));</span>
     }
 
     /**
@@ -163,7 +163,7 @@ public class AuthController {
 <span class="fc" id="L163">        return ResponseEntity.ok()</span>
 <span class="fc" id="L164">                .header(HttpHeaders.SET_COOKIE, buildAccessTokenCookie(response.accessToken()))</span>
 <span class="fc" id="L165">                .header(HttpHeaders.SET_COOKIE, buildRefreshTokenCookie(response.refreshToken()))</span>
-<span class="fc" id="L166">                .body(aSesion(response));</span>
+<span class="fc" id="L166">                .body(toSessionResponse(response));</span>
     }
 
     /**
@@ -239,7 +239,7 @@ public class AuthController {
 <span class="fc" id="L239">                .build();</span>
     }
 
-    private SessionResponse aSesion(AuthResponse response) {
+    private SessionResponse toSessionResponse(AuthResponse response) {
 <span class="fc" id="L243">        return new SessionResponse(</span>
 <span class="fc" id="L244">                response.name(),</span>
 <span class="fc" id="L245">                response.email(),</span>

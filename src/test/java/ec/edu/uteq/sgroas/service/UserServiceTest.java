@@ -85,7 +85,7 @@ class UserServiceTest {
     }
 
     @Test
-    void listWithBlankSearchUsesFindByActivoTrue() {
+    void listWithBlankSearchUsesFindByActiveTrue() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(userRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(usuarioEjemplo())));

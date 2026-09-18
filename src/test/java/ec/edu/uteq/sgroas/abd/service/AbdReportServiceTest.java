@@ -52,12 +52,12 @@ class AbdReportServiceTest {
     private AbdReportService abdReporteService;
 
     @Test
-    void summaryConsolidaLosTotalesYLasActivas() {
+    void summaryConsolidatesTotalsAndActives() {
         when(programacionRepository.count()).thenReturn(50L);
         when(programacionRepository.findByStatusIgnoreCase(eq("Programado"), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new Schedule()), PageRequest.of(0, 1), 3));
         when(incidenteRepository.count()).thenReturn(20L);
-        when(incidenteRepository.findByNivelSugeridoIgnoreCase(eq("ALTO"), any(PageRequest.class)))
+        when(incidenteRepository.findBySuggestedLevelIgnoreCase(eq("ALTO"), any(PageRequest.class)))
                 .thenReturn(new PageImpl<>(List.of(new AbdIncident()), PageRequest.of(0, 1), 2));
         when(alertaRepository.count()).thenReturn(5L);
         when(unidadRepository.count()).thenReturn(12L);
@@ -80,7 +80,7 @@ class AbdReportServiceTest {
     @Test
     void incidentsByLevelMapsLevelAndTotal() {
         AbdIncidentRepository.CountByLevel nivel = mock(AbdIncidentRepository.CountByLevel.class);
-        when(nivel.getNivel()).thenReturn("ALTO");
+        when(nivel.getLevel()).thenReturn("ALTO");
         when(nivel.getTotal()).thenReturn(3);
         when(incidenteRepository.countByLevel()).thenReturn(List.of(nivel));
 
@@ -169,7 +169,7 @@ class AbdReportServiceTest {
         when(programacionRepository.findByStatusIgnoreCase(eq("Programado"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(incidenteRepository.count()).thenReturn(0L);
-        when(incidenteRepository.findByNivelSugeridoIgnoreCase(eq("ALTO"), any(PageRequest.class)))
+        when(incidenteRepository.findBySuggestedLevelIgnoreCase(eq("ALTO"), any(PageRequest.class)))
                 .thenReturn(org.springframework.data.domain.Page.empty());
         when(alertaRepository.count()).thenReturn(0L);
         when(unidadRepository.count()).thenReturn(0L);

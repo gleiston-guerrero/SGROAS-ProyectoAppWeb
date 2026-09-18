@@ -108,7 +108,7 @@ public class AbdUnitService {
             if (unidadRepository.existsByLicensePlateIgnoreCase(placa)) {
                 throw new IllegalArgumentException("Ya existe una unidad con la placa " + placa);
             }
-            if (unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {
+            if (unidadRepository.existsByDiskNumberIgnoreCase(numeroDisco)) {
                 throw new IllegalArgumentException("Ya existe una unidad con el disco " + numeroDisco);
             }
             return;
@@ -120,7 +120,7 @@ public class AbdUnitService {
         if (cambioPlaca && unidadRepository.existsByLicensePlateIgnoreCase(placa)) {
             throw new IllegalArgumentException("Ya existe una unidad con la placa " + placa);
         }
-        if (cambioDisco && unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {
+        if (cambioDisco && unidadRepository.existsByDiskNumberIgnoreCase(numeroDisco)) {
             throw new IllegalArgumentException("Ya existe una unidad con el disco " + numeroDisco);
         }
     }

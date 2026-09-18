@@ -49,7 +49,7 @@ public class AbdIncidentService {
         if (estadoFiltro != null) {
             page = incidenteRepository.findByStatusIgnoreCase(estadoFiltro, pageable);
         } else {
-            page = incidenteRepository.findByNivelSugeridoIgnoreCase(nivelFiltro, pageable);
+            page = incidenteRepository.findBySuggestedLevelIgnoreCase(nivelFiltro, pageable);
         }
         return page.map(this::aResponse);
     }

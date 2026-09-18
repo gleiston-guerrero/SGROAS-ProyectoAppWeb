@@ -50,6 +50,19 @@ SPANISH_TEST_EXTRA = [
     "correcto", "configurado", "genera", "devuelve", "mapea", "normaliza",
     "conserva", "desbloquea", "permite", "mantiene", "cambia", "borra",
     "activa", "correctamente", "sin", "con",
+    # Anadidos tras un escaneo con javap sobre las clases compiladas de
+    # src/test (2026-09-18): el escaneo anterior, basado solo en texto
+    # fuente con un lexico curado a mano, no cubria estas raices reales
+    # que si aparecen en nombres de metodo @Test.
+    "acceder", "activas", "activo", "argumentos", "asignacion",
+    "autorizado", "bloquea", "bloquean", "ciudad", "conductor",
+    "configurar", "coordinador", "credenciales", "cuatro", "dias",
+    "ejemplo", "errores", "fallidos", "fila", "generacion", "incidente",
+    "intentos", "invalidas", "invalidos", "licencias", "listados",
+    "programacion", "publico", "puede", "registro", "reportes",
+    "retornar", "reune", "ruta", "seguridad", "seis", "simular",
+    "titulo", "totales", "usuario", "usuarios", "validacion", "vehiculo",
+    "vencer", "deben",
 ]
 
 HAS_ACCENT = re.compile(r"[áéíóúñÁÉÍÓÚÑ]", re.UNICODE)

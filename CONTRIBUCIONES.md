@@ -504,10 +504,47 @@ $ python3 scripts/check-spanish-methods.py
 que agregó 4 records nuevos en inglés, y luego por la corrección del
 checker del 2026-09-18: tenía un denominador inflado (records contados
 también como método) y un léxico incompleto que no cubría el módulo
-`abd/`. Corregido, aparecen 7 métodos y 1 tipo reales en español —
-todos bajo el umbral del 5%. Ver `VERIFICACION.md` sección P5, "Salida
-final (2026-09-18...)" para la cifra vigente y el detalle: 7/442
-métodos (1.58%) y 1/136 tipos (0.74%) en `src/main`.)
+`abd/`. Con el checker corregido aparecieron 7 métodos y 1 tipo reales
+en español en `src/main`, y una re-verificación con el mismo léxico
+ampliado encontró además 16 métodos `@Test` reales en español en
+`src/test` — ver actualización siguiente.)
+
+---
+
+**Actualización (2026-09-18) — los 24 identificadores reales encontrados
+se renombraron, no solo se documentaron:**
+**Cerrado por: Luis Tejada**
+
+Tras corregir el checker (denominador inflado + léxico incompleto, ver
+arriba), quedaron 8 identificadores reales en español en `src/main`
+(`findByNivelSugeridoIgnoreCase`, `getNivel`,
+`findByProvinciaIdProvinciaOrderByIdCiudadAsc`,
+`findByCiudadIdCiudadOrderByIdTerminalAsc`,
+`existsByNumeroDiscoIgnoreCase`, `AuthController.aSesion`,
+`ReportService.mapa`, `AbdDtos.RolResponse`) y 16 métodos `@Test` en
+español en `src/test` (`AbdCatalogServiceTest`, `AbdReportServiceTest`,
+`OpenApiConfigTest`, `SecurityConfigTest` ×6, `ReportControllerTest`,
+`GlobalExceptionHandlerTest` ×3, `LoginRateLimiterTest` ×2, y un typo
+residual en `UserServiceTest`).
+
+**Archivos modificados:**
+- Repositorios `abd/`: renombrados con `@Query` explícita, sin tocar
+  campos de entidad (mismo patrón que el rename anterior de
+  `findByEstadoIgnoreCase`). Dos de los cinco eran código muerto (0
+  llamadores, confirmado con `grep` antes del rename).
+- `AuthController.java`, `ReportService.java`, `AbdDtos.java` +
+  `AbdCatalogService.java` (llamador de `RolResponse`) — helpers y un
+  record renombrados a inglés; ningún campo de entidad ni clave JSON
+  tocada.
+- 16 archivos de test en `src/test/java/` — solo el nombre del método
+  `@Test` (sin llamadores externos posibles, riesgo cero).
+
+**Verificación:** `./mvnw test` completo contra PostgreSQL real: 299
+pruebas, 0 fallos, 0 errores. JaCoCo recalculado: 95.67%/88.38%/96.19%,
+idéntico a antes del rename. `check-spanish-methods.py` da ahora
+**0/442 (0.00%) real** en `src/main` y **0/299 (0.00%) real** en
+`src/test` — reproducible, no por denominador inflado ni léxico
+incompleto. Detalle completo en `VERIFICACION.md`, sección P5.
 
 ---
 

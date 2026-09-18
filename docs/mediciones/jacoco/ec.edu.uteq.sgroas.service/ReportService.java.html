@@ -38,7 +38,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; generalStatistics() {
 <span class="fc" id="L40">        return incidentRepository.generalStatistics().stream()</span>
-<span class="fc" id="L41">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L41">                .map(fila -&gt; toMap(</span>
                         &quot;total_conductores&quot;, fila[0],
                         &quot;conductores_activos&quot;, fila[1],
                         &quot;total_vehiculos&quot;, fila[2],
@@ -59,7 +59,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsBySeverity(String tipo) {
 <span class="fc" id="L61">        return incidentRepository.incidentsBySeverity(tipo).stream()</span>
-<span class="fc" id="L62">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L62">                .map(fila -&gt; toMap(</span>
                         &quot;gravedad&quot;, fila[0],
                         &quot;total_incidentes&quot;, fila[1],
                         &quot;ultimo_incidente&quot;, fila[2]))
@@ -74,7 +74,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsByRange(Instant desde, Instant hasta) {
 <span class="fc" id="L76">        return incidentRepository.getIncidentsByRange(desde, hasta).stream()</span>
-<span class="fc" id="L77">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L77">                .map(fila -&gt; toMap(</span>
                         &quot;incidente_id&quot;, fila[0],
                         &quot;tipo&quot;, fila[1],
                         &quot;gravedad&quot;, fila[2],
@@ -95,7 +95,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; licensesExpiring(Integer dias) {
 <span class="fc" id="L97">        return driverRepository.licensesExpiring(dias).stream()</span>
-<span class="fc" id="L98">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L98">                .map(fila -&gt; toMap(</span>
                         &quot;conductor_id&quot;, fila[0],
                         &quot;nombre_completo&quot;, fila[1],
                         &quot;cedula&quot;, fila[2],
@@ -112,7 +112,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; vehiclesInMaintenance() {
 <span class="fc" id="L114">        return vehicleRepository.vehiclesInMaintenance().stream()</span>
-<span class="fc" id="L115">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L115">                .map(fila -&gt; toMap(</span>
                         &quot;vehiculo_id&quot;, fila[0],
                         &quot;placa&quot;, fila[1],
                         &quot;marca&quot;, fila[2],
@@ -129,7 +129,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; routePerformanceReport() {
 <span class="fc" id="L131">        return routeRepository.routePerformanceReport().stream()</span>
-<span class="fc" id="L132">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L132">                .map(fila -&gt; toMap(</span>
                         &quot;ruta_id&quot;, fila[0],
                         &quot;ruta_codigo&quot;, fila[1],
                         &quot;ruta_nombre&quot;, fila[2],
@@ -150,7 +150,7 @@ public class ReportService {
      */
     public List&lt;Map&lt;String, Object&gt;&gt; activeAssignmentsByDriver(Long conductorId) {
 <span class="fc" id="L152">        return routeAssignmentRepository.activeAssignmentsByDriver(conductorId).stream()</span>
-<span class="fc" id="L153">                .map(fila -&gt; mapa(</span>
+<span class="fc" id="L153">                .map(fila -&gt; toMap(</span>
                         &quot;asignacion_id&quot;, fila[0],
                         &quot;vehiculo_placa&quot;, fila[1],
                         &quot;vehiculo_marca&quot;, fila[2],
@@ -161,7 +161,7 @@ public class ReportService {
 <span class="fc" id="L161">                .collect(Collectors.toList());</span>
     }
 
-    private Map&lt;String, Object&gt; mapa(Object... pares) {
+    private Map&lt;String, Object&gt; toMap(Object... pares) {
 <span class="fc" id="L165">        Map&lt;String, Object&gt; m = new LinkedHashMap&lt;&gt;();</span>
 <span class="fc bfc" id="L166" title="All 2 branches covered.">        for (int i = 0; i &lt; pares.length; i += 2) {</span>
 <span class="fc" id="L167">            m.put((String) pares[i], pares[i + 1]);</span>

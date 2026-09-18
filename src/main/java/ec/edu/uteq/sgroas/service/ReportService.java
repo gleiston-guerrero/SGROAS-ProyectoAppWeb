@@ -38,7 +38,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> generalStatistics() {
         return incidentRepository.generalStatistics().stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "total_conductores", fila[0],
                         "conductores_activos", fila[1],
                         "total_vehiculos", fila[2],
@@ -59,7 +59,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> incidentsBySeverity(String tipo) {
         return incidentRepository.incidentsBySeverity(tipo).stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "gravedad", fila[0],
                         "total_incidentes", fila[1],
                         "ultimo_incidente", fila[2]))
@@ -74,7 +74,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> incidentsByRange(Instant desde, Instant hasta) {
         return incidentRepository.getIncidentsByRange(desde, hasta).stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "incidente_id", fila[0],
                         "tipo", fila[1],
                         "gravedad", fila[2],
@@ -95,7 +95,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> licensesExpiring(Integer dias) {
         return driverRepository.licensesExpiring(dias).stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "conductor_id", fila[0],
                         "nombre_completo", fila[1],
                         "cedula", fila[2],
@@ -112,7 +112,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> vehiclesInMaintenance() {
         return vehicleRepository.vehiclesInMaintenance().stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "vehiculo_id", fila[0],
                         "placa", fila[1],
                         "marca", fila[2],
@@ -129,7 +129,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> routePerformanceReport() {
         return routeRepository.routePerformanceReport().stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "ruta_id", fila[0],
                         "ruta_codigo", fila[1],
                         "ruta_nombre", fila[2],
@@ -150,7 +150,7 @@ public class ReportService {
      */
     public List<Map<String, Object>> activeAssignmentsByDriver(Long conductorId) {
         return routeAssignmentRepository.activeAssignmentsByDriver(conductorId).stream()
-                .map(fila -> mapa(
+                .map(fila -> toMap(
                         "asignacion_id", fila[0],
                         "vehiculo_placa", fila[1],
                         "vehiculo_marca", fila[2],
@@ -161,7 +161,7 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
-    private Map<String, Object> mapa(Object... pares) {
+    private Map<String, Object> toMap(Object... pares) {
         Map<String, Object> m = new LinkedHashMap<>();
         for (int i = 0; i < pares.length; i += 2) {
             m.put((String) pares[i], pares[i + 1]);

@@ -33,7 +33,8 @@ public interface UnitRepository extends JpaRepository<Unit, Integer> {
      * @param numeroDisco numero de disco a verificar.
      * @return verdadero si existe una unidad con ese numero de disco.
      */
-    boolean existsByNumeroDiscoIgnoreCase(String numeroDisco);
+    @Query("SELECT CASE WHEN COUNT(u) > 0 THEN true ELSE false END FROM Unit u WHERE LOWER(u.numeroDisco) = LOWER(:diskNumber)")
+    boolean existsByDiskNumberIgnoreCase(@Param("diskNumber") String diskNumber);
 
     /**
      * Consulta las unidades con filtros opcionales de estado y texto de busqueda por placa, disco o modelo.

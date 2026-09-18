@@ -14,7 +14,7 @@ class LoginRateLimiterTest {
     }
 
     @Test
-    void menosDeSeisIntentosNoBloquea() {
+    void fewerThanSixAttemptsDoesNotBlock() {
         LoginRateLimiter limiter = new LoginRateLimiter();
         for (int i = 0; i < 5; i++) {
             limiter.recordFailedAttempt("192.168.1.1");
@@ -24,7 +24,7 @@ class LoginRateLimiterTest {
     }
 
     @Test
-    void seisIntentosFallidosBloquean() {
+    void sixFailedAttemptsBlocks() {
         LoginRateLimiter limiter = new LoginRateLimiter();
         for (int i = 0; i < 6; i++) {
             limiter.recordFailedAttempt("192.168.1.1");

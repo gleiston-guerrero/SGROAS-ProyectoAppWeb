@@ -41,7 +41,7 @@ class AbdCatalogServiceTest {
     private AbdCatalogService abdCatalogoService;
 
     @Test
-    void getCatalogsReuneLosCuatroListados() {
+    void getCatalogsGathersAllFourLists() {
         Province provincia = Province.builder().idProvincia(1).nombre("Pichincha").build();
         City ciudad = City.builder().idCiudad(1).nombre("Quito").provincia(provincia).build();
         Terminal terminal = Terminal.builder().idTerminal(1).nombre("Terminal Quito").ciudad(ciudad).build();

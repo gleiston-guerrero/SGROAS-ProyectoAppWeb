@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class OpenApiConfigTest {
 
     @Test
-    void openAPIDefineTituloVersionYSeguridad() {
+    void openAPIDefinesTitleVersionAndSecurity() {
         OpenApiConfig config = new OpenApiConfig();
 
         OpenAPI api = config.openAPI();

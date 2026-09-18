@@ -30,7 +30,7 @@ public class AbdReportService {
 <span class="fc" id="L30">        long programacionesActivas = programacionRepository.findByStatusIgnoreCase(&quot;Programado&quot;,</span>
 <span class="fc" id="L31">                org.springframework.data.domain.PageRequest.of(0, 1)).getTotalElements();</span>
 <span class="fc" id="L32">        long totalIncidentes = incidenteRepository.count();</span>
-<span class="fc" id="L33">        long incidentesAlto = incidenteRepository.findByNivelSugeridoIgnoreCase(&quot;ALTO&quot;,</span>
+<span class="fc" id="L33">        long incidentesAlto = incidenteRepository.findBySuggestedLevelIgnoreCase(&quot;ALTO&quot;,</span>
 <span class="fc" id="L34">                org.springframework.data.domain.PageRequest.of(0, 1)).getTotalElements();</span>
 <span class="fc" id="L35">        long totalAlertas = alertaRepository.count();</span>
 <span class="fc" id="L36">        long totalUnidades = unidadRepository.count();</span>
@@ -52,7 +52,7 @@ public class AbdReportService {
      */
     public java.util.List&lt;AbdDtos.CountResponse&gt; incidentsByLevel() {
 <span class="fc" id="L54">        return incidenteRepository.countByLevel().stream()</span>
-<span class="fc" id="L55">                .map(f -&gt; new AbdDtos.CountResponse(f.getNivel(), f.getTotal()))</span>
+<span class="fc" id="L55">                .map(f -&gt; new AbdDtos.CountResponse(f.getLevel(), f.getTotal()))</span>
 <span class="fc" id="L56">                .toList();</span>
     }
 

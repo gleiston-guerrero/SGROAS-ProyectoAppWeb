@@ -26,7 +26,8 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
      * @param pageable configuracion de paginacion y ordenamiento.
      * @return pagina con los incidentes del nivel indicado.
      */
-    Page<AbdIncident> findByNivelSugeridoIgnoreCase(String nivelSugerido, Pageable pageable);
+    @Query("SELECT i FROM AbdIncident i WHERE LOWER(i.nivelSugerido) = LOWER(:level)")
+    Page<AbdIncident> findBySuggestedLevelIgnoreCase(@Param("level") String level, Pageable pageable);
 
     /**
      * Consulta los incidentes con filtros opcionales de estado, nivel y texto de busqueda por tipo, descripcion o placa.
@@ -55,7 +56,7 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
      * @return lista con el total por cada nivel.
      */
     @Query("""
-            select i.nivelSugerido as nivel, count(i) as total
+            select i.nivelSugerido as level, count(i) as total
             from AbdIncident i
             group by i.nivelSugerido
             order by total desc
@@ -81,7 +82,7 @@ public interface AbdIncidentRepository extends JpaRepository<AbdIncident, Intege
          * Obtiene el nivel sugerido del grupo.
          * @return nivel sugerido.
          */
-        String getNivel();
+        String getLevel();
 
         /**
          * Obtiene el total de incidentes del nivel.

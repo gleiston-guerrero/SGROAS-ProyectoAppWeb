@@ -51,7 +51,7 @@ public final class AbdDtos {
      * @param nombre nombre del rol.
      * @param descripcion descripcion del rol.
      */
-    public record RolResponse(Integer idRol, String nombre, String descripcion) {
+    public record RoleResponse(Integer idRol, String nombre, String descripcion) {
     }
 
     /**
@@ -64,7 +64,7 @@ public final class AbdDtos {
     public record CatalogsResponse(List<ProvinceResponse> provincias,
                                     List<CityResponse> ciudades,
                                     List<TerminalResponse> terminales,
-                                    List<RolResponse> roles) {
+                                    List<RoleResponse> roles) {
     }
 
     // ---------- Rutas (ABD) ----------

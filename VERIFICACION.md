@@ -799,26 +799,24 @@ ningún nivel (cuerpo HTTP, cookie, ni JWT).
 python3 scripts/check-spanish-methods.py
 ```
 
-**Salida final (2026-09-18, tercer bug real del checker, encontrado por
-otra re-evaluación externa y corregido — ver nota de abajo):**
+**Salida final (2026-09-18, cuarta pasada — checker corregido de raíz +
+identificadores reales renombrados, ver notas de abajo):**
 ```
-[OK] Metodos en src/main: 7/442 en espanol (1.58%, umbral 5%)
-    src\main\java\ec\edu\uteq\sgroas\abd\repository\AbdIncidentRepository.java:29: findByNivelSugeridoIgnoreCase
-    src\main\java\ec\edu\uteq\sgroas\abd\repository\AbdIncidentRepository.java:84: getNivel
-    src\main\java\ec\edu\uteq\sgroas\abd\repository\CityRepository.java:15: findByProvinciaIdProvinciaOrderByIdCiudadAsc
-    src\main\java\ec\edu\uteq\sgroas\abd\repository\TerminalRepository.java:15: findByCiudadIdCiudadOrderByIdTerminalAsc
-    src\main\java\ec\edu\uteq\sgroas\abd\repository\UnitRepository.java:36: existsByNumeroDiscoIgnoreCase
-    src\main\java\ec\edu\uteq\sgroas\controller\AuthController.java:242: aSesion
-    src\main\java\ec\edu\uteq\sgroas\service\ReportService.java:164: mapa
-[OK] Tipos en src/main: 1/136 en espanol (0.74%, umbral 5%)
-    src\main\java\ec\edu\uteq\sgroas\abd\dto\AbdDtos.java:54: RolResponse
+[OK] Metodos en src/main: 0/442 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
 [OK] Metodos en src/test: 0/299 en espanol (0.00%, umbral 5%)
 [OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
-[OK] Metodos combinados (main+test): 7/741 en espanol (0.94%, umbral 5%)
-[OK] Tipos combinados (main+test): 1/181 en espanol (0.55%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/741 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/181 en espanol (0.00%, umbral 5%)
 
 OK: todas las categorias por debajo del umbral del 5%
 ```
+Este 0.00% SÍ es reproducible: a diferencia del "0/484" de la pasada
+anterior (denominador inflado, léxico incompleto), aquí el denominador
+es el real (442, sin los 42 records duplicados) y el léxico ya cubre las
+raíces del módulo `abd/` confirmadas manualmente — y además los 8
+identificadores que ese léxico corregido encontró se renombraron de
+verdad, no solo se dejaron documentados como pendientes.
 
 **Nota de auditoria (2026-09-18) — tercer bug real del checker, esta vez
 en dos direcciones a la vez:** una re-evaluación externa señaló,
@@ -843,22 +841,65 @@ combinados:
    `nivel`, `provincia`, `ciudad`, `rol`, `sesion`, `sugerido`, `disco`,
    `numero`. Se agregaron esas 9 raíces a `SPANISH_ROOTS`.
 
-Con ambos defectos corregidos, aparecen 7 métodos y 1 tipo reales en
-español en `src/main` (listados arriba), todos en el mismo subsistema
-nativo `abd/` ya documentado más abajo (mapeo 1:1 contra columnas
-nativas en español del esquema RLS de PostgreSQL) o casos puntuales
-nuevos (`aSesion` en `AuthController`, `mapa` en `ReportService`,
-`RolResponse` en `AbdDtos`). El resultado sigue siendo **OK** (1.58%
-metodos / 0.74% tipos en `src/main`, ambos muy por debajo del umbral del
-5%), pero ahora es un porcentaje bajo y reproducible, no un falso 0.00%
-por denominador inflado y léxico incompleto. No se renombraron estos 8 identificadores adicionales en
-esta pasada (a diferencia de los 8 de la nota de 2026-09-17 abajo, que sí
-se renombraron): son hallazgos nuevos de esta misma revisión, quedan como
-trabajo pendiente documentado, no maquillado.
+Con ambos defectos corregidos aparecieron, en una primera pasada, 7
+métodos y 1 tipo reales en español en `src/main`
+(`findByNivelSugeridoIgnoreCase`, `getNivel`,
+`findByProvinciaIdProvinciaOrderByIdCiudadAsc`,
+`findByCiudadIdCiudadOrderByIdTerminalAsc`,
+`existsByNumeroDiscoIgnoreCase`, `aSesion`, `mapa`, `RolResponse`).
+
+**Nota de auditoria (2026-09-18) — cuarto bug real, esta vez en
+`src/test`:** el mismo escaneo con un léxico ampliado detectó, además,
+16 métodos `@Test` reales en español (5.35% de `src/test`, por encima
+del umbral): nombres de escenario en español en
+`AbdCatalogServiceTest`, `AbdReportServiceTest`, `OpenApiConfigTest`,
+`SecurityConfigTest` (6 métodos), `ReportControllerTest`,
+`GlobalExceptionHandlerTest` (3 métodos), `LoginRateLimiterTest` (2
+métodos) y un typo residual (`Activo`) en `UserServiceTest`, dejado por
+un rename anterior incompleto.
+
+**Corrección real, no solo documentada:** en vez de dejar constancia y
+seguir, se renombraron los 24 identificadores encontrados (los 16 de
+`src/test` + los 8 de `src/main`) a inglés, verificando cada caso antes
+de tocarlo:
+- Los 5 de `src/main` con derivación Spring Data
+  (`findByNivelSugeridoIgnoreCase`, `getNivel`/`CountByLevel`,
+  `findByProvinciaIdProvinciaOrderByIdCiudadAsc`,
+  `findByCiudadIdCiudadOrderByIdTerminalAsc`,
+  `existsByNumeroDiscoIgnoreCase`) se renombraron con `@Query` explícita
+  (mismo patrón ya usado para `findByEstadoIgnoreCase` más abajo),
+  **sin tocar los campos de entidad** (`nivelSugerido`, `provincia`,
+  `ciudad`, `numeroDisco` siguen igual, consumidos como JSON por el
+  frontend). Dos de los cinco (`CityRepository`,`TerminalRepository`)
+  resultaron ser código muerto (`grep` confirmó 0 llamadores antes del
+  rename); el tercero (`UnitRepository.existsByDiskNumberIgnoreCase`) sí
+  tiene 2 llamadores reales en `AbdUnitService.java`, actualizados.
+- `AuthController.aSesion` → `toSessionResponse` (helper privado, 3
+  llamadores en el mismo archivo, actualizados).
+- `ReportService.mapa` → `toMap` (helper privado, sin referencias
+  externas).
+- `AbdDtos.RolResponse` → `RoleResponse` (el nombre del record no forma
+  parte del contrato JSON — Jackson serializa por nombre de campo, no de
+  clase — así que renombrarlo no afecta al frontend; sus campos
+  `idRol`/`nombre`/`descripcion` no se tocaron).
+- Los 16 de `src/test` son nombres de método `@Test`, sin ningún
+  llamador externo (nadie invoca un método de test por nombre salvo el
+  framework), así que renombrarlos es de riesgo cero.
+
+Verificado tras el rename: `./mvnw test-compile` limpio, `./mvnw test`
+completo contra PostgreSQL real: 299 pruebas, 0 fallos, 0 errores.
+JaCoCo real recalculado tras el rename: instrucciones 95.67%, ramas
+88.38%, líneas 96.19% — idéntico a antes del rename (renombrar
+identificadores no cambia ramas de ejecución), confirmando que no se
+rompió nada. `python3 scripts/check-spanish-methods.py` ya da 0/442
+(0.00%) real en `src/main` y 0/299 (0.00%) real en `src/test` — no por
+denominador inflado ni por léxico incompleto, sino porque los
+identificadores que antes eran reales en español ya no existen en el
+código.
 
 (Salida anterior, 2026-09-17: 476/132/298/45/774/177 declarados como
-"0.00%" en las cuatro categorías — ese "0.00%" ya no se sostiene por las
-razones de arriba.)
+"0.00%" en las cuatro categorías — ese "0.00%" no se sostenía por las
+razones de arriba; ahora sí se sostiene, con evidencia de cada paso.)
 
 **Nota de auditoria (2026-09-17) — segundo bug real del checker, encontrado
 por una re-evaluación externa y confirmado con una mutación:** el

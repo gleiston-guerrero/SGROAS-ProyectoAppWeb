@@ -70,7 +70,7 @@ class ReportControllerTest {
     }
 
     @Test
-    void licenciasPorVencerUsaDefaultDe30Dias() throws Exception {
+    void licensesExpiringSoonUsesDefault30Days() throws Exception {
         when(reportService.licensesExpiring(anyInt()))
                 .thenReturn(List.of(Map.of("conductor_id", 1L, "cedula", "1234567890")));
 

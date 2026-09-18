@@ -39,8 +39,8 @@ public class AbdCatalogService {
 <span class="fc" id="L39">        List&lt;AbdDtos.TerminalResponse&gt; terminales = terminalRepository.findAll().stream()</span>
 <span class="fc" id="L40">                .map(this::toTerminalResponse)</span>
 <span class="fc" id="L41">                .toList();</span>
-<span class="fc" id="L42">        List&lt;AbdDtos.RolResponse&gt; roles = rolAbdRepository.findAll().stream()</span>
-<span class="fc" id="L43">                .map(r -&gt; new AbdDtos.RolResponse(r.getIdRol(), r.getNombre(), r.getDescripcion()))</span>
+<span class="fc" id="L42">        List&lt;AbdDtos.RoleResponse&gt; roles = rolAbdRepository.findAll().stream()</span>
+<span class="fc" id="L43">                .map(r -&gt; new AbdDtos.RoleResponse(r.getIdRol(), r.getNombre(), r.getDescripcion()))</span>
 <span class="fc" id="L44">                .toList();</span>
 <span class="fc" id="L45">        return new AbdDtos.CatalogsResponse(provincias, ciudades, terminales, roles);</span>
     }

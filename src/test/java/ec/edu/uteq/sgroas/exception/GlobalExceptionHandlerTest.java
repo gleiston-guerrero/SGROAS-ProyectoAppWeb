@@ -27,7 +27,7 @@ class GlobalExceptionHandlerTest {
     private final GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
     @Test
-    void erroresDeValidacionDebenRetornarProblemDetail() {
+    void validationErrorsShouldReturnProblemDetail() {
         when(request.getRequestURI()).thenReturn("/api/conductores");
         BindingResult bindingResult = org.mockito.Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(
@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void argumentosInvalidosDebenRetornarBadRequest() {
+    void invalidArgumentsShouldReturnBadRequest() {
         when(request.getRequestURI()).thenReturn("/api/conductores");
 
         ProblemDetail detail = handler.handleInvalidArguments(
@@ -58,7 +58,7 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void credencialesInvalidasDebenRetornarNoAutorizado() {
+    void invalidCredentialsShouldReturnUnauthorized() {
         when(request.getRequestURI()).thenReturn("/api/auth/login");
 
         ProblemDetail detail = handler.handleInvalidCredentials(

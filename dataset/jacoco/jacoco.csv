@@ -5,7 +5,6 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.UnitResponse,0,24,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.UnitRequest,0,21,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.ProvinceResponse,0,9,0,0,0,1,0,1,0,1
-,ec.edu.uteq.sgroas.abd.dto,AbdDtos.RolResponse,0,12,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.TopRouteResponse,0,12,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.AbdIncidentResponse,0,30,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.SummaryResponse,0,27,0,0,0,1,0,1,0,1
@@ -15,6 +14,7 @@ GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.ScheduleResponse,0,36,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.AbdRouteResponse,0,24,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.TerminalResponse,0,15,0,0,0,1,0,1,0,1
+,ec.edu.uteq.sgroas.abd.dto,AbdDtos.RoleResponse,0,12,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.abd.dto,AbdDtos.AbdIncidentRequest,0,21,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.dto,VerifyEmailRequest,0,9,0,0,0,1,0,1,0,1
 ,ec.edu.uteq.sgroas.dto,DriverRequest,0,30,0,0,0,1,0,1,0,1
