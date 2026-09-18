@@ -87,7 +87,7 @@ También se puede compilar desde la raíz del repositorio con `make pdf`.
 | `scripts/validate-traceability.sh` | Matriz 88 REQ vs SRS (identificadores, estados, trazabilidad mínima) | 0/1 | `docs/trazabilidad/` |
 | `scripts/validate-listings.sh` | Los 4 Listings de cap. 7 existen en el código | 0/1 | `docs/informe-final/cap7-implementacion.tex` |
 | `scripts/test-validators.sh` | Self-test: valida que las guardas anteriores **fallan** con exit 1 ante evidencia rota | 0 | este README |
-| `scripts/validate-sus-demografia.sh` | Cruza la demografía del cap. 5 (n=15, 8H/7M, 19–25 años, exp. B3/M10/A2) contra `sus-raw.csv` | 0/1 | cap. 5 (`tab:sus-demografia`) |
+| `scripts/validate-sus-demografia.sh` | Cruza la demografía del cap. 5 (n=10, 5H/5M, 19–25 años, exp. B1/M7/A2) contra `sus-raw.csv` | 0/1 | cap. 5 (`tab:sus-demografia`) |
 
 El self-test es la evidencia de hechos de los exit codes (casos A: matriz válida
 → 0; B: matriz rota → 1; C: listings OK → 0; D: listing roto → 1):

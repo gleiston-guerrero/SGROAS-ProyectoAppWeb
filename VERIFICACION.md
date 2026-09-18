@@ -98,6 +98,32 @@ se expone en este documento ni en ningún archivo del repositorio.
 `.env.example`, `src/test/java/ec/edu/uteq/sgroas/security/JwtServiceTest.java`,
 `src/test/resources/application-test.properties`, `.github/workflows/ci.yml`.
 
+**Hallazgo pendiente, declarado sin ocultarlo:** las corridas crudas de k6
+en `dataset/perf/*.json` capturan el `Authorization: Bearer <token>` real
+que k6 usó en cada request, porque el propio k6 lo registra en el JSON de
+salida — no es un secreto insertado a mano, es un efecto colateral de cómo
+k6 documenta sus corridas. Quedan 13 tokens de admin versionados. Prueba de
+que ya no son explotables:
+
+```
+$ TOKEN=$(grep -oE "eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}" dataset/perf/k01-run1.json | head -1)
+$ echo "$TOKEN" | cut -d. -f2 | base64 -d 2>/dev/null
+{"jti":"f063abe3-...","iss":"https://sgroas.uteq.edu.ec","sub":"admin@sgroas.com", ...,"exp":1785370130,"nombre":"Admin SGROAS","rol":"ROLE_ADMIN"}
+# exp=1785370130 -> 2026-07-29 (ya vencido: hoy es 2026-09-17)
+
+$ curl -s -o /dev/null -w "HTTP %{http_code}\n" -H "Authorization: Bearer $TOKEN" \
+    https://sgroas-backend.onrender.com/api/conductores
+HTTP 403
+```
+
+El token es rechazado por dos razones independientes: (1) su `exp` venció
+hace más de un mes, y (2) el `APP_JWT_SECRET` que lo firmó ya fue rotado
+(sección anterior), así que ni siquiera un token no-expirado firmado con el
+secreto viejo pasaría la verificación de firma. No se retiraron los 13
+archivos del historial de git (reescribir historia es una operación
+destructiva que no se hizo sin acuerdo explícito), pero los tokens que
+contienen están probadamente inertes.
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (1.2)

@@ -118,6 +118,29 @@ histórica; las 6 nuevas son la evidencia vigente de performance actual.
 
 ---
 
+**Actualización (2026-09-17) — corridas reales contra el despliegue público (commit `13cf740`):**
+**Cerrado por: Luis Tejada**
+
+Las 6 corridas de `1a07dc7`/fresh-20260916 se hicieron contra un build local
+servido con `serve-gzip.js`, no contra la URL pública declarada en el
+informe. Se generaron 6 corridas nuevas (3 móvil + 3 escritorio) con
+`npx @lhci/cli collect --numberOfRuns=1` ejecutado seis veces por separado
+(workaround al bug de Lighthouse CLI en Windows que falla con `EPERM` al
+limpiar su carpeta temporal entre corridas cuando `numberOfRuns>1`),
+apuntando directamente a `https://sgroas-backend.onrender.com` (el
+despliegue real).
+
+**Archivos modificados:**
+- `dataset/lighthouse/lh-{mobile,desktop}-render-20260917-{1,2,3}.json` -- 6
+  corridas nuevas contra el despliegue público real.
+- `dataset/MANIFEST.sha256` -- 6 entradas nuevas para los archivos anteriores.
+- `VERIFICACION.md` (sección P3) -- scores y metadatos de estas 6 corridas
+  documentados con salida literal de los JSON.
+
+**Commit:** `13cf740`
+
+---
+
 ## P4 — Cookie Secure(true) (commit 92576cf)
 **Cerrado por: Luis Tejada**
 

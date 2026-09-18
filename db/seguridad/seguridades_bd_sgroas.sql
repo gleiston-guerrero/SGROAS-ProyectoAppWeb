@@ -6,6 +6,12 @@
 --  * Script manual (DBA). Ejecutarlo como superusuario (p. ej. postgres)
 --    DESPUÉS de que Flyway haya creado las tablas (V1..V12).
 --    NO es migración de Flyway para no afectar el arranque de la aplicación.
+--  * Contraseñas parametrizadas via variables psql (sin secretos literales
+--    en el script). Ejecutar con:
+--      psql -v admin_pw='...' -v coord_pw='...' -v segur_pw='...' \
+--           -f db/seguridad/seguridades_bd_sgroas.sql
+--    Si no se pasan, psql pedirá el valor de forma interactiva (\prompt) en
+--    vez de usar un valor por defecto embebido.
 --  * Se usa ENABLE ROW LEVEL SECURITY (no FORCE): el dueño de las tablas
 --    (el usuario con el que corre la aplicación web) omite RLS, por lo que
 --    la app sigue funcionando; RLS sólo restringe a los roles operativos
@@ -36,16 +42,31 @@ REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM public;
 -- SECCIÓN 2: CREACIÓN DE USUARIOS OPERATIVOS (LOGINS)
 -- -------------------------------------------------------------------------
 -- Una cuenta única por actor real para trazabilidad y auditoría.
+-- Contraseñas tomadas de variables psql (-v admin_pw=... etc.); si no se
+-- pasan por línea de comandos, se piden de forma interactiva.
+\if :{?admin_pw}
+\else
+\prompt 'Contraseña para usr_admin_coop: ' admin_pw
+\endif
+\if :{?coord_pw}
+\else
+\prompt 'Contraseña para usr_coordinador: ' coord_pw
+\endif
+\if :{?segur_pw}
+\else
+\prompt 'Contraseña para usr_seguridad_vial: ' segur_pw
+\endif
+
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'usr_admin_coop') THEN
-        EXECUTE 'CREATE ROLE usr_admin_coop LOGIN PASSWORD ''admin123''';
+        EXECUTE format('CREATE ROLE usr_admin_coop LOGIN PASSWORD %L', :'admin_pw');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'usr_coordinador') THEN
-        EXECUTE 'CREATE ROLE usr_coordinador LOGIN PASSWORD ''coord123''';
+        EXECUTE format('CREATE ROLE usr_coordinador LOGIN PASSWORD %L', :'coord_pw');
     END IF;
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'usr_seguridad_vial') THEN
-        EXECUTE 'CREATE ROLE usr_seguridad_vial LOGIN PASSWORD ''segur123''';
+        EXECUTE format('CREATE ROLE usr_seguridad_vial LOGIN PASSWORD %L', :'segur_pw');
     END IF;
 END $$;
 
