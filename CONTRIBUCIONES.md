@@ -5,6 +5,31 @@ Repositorio: https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb
 Período: Supletorio 2026-09
 Integrantes: Luis Alejandro Tejada Bajaña, María del Rosario Escudero Plaza, Kevin Moisés Castro Espinoza
 
+## Firmas de esta ronda del examen suspenso
+
+**Firma esta ronda: Luis Alejandro Tejada Bajaña** (todas las secciones de
+este documento y de `VERIFICACION.md`).
+
+**No firman esta ronda: María del Rosario Escudero Plaza y Kevin Moisés
+Castro Espinoza.** No es un olvido ni una firma pendiente de recoger: los
+dos ya aprobaron su evaluación individual y no están rindiendo el examen
+suspenso. Verificable de forma objetiva en el propio historial de git —
+ninguno de los dos tiene un solo commit en esta ronda de correcciones
+(2026-09-16 en adelante):
+
+```
+$ git log --format='%an <%ae> %ad' --date=short 110d5a1..HEAD | grep -iE "escudero|castro|mescuderop|kcastroe|0999595561kevin"
+(sin resultados)
+```
+
+Pedirles una firma para un trabajo que no hicieron ni revisaron sería
+falsear la autoría, no corregirla. Sus aportes históricos reales al
+proyecto original (CSV de datos SUS, corridas de Lighthouse, evidencia de
+asignaciones, etc.) siguen reconocidos con su nombre y el respaldo de
+`git log` en las secciones P3 y P8 más abajo — eso no cambia. Detalle
+completo de esta decisión en la sección "Situación del equipo en el
+examen suspenso" más abajo.
+
 ---
 
 ## P1 — Passwords/secrets a variables de entorno (commit ac72f7a)
