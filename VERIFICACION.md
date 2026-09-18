@@ -2728,3 +2728,56 @@ correcciones de P1 (limitación documentada sobre la prueba de rotación),
 P2 (`@Cacheable`/Redis/`Page`), P3 (atribución correcta de la evidencia
 Lighthouse real) y P5 (segundo bug del checker + 8 métodos reales
 corregidos).
+
+**Actualización final (2026-09-18) — auditoría rigurosa completa, plan de
+3 pasos ejecutado y verificado en vivo, más una revisión final de
+documentación antes de mover el tag por última vez:**
+
+1. **EV-1**: 5 salidas resumidas con "..." reemplazadas por output
+   literal real (commit `236bb9d`).
+2. **CSP/onload**: hallazgo nuevo (no es uno de los 11 puntos de la
+   guía) — el propio build de Angular inyectaba un `onload` inline
+   bloqueado por la CSP. Corregido (`frontend/angular.json`,
+   `optimization.styles.inlineCritical: false`, commit `e556454`).
+3. **P2, alcance ampliado**: el mismo bug de auto-invocación de
+   `DriverService` estaba también en `IncidentService`, `RouteService` y
+   `VehicleService`, más un bug de corrección real (paginación mal
+   calculada) en los tres, y un cuarto defecto distinto en
+   `RouteAssignmentService` (`listCached()` nunca se llamaba). Los
+   cuatro corregidos con el mismo patrón que `DriverService` (commit
+   `a8a5e49`). JaCoCo real recalculado dos veces más en el proceso
+   (298→299 tests, 95,67 %/88,38 %/96,19 %), propagado al informe y PDF
+   recompilado cada vez.
+4. **Hallazgo de infraestructura, no de código**: el auto-deploy de
+   Render (webhook GitHub→Render) llevaba atascado 11 commits, desde
+   antes de que empezara esta sesión — nada de esta auditoría se había
+   desplegado hasta disparar manualmente un "Manual Deploy" desde el
+   dashboard. Verificado en vivo tras el redeploy: sin `onload` inline,
+   `totalElements` correcto en `/api/incidentes` (6), `/api/rutas` (5),
+   `/api/vehiculos` (5) y `/api/asignaciones` (8) — ninguno igual al
+   tamaño de página pedido (commit `ec029d2`).
+5. **Revisión final de documentación (README y demás), pedida
+   explícitamente antes de mover el tag por última vez:** se encontró
+   que `docs/informe-final.pdf` (el wrapper compilado desde `docs/`,
+   enlazado en el README) tenía 98 páginas y una fecha de compilación
+   (16-sep) muy anterior a `docs/informe-final/main.pdf` (97 páginas,
+   17-sep) — **el mismo defecto que una evaluación externa ya había
+   señalado en una ronda anterior** ("El PDF que enlaza el README...
+   está desactualizado") y que nunca se había corregido. Se recompiló
+   el wrapper (mismo resultado: 97 páginas, 0 errores, 0 referencias sin
+   resolver, tamaño de archivo idéntico al principal) y se corrigieron
+   las 3 menciones de "98 páginas" en `README.md`. De paso se completó
+   `.gitignore` para los artefactos de compilación del wrapper
+   (`docs/informe-final.aux/.log/.bbl/...`), que no estaban cubiertos
+   por la regla existente (solo cubría `docs/informe-final/*`, no
+   `docs/informe-final.*` a nivel raíz de `docs/`).
+
+```
+$ git rev-parse v1.1.0^{commit}
+[valor tras este commit]
+$ git rev-parse HEAD
+[valor tras este commit]
+$ git rev-parse origin/main
+[valor tras este commit]
+```
+(Los tres deben coincidir tras mover el tag una última vez a este commit.)
