@@ -2785,27 +2785,41 @@ documentación antes de mover el tag por última vez:**
    por la regla existente (solo cubría `docs/informe-final/*`, no
    `docs/informe-final.*` a nivel raíz de `docs/`).
 
-La confirmación de que `v1.1.0`/`HEAD`/`origin/main` coinciden en el
-commit final, después de moverlo, se agrega en un commit posterior muy
-breve (solo esa confirmación, sin más cambios) para no caer en la misma
-trampa que motivó esta ronda de correcciones: no se puede citar el propio
-hash de un commit dentro de sí mismo, así que la verificación real tiene
-que ir en el commit siguiente.
+**Nota de proceso (2026-09-18):** citar aquí un hash concreto como "el
+commit final" es, por construcción, una afirmación que caduca en cuanto
+se hace un commit más — le pasó dos veces en esta misma auditoría (una
+vez con `c25dc06`/`847ee44` al principio de este archivo, otra vez con
+`d98d28e` unos párrafos más arriba, ambas ya superadas por commits
+posteriores de la propia auditoría). En vez de perseguir esa cifra cada
+vez, la verificación que importa es el **comando**, no un valor fijado
+por escrito:
 
-**Confirmación real (2026-09-18):**
+```bash
+git rev-parse v1.1.0^{commit}
+git rev-parse HEAD
+git rev-parse origin/main
+git describe --tags
+```
+
+Si las tres primeras líneas devuelven el mismo hash y la cuarta imprime
+`v1.1.0`, la etiqueta está al día — sin importar qué commit sea en el
+momento en que se ejecute. **Última vez que se confirmó, y el hash que
+arrojó en ese momento** (2026-09-18, no se garantiza que siga siendo el
+HEAD actual si hubo commits después — correr el comando de arriba para
+saberlo con certeza):
 ```
 $ git rev-parse v1.1.0^{commit}
-d98d28e7c50c8511951a9afccb5a304a8104cd00
+68ce9da4b81e9a78a04a9076ceb62f80730e7150
 $ git rev-parse HEAD
-d98d28e7c50c8511951a9afccb5a304a8104cd00
+68ce9da4b81e9a78a04a9076ceb62f80730e7150
 $ git rev-parse origin/main
-d98d28e7c50c8511951a9afccb5a304a8104cd00
+68ce9da4b81e9a78a04a9076ceb62f80730e7150
 $ git describe --tags
 v1.1.0
 ```
-Los tres coinciden en `d98d28e`. El tag `v1.1.0` es el vigente para esta
-evaluación y contiene todos los fixes de esta auditoría rigurosa: EV-1,
-CSP/onload, cache/paginación en 5 servicios (`DriverService` de una ronda
-anterior + `IncidentService`/`RouteService`/`VehicleService`/
+Los tres coincidían en `68ce9da` en ese momento. El tag `v1.1.0` es el
+vigente para esta evaluación y contiene todos los fixes de esta auditoría
+rigurosa: EV-1, CSP/onload, cache/paginación en 5 servicios
+(`DriverService` de una ronda anterior + `IncidentService`/`RouteService`/`VehicleService`/
 `RouteAssignmentService` de esta), redeploy real verificado en producción,
 y la corrección del wrapper del informe.

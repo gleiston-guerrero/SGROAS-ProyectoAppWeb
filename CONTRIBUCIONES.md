@@ -125,8 +125,8 @@ recompilado (97 páginas, 0 errores). Detalle completo en
 
 ---
 
-## P3 — Lighthouse corridas versionadas (commit 1a07dc7)
-**Cerrado por: María del Rosario Escudero Plaza**
+## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
+**Cerrado por: María del Rosario Escudero Plaza (corridas 1) y Luis Alejandro Tejada Bajaña (perfil tableta)**
 
 **Corrección de atribución (2026-09-16):** este punto estaba firmado
 "Cerrado por: Luis Tejada" en la version anterior de este documento, pero
@@ -140,11 +140,46 @@ $ git log --format='%H %an <%ae> %ad %s' --date=short -1 1a07dc7
 1a07dc7... charito20 <mescuderop@uteq.edu.ec> feat(entrega3): SRS, scripts de validacion, lighthouse real, reporte perf y correccion de evidencias
 ```
 
-**Archivos modificados:**
-- dataset/lighthouse/lh-*.json -- 9 corridas (mobile, desktop, tablet).
-- dataset/lighthouse/REPORT.md -- resumen de scores.
+**Corrección adicional (2026-09-18) — `1a07dc7` NO contiene las 9
+corridas reales; el "Archivos modificados" de abajo estaba mal desde el
+origen de este documento:**
+```
+$ git show --stat 1a07dc7 | grep -i lighthouse
+docs/mediciones/lighthouse/REPORT.md               |   27 +
+docs/mediciones/lighthouse/lhci-20260730-2115.json | 9435 ++++++++++++++++++++
+docs/mediciones/lighthouse/lhci-20260730-2117.json | 9431 +++++++++++++++++++
+lighthouserc.js                                    |   34 +
+```
+`1a07dc7` solo agrega **2 corridas locales** (`lhci-20260730-2115/2117.json`,
+contra `localhost`, no contra el despliegue público) más `REPORT.md` y
+`lighthouserc.js` — nunca tocó los 9 archivos `lh-{mobile,desktop,tablet}-{1,2,3}.json`
+que sí son la evidencia real contra el despliegue público (ver corrección
+de 2026-09-17/18 más abajo). Los commits reales que sí agregan esos 9
+archivos, verificados con `git log --follow`:
+```
+$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-desktop-1.json
+dd6b81d charito20 2026-09-06 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-mobile-1.json
+ef2de04 charito20 2026-09-06 perf(lighthouse): mobile corrida 1 - P=0.79 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-tablet-1.json
+3062984 Alxjandr07 2026-09-13 docs(P8): agregar perfil tableta Lighthouse (3 corridas) y regenerar dataset
+$ git log --format='%H %an %ad %s' --date=short -1 --follow -- dataset/lighthouse/lh-desktop-2.json
+b516447 TheAsesink 2026-09-13 fix(P11,P15,P6,P16,P10): valida trazabilidad CRLF+exit1, dataset 275 arch sha256 OK, cookie HttpOnly sin token JSON, evidencia asignaciones 200
+```
+Es decir: corrida 1 de móvil/escritorio (María Escudero, `dd6b81d`/`ef2de04`,
+2026-09-06); perfil tableta completo (Luis Tejada, `3062984`, 2026-09-13);
+corridas 2 y 3 de móvil/escritorio consolidadas en `b516447` (Kevin Castro,
+2026-09-13). Ningún archivo de este punto viene de `1a07dc7`.
 
-**Commit:** 1a07dc7
+**Archivos modificados (corregido):**
+- `1a07dc7` -- 2 corridas locales (`lhci-20260730-2115/2117.json`),
+  `REPORT.md`, `lighthouserc.js`. NO son las 9 corridas del despliegue
+  público.
+- `dd6b81d`, `ef2de04`, `3062984`, `b516447` -- las 9 corridas reales
+  `lh-{mobile,desktop,tablet}-{1,2,3}.json` contra el despliegue público
+  (ver detalle de commits arriba).
+
+**Commit:** `1a07dc7` (corridas locales) + `dd6b81d`/`ef2de04`/`3062984`/`b516447` (corridas reales, ver arriba)
 
 ---
 
@@ -181,6 +216,15 @@ versión de Lighthouse.
 
 Las 9 corridas de `1a07dc7` se conservan sin borrar por trazabilidad
 histórica; las 6 nuevas son la evidencia vigente de performance actual.
+
+**Nota (2026-09-18):** "las 9 corridas de `1a07dc7`" en este párrafo (y en
+el resto de esta entrada de 2026-09-16) es una atribución incorrecta que
+se repite de la sección de arriba — `1a07dc7` nunca contuvo esos 9
+archivos; son de `dd6b81d`/`ef2de04`/`3062984`/`b516447`. Se corrige la
+atribución en la sección "P3" de arriba, con el detalle completo de qué
+commit agregó cada archivo; no se reescribe cada mención suelta aquí para
+no perder el registro histórico de cómo se entendía la situación en cada
+fecha.
 
 **Corrección (2026-09-17):** la afirmación de arriba ("antes de la
 corrección del contrato... no se usó como evidencia") era incorrecta — las
