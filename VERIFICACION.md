@@ -2778,3 +2778,21 @@ breve (solo esa confirmación, sin más cambios) para no caer en la misma
 trampa que motivó esta ronda de correcciones: no se puede citar el propio
 hash de un commit dentro de sí mismo, así que la verificación real tiene
 que ir en el commit siguiente.
+
+**Confirmación real (2026-09-18):**
+```
+$ git rev-parse v1.1.0^{commit}
+d98d28e7c50c8511951a9afccb5a304a8104cd00
+$ git rev-parse HEAD
+d98d28e7c50c8511951a9afccb5a304a8104cd00
+$ git rev-parse origin/main
+d98d28e7c50c8511951a9afccb5a304a8104cd00
+$ git describe --tags
+v1.1.0
+```
+Los tres coinciden en `d98d28e`. El tag `v1.1.0` es el vigente para esta
+evaluación y contiene todos los fixes de esta auditoría rigurosa: EV-1,
+CSP/onload, cache/paginación en 5 servicios (`DriverService` de una ronda
+anterior + `IncidentService`/`RouteService`/`VehicleService`/
+`RouteAssignmentService` de esta), redeploy real verificado en producción,
+y la corrección del wrapper del informe.
