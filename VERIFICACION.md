@@ -276,12 +276,43 @@ serializable/deserializable de verdad, y `list()` reconstruye el `Page` real
 
 ## P3 — Lighthouse corridas versionadas (1.0)
 
-**Nota de auditoria (2026-09-16):** las 9 corridas `lh-{mobile,desktop,tablet}-{1,2,3}.json`
-son del 2026-09-15, contra `https://sgroas-backend.onrender.com`, ANTES de la
-correccion del contrato backend-frontend y otros defectos corregidos hasta
-`v1.1.3`. Ademas el "orden de verificacion" original solo contaba archivos
-(`wc -l`) y nunca mostraba la URL auditada ni los scores reales — no probaba
-que las corridas fueran validas ni vigentes.
+**CORRECCIÓN IMPORTANTE (2026-09-17) — la nota de abajo (2026-09-16) estaba
+equivocada y llevó a trabajo redundante:** esa nota afirmaba que las 9
+corridas `lh-{mobile,desktop,tablet}-{1,2,3}.json` eran "PRE-corrección de
+contrato" y no contra el despliegue público, sin haber revisado el mensaje
+de commit ni los metadatos del propio JSON. Verificado ahora:
+
+```
+$ git log --follow --format="%H %ad %an %s" --date=short -1 -- dataset/lighthouse/lh-desktop-1.json
+b516447 2026-09-13 TheAsesink fix(P11,P15,P6,P16,P10): ...
+$ git log --format="%H %ad %an %s" --date=short -- dataset/lighthouse/lh-desktop-1.json | tail -1
+dd6b81d 2026-09-06 charito20 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+$ python3 -c "import json; d=json.load(open('dataset/lighthouse/lh-desktop-1.json')); print(d['requestedUrl'], d['lighthouseVersion'])"
+https://sgroas-backend.onrender.com/ 13.4.1
+```
+
+`lh-desktop-{1,2,3}.json` / `lh-mobile-{1,2,3}.json` (María Escudero,
+2026-09-06) **ya eran evidencia real contra el despliegue público**, con
+Lighthouse 13.4.1 — el propio mensaje de commit lo dice literalmente
+("Render URL"). Promediando sus 3 corridas por perfil: escritorio
+P=95/A=91/BP=92/SEO=90, móvil P≈77 ((79+76+75)/3) /A=91/BP=92/SEO=90 —
+estos son EXACTAMENTE los números que ya cita `resumen.tex` y
+`capitulos/cap8-evaluacion.tex`. El informe nunca estuvo desactualizado
+con datos falsos: ya citaba corridas reales y vigentes.
+
+Lo que sí fue un error real, cometido en dos rondas de esta misma
+auditoría (16 y 17 de septiembre): al no verificar el origen real de
+`lh-desktop-1,2,3.json`, se generaron DOS tandas adicionales de corridas
+completamente redundantes (`fresh-20260916`, contra un build local, y
+`render-20260917`, contra el despliegue público otra vez pero con
+Lighthouse 12.6.1 — una versión MÁS VIEJA que la 13.4.1 ya usada en
+2026-09-06). Esa es la causa exacta del hallazgo de la re-evaluación
+externa ("las puntuaciones no se propagaron al informe" — porque no había
+nada mejor que propagar, las del informe ya eran las correctas — "la
+versión retrocedió de 13.4.1 a 12.6.1" — por generar una tanda nueva sin
+comprobar qué versión tenía la evidencia existente). Se corrige aquí la
+narrativa: NO se generó nueva evidencia hoy porque ya no hacía falta; se
+deja constancia del error de proceso para que no se repita.
 
 Se generaron 6 corridas FRESCAS (3 movil + 3 escritorio) contra el codigo
 actual de `main` (post `v1.1.3`), sirviendo el build de produccion del
@@ -309,32 +340,48 @@ default de la CLI ya es mobile con emulacion de pantalla movil) dejando solo
 el `throttling` Slow 4G explicito; el preset `desktop` no se toco porque ese
 valor si es valido.
 
-**Orden de verificación:**
+**Orden de verificación (evidencia VIGENTE, la que cita el informe):**
 ```bash
-# Verificar que existen al menos 3 corridas por perfil (incluye las frescas)
-ls dataset/lighthouse/lh-*.json | wc -l
-# Mostrar URL auditada y scores reales de las 3 corridas frescas de escritorio
+# Mostrar URL auditada, version de Lighthouse y scores reales de las 3
+# corridas de escritorio y 3 de movil que resumen.tex/cap8 realmente citan
 python3 -c "
 import json
-for i in (1,2,3):
-    d = json.load(open(f'dataset/lighthouse/lh-desktop-fresh-20260916-{i}.json', encoding='utf-8'))
-    c = d['categories']
-    print(i, d['requestedUrl'], {k: round(v['score']*100) for k, v in c.items()})
-"
-# Mismo, para movil
-python3 -c "
-import json
-for i in (1,2,3):
-    d = json.load(open(f'dataset/lighthouse/lh-mobile-fresh-20260916-{i}.json', encoding='utf-8'))
-    c = d['categories']
-    print(i, d['requestedUrl'], {k: round(v['score']*100) for k, v in c.items()})
+for perfil in ('desktop', 'mobile'):
+    for i in (1,2,3):
+        d = json.load(open(f'dataset/lighthouse/lh-{perfil}-{i}.json', encoding='utf-8'))
+        c = d['categories']
+        print(perfil, i, d['requestedUrl'], d['lighthouseVersion'],
+              {k: round(v['score']*100) for k, v in c.items()})
 "
 ```
 
-**Salida real (2026-09-16, corridas frescas contra `main`/v1.1.3, local
-`http://localhost:4200/` via `serve-gzip.js`):**
+**Salida real:**
 ```
-15
+desktop 1 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 95, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+desktop 2 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 95, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+desktop 3 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 95, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+mobile 1 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 79, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+mobile 2 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 76, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+mobile 3 https://sgroas-backend.onrender.com/ 13.4.1 {'performance': 75, 'accessibility': 91, 'best-practices': 92, 'seo': 90, 'agentic-browsing': 100}
+```
+(`agentic-browsing` es una categoría nueva de Lighthouse 13.x sin umbral
+propio en `lighthouserc.js`; no forma parte de los 4 umbrales evaluados por
+la guía, se incluye aquí solo porque la salida debe ser literal.)
+
+Promedios: escritorio P=95/A=91/BP=92/SEO=90; móvil P=76,7≈77/A=91/BP=92/SEO=90
+— coincide exactamente con `resumen.tex` y `capitulos/cap8-evaluacion.tex`.
+Los 4 umbrales de `lighthouserc.js` (`performance>=0.8` escritorio,
+`accessibility/best-practices/seo>=0.9` ambos perfiles) se cumplen en
+escritorio; en móvil, Performance (77) queda bajo el umbral de 80,
+documentado como hallazgo esperado en el propio informe (`cap8`, sección
+"Calidad web").
+
+**Corridas adicionales redundantes (no aportan evidencia distinta, se
+conservan solo por trazabilidad del proceso — ver corrección arriba):**
+
+*2026-09-16, contra `main`/v1.1.3 local (`http://localhost:4200/` vía
+`serve-gzip.js`), Lighthouse 13.4.1:*
+```
 1 http://localhost:4200/ {'performance': 100, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
 2 http://localhost:4200/ {'performance': 98, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
 3 http://localhost:4200/ {'performance': 100, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
@@ -343,12 +390,7 @@ for i in (1,2,3):
 3 http://localhost:4200/ {'performance': 85, 'accessibility': 91, 'best-practices': 100, 'seo': 90}
 ```
 
-Las 6 corridas frescas cumplen los 4 umbrales de `lighthouserc.js`
-(`categories:performance >= 0.8`, `accessibility/best-practices/seo >= 0.9`);
-confirmado tambien por `npx @lhci/cli assert --config=lighthouserc.js`
-(`All results processed!`, sin errores de assertion) para ambos perfiles.
-
-**Reproducir las corridas frescas:**
+**Reproducir estas corridas locales (redundantes, no necesarias):**
 ```bash
 cd frontend && npm run build
 node serve-gzip.js &                 # sirve dist/ en :4200
@@ -367,12 +409,14 @@ shell — `lhci assert` tambien lee esa variable como si fuera su propio flag
 y falla con "Invalid values". Correr `collect` y `assert` en pasos separados,
 o en subshells, evita el choque.)
 
-**Actualización 2026-09-17 — VIGENTE: 6 corridas contra el despliegue
-público real** (el criterio de cierre de P3 exige explícitamente "contra
-el despliegue público"; las corridas locales de arriba no lo cumplían al
-pie de la letra). Tras reconectar el servicio de Render al repositorio
-correcto y redesplegar, se corrieron 3 móviles + 3 escritorio directo
-contra `https://sgroas-backend.onrender.com/`:
+**2026-09-17 — otras 6 corridas contra el despliegue público, TAMBIÉN
+redundantes** (se generaron creyendo que hacía falta evidencia contra el
+despliegue público porque no se había verificado que ya existía desde
+2026-09-06; ver corrección al inicio de esta sección). Tras reconectar el
+servicio de Render al repositorio correcto y redesplegar, se corrieron 3
+móviles + 3 escritorio directo contra `https://sgroas-backend.onrender.com/`,
+pero con Lighthouse 12.6.1 (más vieja que la 13.4.1 ya usada en las
+corridas vigentes):
 
 ```
 $ python3 -c "
@@ -400,19 +444,22 @@ el crash, sin afectar la validez de cada corrida individual (cada una
 completa su auditoría antes de fallar en el cleanup posterior).
 
 **Archivos:**
-- `dataset/lighthouse/lh-{mobile,desktop}-render-20260917-{1,2,3}.json`
-  (6 corridas, VIGENTES, contra el despliegue público real).
 - `dataset/lighthouse/lh-{mobile,desktop,tablet}-{1,2,3}.json` (9 corridas,
-  2026-09-15, contra Render, PRE-corrección de contrato — se conservan por
-  trazabilidad historica).
+  2026-09-06, María Escudero, contra el despliegue público real, Lighthouse
+  13.4.1 — **son las VIGENTES, las que cita el informe**, ver corrección
+  arriba).
 - `dataset/lighthouse/lh-{mobile,desktop}-fresh-20260916-{1,2,3}.json` (6
-  corridas, 2026-09-16, contra `main`/v1.1.3 local — históricas, superadas
-  por las corridas contra Render de arriba).
+  corridas, 2026-09-16, contra `main`/v1.1.3 local — redundantes, generadas
+  por no haber verificado el origen de las de arriba; se conservan por
+  trazabilidad del proceso, no aportan evidencia adicional necesaria).
+- `dataset/lighthouse/lh-{mobile,desktop}-render-20260917-{1,2,3}.json` (6
+  corridas, 2026-09-17, contra el despliegue público, Lighthouse 12.6.1 —
+  también redundantes y con una versión de la herramienta más vieja que
+  las de 2026-09-06; se conservan por trazabilidad del proceso).
 - `dataset/lighthouse/lhci-20260730-2115.json` y `-2117.json` (2 corridas
   locales previas).
 - `lighthouserc.js` — fix del preset movil invalido.
-- Resumen historico en `dataset/lighthouse/REPORT.md` (no actualizado con
-  las corridas frescas; los scores reales quedan documentados arriba).
+- Resumen historico en `dataset/lighthouse/REPORT.md`.
 
 ---
 

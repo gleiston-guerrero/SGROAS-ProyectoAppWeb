@@ -140,28 +140,49 @@ versión de Lighthouse.
 Las 9 corridas de `1a07dc7` se conservan sin borrar por trazabilidad
 histórica; las 6 nuevas son la evidencia vigente de performance actual.
 
+**Corrección (2026-09-17):** la afirmación de arriba ("antes de la
+corrección del contrato... no se usó como evidencia") era incorrecta — las
+9 corridas de `1a07dc7` (`lh-{mobile,desktop,tablet}-{1,2,3}.json`) SÍ son
+contra el despliegue público real (el propio commit que las creó dice
+"Render URL"), y son las que el informe final efectivamente cita. Las 6
+corridas "frescas" de esta entrada resultaron redundantes. Ver la
+corrección completa más abajo.
+
 ---
 
-**Actualización (2026-09-17) — corridas reales contra el despliegue público (commit `13cf740`):**
+**Actualización (2026-09-17) — corrección de un error propio: las corridas
+"nuevas" del commit `13cf740` eran redundantes; ya existía evidencia real
+contra el despliegue público desde el 2026-09-06:**
 **Cerrado por: Luis Tejada**
 
-Las 6 corridas de `1a07dc7`/fresh-20260916 se hicieron contra un build local
-servido con `serve-gzip.js`, no contra la URL pública declarada en el
-informe. Se generaron 6 corridas nuevas (3 móvil + 3 escritorio) con
-`npx @lhci/cli collect --numberOfRuns=1` ejecutado seis veces por separado
-(workaround al bug de Lighthouse CLI en Windows que falla con `EPERM` al
-limpiar su carpeta temporal entre corridas cuando `numberOfRuns>1`),
-apuntando directamente a `https://sgroas-backend.onrender.com` (el
-despliegue real).
+El commit `13cf740` había afirmado que las 6 corridas de
+`fresh-20260916` (locales, servidas con `serve-gzip.js`) eran las únicas
+existentes y que por tanto hacía falta generar evidencia nueva contra
+`https://sgroas-backend.onrender.com`. Esa afirmación era incorrecta: nunca
+se verificó el origen real de `lh-desktop-{1,2,3}.json` /
+`lh-mobile-{1,2,3}.json`. Al revisar el historial de git para esta
+corrección:
+
+```
+$ git log --format="%H %ad %an %s" --date=short -- dataset/lighthouse/lh-desktop-1.json | tail -1
+dd6b81d 2026-09-06 charito20 perf(lighthouse): desktop corrida 1 - P=0.95 A=0.91 BP=0.92 SEO=0.9 (Render URL)
+```
+
+Esas 9 corridas (María Escudero, 2026-09-06) ya eran evidencia real contra
+el despliegue público, con Lighthouse 13.4.1, y son exactamente las que
+`resumen.tex`/`cap8-evaluacion.tex` citan (escritorio P=95/A=91/BP=92/
+SEO=90, móvil P≈77/A=91/BP=92/SEO=90 — coincide). El informe nunca estuvo
+mal; el trabajo de `13cf740` (y el de `fresh-20260916` antes) fue
+redundante, y además usó Lighthouse 12.6.1, una versión más vieja que la
+13.4.1 ya presente. Esto es exactamente lo que señaló una re-evaluación
+externa. Se corrige la narrativa en `VERIFICACION.md` (sección P3); los
+archivos redundantes se conservan por trazabilidad del proceso, sin
+presentarlos ya como "la evidencia vigente".
 
 **Archivos modificados:**
-- `dataset/lighthouse/lh-{mobile,desktop}-render-20260917-{1,2,3}.json` -- 6
-  corridas nuevas contra el despliegue público real.
-- `dataset/MANIFEST.sha256` -- 6 entradas nuevas para los archivos anteriores.
-- `VERIFICACION.md` (sección P3) -- scores y metadatos de estas 6 corridas
-  documentados con salida literal de los JSON.
-
-**Commit:** `13cf740`
+- `VERIFICACION.md` (sección P3) -- narrativa corregida, atribuye
+  correctamente `lh-desktop-{1,2,3}.json`/`lh-mobile-{1,2,3}.json` como la
+  evidencia real y vigente desde 2026-09-06.
 
 ---
 
