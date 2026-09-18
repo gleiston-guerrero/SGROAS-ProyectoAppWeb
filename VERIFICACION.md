@@ -94,6 +94,28 @@ este health check habría fallado). El login `200` confirma que el
 punta. Ninguno de los dos valores reales (contraseña de BD ni JWT secret)
 se expone en este documento ni en ningún archivo del repositorio.
 
+**Limitación declarada (2026-09-17):** una re-evaluación externa señaló,
+correctamente, que esta prueba demuestra que la contraseña NUEVA funciona,
+pero no que la VIEJA haya dejado de ser válida — son afirmaciones
+distintas. No es posible cerrar esa brecha desde este expediente sin
+violar una regla de seguridad que se sigue en todo este proceso: quien
+asiste en este repositorio nunca debe ver, recibir ni manipular una
+credencial real de producción (solo el responsable del repositorio la
+conoce, y solo él la ingresa directamente en los paneles de Supabase/
+Render). Probar que la contraseña vieja ya no autentica requeriría que
+alguien la escriba en algún punto de este flujo — exactamente lo que esa
+regla prohíbe. La única evidencia disponible sin romper esa regla es la
+de arriba (contraseña nueva funcionando de punta a punta) más la
+declaración del responsable de haber rotado la contraseña desde el panel
+de Supabase (Project Settings → Database → Reset database password, que
+por diseño de Supabase invalida el valor anterior en el mismo acto de
+generar el nuevo). Si se requiere prueba directa de que el valor viejo
+falla, solo el propio responsable podría generarla, ejecutando la conexión
+con el valor viejo desde su propio cliente fuera de este expediente y
+pegando aquí únicamente el mensaje de error (nunca la contraseña) — no se
+hizo porque el valor viejo ya no se recuerda tras la rotación, lo cual es,
+en sí mismo, una señal más de que la rotación fue real y no cosmética.
+
 **Archivos:** `src/main/resources/application.properties`, `docker-compose.yml`,
 `.env.example`, `src/test/java/ec/edu/uteq/sgroas/security/JwtServiceTest.java`,
 `src/test/resources/application-test.properties`, `.github/workflows/ci.yml`.

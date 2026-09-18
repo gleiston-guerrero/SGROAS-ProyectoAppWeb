@@ -46,6 +46,12 @@ HTTP 200
 
 Ver `VERIFICACION.md` (sección P1) para el detalle completo.
 
+**Limitación declarada (2026-09-17):** esta prueba confirma que la
+contraseña NUEVA funciona; no prueba que la vieja ya no sirva, y no se
+puede cerrar esa brecha sin violar la regla de no manipular credenciales
+reales de producción en este expediente. Detalle completo en
+`VERIFICACION.md` (sección P1).
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (commit 51202f5)
