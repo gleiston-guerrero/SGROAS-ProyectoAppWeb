@@ -1087,6 +1087,54 @@ archivo) ya está pegada íntegra en la sección "make verify (EV-2)" más
 arriba en este mismo documento — no se repite aquí para no duplicar 298
 líneas, pero es la misma corrida, no un resumen distinto.
 
+**Hallazgo real y corrección (2026-09-18):** la corrida de arriba se hizo
+sobre la copia de trabajo local, no sobre un clon limpio — y ahí está el
+defecto que una auditoría externa señaló correctamente: `MANIFEST.sha256`
+tenía hashes obsoletos para 9 archivos (`dataset/DATA-PROVENANCE.md`,
+`dataset/jacoco/jacoco.csv`, `dataset/sus/ANALISIS-SUS.md`,
+`dataset/sus/estadisticas-sus.json` y los 5 JSON de
+`dataset/sus/no-verificados/`), calculados sobre una versión de esos
+archivos anterior a ediciones posteriores del contenido. En la copia de
+trabajo local esos archivos ya tenían el contenido nuevo pero el manifest
+nunca se regeneró después de ese último cambio, así que localmente
+"pasaba" solo porque no se detectó el desfase; en `git clone` — es decir,
+para cualquiera que evalúe el repositorio igual que lo hizo esa auditoría
+— los 9 hashes no coincidían y `make verify`/`verify.sh`/`verify.ps1`
+fallaban con exit 1/2. El contenido de los 9 archivos siempre estuvo
+íntegro; lo que estaba mal era únicamente el manifest.
+
+Corregido regenerando `dataset/MANIFEST.sha256` (commit `6bb7e75`) a
+partir del contenido real versionado en git, y verificado sobre un
+**clon limpio** (`git clone`, no la copia de trabajo) con los tres
+verificadores:
+
+```
+$ git clone <repo> /tmp/check && cd /tmp/check
+$ bash scripts/verify.sh   | tail -6
+[P9] Checking Postman collection...
+  9 assignment endpoints found
+==========================================
+ALL CHECKS PASSED
+==========================================
+exit: 0
+
+$ make verify | tail -6
+[P9] OK
+==========================================
+ALL CHECKS PASSED
+==========================================
+exit: 0
+```
+
+`verify.ps1` (PowerShell, Windows) sobre el mismo clon limpio: `OK (302
+files verified)` en `[P10]`, `ALL CHECKS PASSED`, `EXIT CODE: 0`.
+
+Lección de proceso para no repetir el error: regenerar el manifest y
+correr los verificadores en la copia de trabajo local no es suficiente
+evidencia de que EV-2 se cumple — el commit no es lo que está en el
+disco local, es lo que devuelve `git clone`. La comprobación válida es
+siempre sobre un clon limpio.
+
 **Historial de defectos encontrados y corregidos en `check-javadoc.py`
 (todas las fechas son 2026-09-16, en pasadas sucesivas de re-verificación
 honesta contra la guía de evaluación, no una sola sesión):**
