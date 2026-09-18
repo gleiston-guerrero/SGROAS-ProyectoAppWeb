@@ -388,6 +388,11 @@ $ python3 scripts/check-spanish-methods.py
 ```
 `./mvnw compile` limpio; las 8 clases de test del módulo `abd/` en verde.
 
+(Estos números quedaron superados por el fix de P2 en 4 servicios más,
+que agregó 4 records nuevos en inglés: ver la entrada "auditoría rigurosa:
+JaCoCo real regenerado..." más abajo y `VERIFICACION.md` sección P5 para
+la cifra vigente, 0/484.)
+
 ---
 
 ## P6 — Javadoc >= 90% (commit d2b88b7)

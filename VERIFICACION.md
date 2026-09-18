@@ -709,18 +709,21 @@ ningún nivel (cuerpo HTTP, cookie, ni JWT).
 python3 scripts/check-spanish-methods.py
 ```
 
-**Salida final (2026-09-17, tercera pasada, tras corregir un segundo bug real
-del propio checker — ver nota de abajo):**
+**Salida final (2026-09-18, re-verificada tras el fix de P2 en 4 servicios
+más, que agregó 4 records nuevos — ver nota de abajo):**
 ```
-[OK] Metodos en src/main: 0/476 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/main: 0/132 en espanol (0.00%, umbral 5%)
-[OK] Metodos en src/test: 0/298 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/main: 0/484 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/299 en espanol (0.00%, umbral 5%)
 [OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
-[OK] Metodos combinados (main+test): 0/774 en espanol (0.00%, umbral 5%)
-[OK] Tipos combinados (main+test): 0/177 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/783 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/181 en espanol (0.00%, umbral 5%)
 
 OK: todas las categorias por debajo del umbral del 5%
 ```
+(Salida anterior, 2026-09-17: 476/132/298/45/774/177 — subió por los 4
+records `CachedXPage` nuevos del fix de P2, todos con nombres en inglés,
+así que el porcentaje se mantiene en 0.00%.)
 
 **Nota de auditoria (2026-09-17) — segundo bug real del checker, encontrado
 por una re-evaluación externa y confirmado con una mutación:** el
@@ -2512,6 +2515,16 @@ P11 (`docs/etica/consentimientos/CONSENT-STATUS.md`) sigue vigente como
 documentación — `make verify` solo comprueba que los archivos existen
 (`test -f`), no evalúa la validez del consentimiento en sí, así que su
 "OK" no contradice la advertencia de Piso 3 documentada más arriba.
+
+**Actualización (2026-09-18) — los conteos de P5 en el bloque de arriba
+quedaron obsoletos tras el fix de P2 en 4 servicios más (ver sección
+"P5"):** `Metodos en src/main` es ahora `0/484` (no `0/476`), `Tipos en
+src/main` `0/136` (no `0/132`), `Metodos en src/test` `0/299` (no
+`0/298`), `Metodos combinados` `0/783` (no `0/774`), `Tipos combinados`
+`0/181` (no `0/177`). El resto del bloque (P1/P2/P4/P6/P7/P10/P11/P3/P8/P9)
+sigue siendo la salida vigente; `make verify` en este momento sigue
+terminando en `ALL CHECKS PASSED` con exit `0`, re-confirmado justo antes
+de este párrafo.
 
 **Compilación y tests tras el renombrado final (2026-09-17):**
 ```
