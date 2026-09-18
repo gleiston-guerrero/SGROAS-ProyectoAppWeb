@@ -795,6 +795,82 @@ Javadoc coverage: 248/248 (100.0%)
 OK: Javadoc >= 90%
 ```
 
+**Actualización (2026-09-17):** tras los fixes de P2/P5 de esta fecha
+(nuevo record `CachedDriverPage`, métodos de repositorio renombrados vía
+`@Query`), el total real de métodos/constructores escaneados subió de 248
+a 249 — se documentó javadoc en cada método nuevo, así que la cobertura
+se mantiene en 100%:
+```
+$ python3 scripts/check-javadoc.py
+Javadoc coverage: 249/249 (100.0%)
+OK: Javadoc >= 90%
+```
+
+**Actualización (2026-09-17) — auditoría rigurosa: JaCoCo real regenerado,
+293→298 tests, y un hallazgo de proceso real encontrado y corregido.**
+Se pidió explícitamente revisar todo lo que pudiera depender de los fixes
+de hoy. El informe final (`resumen.tex`, `cap8-evaluacion.tex`, `anexos.tex`)
+citaba "293 pruebas JUnit 5" con JaCoCo 95,49%/88,38%/95,94% — cifras de
+antes de los fixes de P2/P5, que añadieron 5 tests nuevos
+(`CacheRedisSerializationTest` ×3 y otros). Con Docker ya disponible, se
+regeneró la suite completa contra una base de datos real (no simulada):
+
+```
+$ docker compose up -d postgres redis   # volumen anterior tenía password
+                                          # distinta de una sesion previa;
+                                          # se recreo limpio (dato local de
+                                          # prueba, no la BD de produccion)
+$ export SPRING_DATASOURCE_PASSWORD=<valor local de prueba>
+$ export JWT_SECRET=<valor local de prueba, generado con python secrets>
+$ ./mvnw clean verify
+[INFO] Tests run: 298, Failures: 0, Errors: 0, Skipped: 0
+```
+
+(El build completo marcó `BUILD FAILURE` en un paso posterior a los tests:
+el plugin de SpotBugs 4.8.6 no puede analizar bytecode de las clases del
+propio JDK cuando `JAVA_HOME` apunta a una versión de Java más nueva que
+la que soporta —`Unsupported class file major version 70`—, un problema
+de entorno local de esta máquina, no del código: las clases del proyecto
+sí compilan correctamente a bytecode de Java 21, `major version 65`,
+verificado con `javap -v`. El reporte de JaCoCo se genera en una fase
+anterior a SpotBugs en el ciclo de vida de Maven, así que sí se regeneró
+completo antes de ese fallo posterior.)
+
+Cifras reales recalculadas desde `docs/mediciones/jacoco/jacoco.csv`:
+```
+Instrucciones: 95.52% (7306/7649)   [antes: 95.49%]
+Ramas:         88.38% (251/284)     [sin cambio]
+Lineas:        95.97% (1311/1366)   [antes: 95.94%]
+```
+
+Se propagaron estas cifras y el conteo de 298 tests a
+`resumen.tex`/`cap8-evaluacion.tex`/`anexos.tex`/`cap1-introduccion.tex`/
+`cap2-marco-teorico.tex`/`cap12-conclusiones.tex`/`capA-anexo-resultados.tex`,
+y se recompiló el PDF (`pdflatex`+`biber`+2×`pdflatex`): 97 páginas, 0
+errores, 0 referencias sin resolver — mismo resultado que antes de este
+cambio, ahora con datos vigentes.
+
+**Hallazgo de proceso real, encontrado y corregido en esta misma pasada:**
+`dataset/jacoco/` (lo que verifica `MANIFEST.sha256`/P10) es una copia
+manual separada de `docs/mediciones/jacoco/` (lo único que el build
+realmente regenera, según `outputDirectory` en `pom.xml`) — un patrón de
+"copia para publicación en Zenodo" que también existe para
+`lighthouse/perf/sus`, pero que en esos tres casos solo difiere en fin de
+línea CRLF/LF (contenido idéntico, verificado con `cmp` tras normalizar
+con `tr -d '\r'`). Para `jacoco/` sí eran divergentes de verdad: la copia
+en `dataset/` seguía siendo la de una corrida anterior a los fixes de hoy.
+Se resincronizó (`dataset/jacoco/` reemplazado por una copia exacta de
+`docs/mediciones/jacoco/`) y se regeneró `MANIFEST.sha256`
+(`scripts/regenerate-manifest.ps1`, 298 entradas). Verificado:
+```
+$ bash scripts/verify.sh
+...
+ALL CHECKS PASSED
+$ make verify
+...
+ALL CHECKS PASSED
+```
+
 **Historial de defectos encontrados y corregidos en `check-javadoc.py`
 (todas las fechas son 2026-09-16, en pasadas sucesivas de re-verificación
 honesta contra la guía de evaluación, no una sola sesión):**
@@ -1865,7 +1941,9 @@ make verify
    se corrigió deliberadamente, así que su hash cambió — no es un dato
    inventado, es la consecuencia esperada de arreglar esos archivos).
 
-**Salida literal completa (2026-09-17, corrida final):**
+**Salida literal completa (2026-09-17, corrida final tras los fixes de
+P1/P2/P3/P5 de esta auditoría rigurosa — reemplaza la salida anterior, que
+quedó obsoleta en los conteos de P5/P6/P10/P3):**
 ```
 === SGROAS Verification ===
 
@@ -1885,26 +1963,24 @@ make verify
 [P5] Checking Spanish field names in entities...
 [P5] OK - no Spanish fields in entities
 [P5] Checking Spanish method names in main...
-[OK] Metodos en src/main: 0/226 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/main: 0/131 en espanol (0.00%, umbral 5%)
-[OK] Metodos en src/test: 0/293 en espanol (0.00%, umbral 5%)
-[OK] Tipos en src/test: 0/42 en espanol (0.00%, umbral 5%)
-[OK] Metodos combinados (main+test): 0/519 en espanol (0.00%, umbral 5%)
-[OK] Tipos combinados (main+test): 0/173 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/main: 0/476 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/132 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/298 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/774 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/177 en espanol (0.00%, umbral 5%)
 
 OK: todas las categorias por debajo del umbral del 5%
 
 [P6] Checking Javadoc coverage on public methods...
-Javadoc coverage: 248/248 (100.0%)
+Javadoc coverage: 249/249 (100.0%)
 OK: Javadoc >= 90%
 
 [P7] Checking Spanish captions in informe...
 [P7] OK - all figure/table captions in English
 
 [P10] Verifying MANIFEST.sha256...
-(283 archivos verificados, todos OK, incluidos dataset/sus/CONSENT-FORM.md
-y dataset/sus/CONSENT-REGISTRY.md con sus hashes regenerados tras la
-corrección de contenido de P11)
+(297 archivos verificados, todos OK)
 [P10] OK
 
 [P11] Checking SUS instrument and consent...
@@ -1914,11 +1990,12 @@ corrección de contenido de P11)
 [P11] OK
 
 [P3] Checking Lighthouse runs...
-  9 lighthouse runs found
+  21 lighthouse runs found
 [P3] OK
 
 [P8] Checking SUS demographics script...
   OK: SUS demographics script runs
+OK: las 10 filas de tab:sus-demografia (cap5-materiales-metodos.tex) cruzan 1:1, campo por campo, con dataset/sus/sus-raw.csv (codigo, edad, sexo, experiencia_web, sus_score)
 [P8] OK
 
 [P9] Checking Postman collection...
@@ -2121,3 +2198,26 @@ ahora — es el que la guía revisa por definición, y el que contiene
 absolutamente todas las correcciones documentadas en este archivo.
 
 URL pública del sistema en la primera pantalla del README: `https://sgroas-backend.onrender.com`.
+
+**Actualización (2026-09-17, estado final de esta ronda) — el tag se
+volvió a mover dos veces más**, tras los fixes de P2/P5 (commit `30705b1`)
+y de P1/P3 (commit `eba4f03`), cada vez con confirmación explícita del
+responsable del repositorio antes del `git push --force` sobre el tag:
+
+```
+$ git rev-parse v1.1.0^{commit}
+eba4f03537e02f1704deddd7de0fc775d52eb424
+$ git rev-parse HEAD
+eba4f03537e02f1704deddd7de0fc775d52eb424
+$ git rev-parse origin/main
+eba4f03537e02f1704deddd7de0fc775d52eb424
+$ git describe --tags
+v1.1.0
+```
+
+`v1.1.0`, `HEAD` y `origin/main` coinciden en `eba4f03` — el tag sigue
+siendo el único relevante para la evaluación y ahora contiene también las
+correcciones de P1 (limitación documentada sobre la prueba de rotación),
+P2 (`@Cacheable`/Redis/`Page`), P3 (atribución correcta de la evidencia
+Lighthouse real) y P5 (segundo bug del checker + 8 métodos reales
+corregidos).

@@ -26,18 +26,18 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class ReportService {
 
-    private final IncidentRepository incidenteRepository;
-    private final DriverRepository conductorRepository;
-    private final VehicleRepository vehiculoRepository;
-    private final RouteRepository rutaRepository;
-    private final RouteAssignmentRepository asignacionRutaRepository;
+    private final IncidentRepository incidentRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleRepository vehicleRepository;
+    private final RouteRepository routeRepository;
+    private final RouteAssignmentRepository routeAssignmentRepository;
 
     /**
      * Calcula los conteos globales de conductores, vehiculos, rutas, asignaciones e incidentes.
      * @return lista de filas con los totales y los conteos de registros activos y abiertos
      */
     public List&lt;Map&lt;String, Object&gt;&gt; generalStatistics() {
-<span class="fc" id="L40">        return incidenteRepository.generalStatistics().stream()</span>
+<span class="fc" id="L40">        return incidentRepository.generalStatistics().stream()</span>
 <span class="fc" id="L41">                .map(fila -&gt; mapa(</span>
                         &quot;total_conductores&quot;, fila[0],
                         &quot;conductores_activos&quot;, fila[1],
@@ -58,7 +58,7 @@ public class ReportService {
      * @return lista de filas con cada gravedad, su total de incidentes y la fecha del ultimo caso
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsBySeverity(String tipo) {
-<span class="fc" id="L61">        return incidenteRepository.incidentsBySeverity(tipo).stream()</span>
+<span class="fc" id="L61">        return incidentRepository.incidentsBySeverity(tipo).stream()</span>
 <span class="fc" id="L62">                .map(fila -&gt; mapa(</span>
                         &quot;gravedad&quot;, fila[0],
                         &quot;total_incidentes&quot;, fila[1],
@@ -73,7 +73,7 @@ public class ReportService {
      * @return lista de filas con el detalle de cada incidente y sus datos de conductor, vehiculo y ruta
      */
     public List&lt;Map&lt;String, Object&gt;&gt; incidentsByRange(Instant desde, Instant hasta) {
-<span class="fc" id="L76">        return incidenteRepository.getIncidentsByRange(desde, hasta).stream()</span>
+<span class="fc" id="L76">        return incidentRepository.getIncidentsByRange(desde, hasta).stream()</span>
 <span class="fc" id="L77">                .map(fila -&gt; mapa(</span>
                         &quot;incidente_id&quot;, fila[0],
                         &quot;tipo&quot;, fila[1],
@@ -94,7 +94,7 @@ public class ReportService {
      * @return lista de filas con los datos del conductor, su licencia y su asignacion vigente
      */
     public List&lt;Map&lt;String, Object&gt;&gt; licensesExpiring(Integer dias) {
-<span class="fc" id="L97">        return conductorRepository.licensesExpiring(dias).stream()</span>
+<span class="fc" id="L97">        return driverRepository.licensesExpiring(dias).stream()</span>
 <span class="fc" id="L98">                .map(fila -&gt; mapa(</span>
                         &quot;conductor_id&quot;, fila[0],
                         &quot;nombre_completo&quot;, fila[1],
@@ -111,7 +111,7 @@ public class ReportService {
      * @return lista de filas con los datos del vehiculo y sus totales de asignaciones e incidentes
      */
     public List&lt;Map&lt;String, Object&gt;&gt; vehiclesInMaintenance() {
-<span class="fc" id="L114">        return vehiculoRepository.vehiclesInMaintenance().stream()</span>
+<span class="fc" id="L114">        return vehicleRepository.vehiclesInMaintenance().stream()</span>
 <span class="fc" id="L115">                .map(fila -&gt; mapa(</span>
                         &quot;vehiculo_id&quot;, fila[0],
                         &quot;placa&quot;, fila[1],
@@ -128,7 +128,7 @@ public class ReportService {
      * @return lista de filas con los totales de asignaciones e incidentes de cada ruta evaluada
      */
     public List&lt;Map&lt;String, Object&gt;&gt; routePerformanceReport() {
-<span class="fc" id="L131">        return rutaRepository.routePerformanceReport().stream()</span>
+<span class="fc" id="L131">        return routeRepository.routePerformanceReport().stream()</span>
 <span class="fc" id="L132">                .map(fila -&gt; mapa(</span>
                         &quot;ruta_id&quot;, fila[0],
                         &quot;ruta_codigo&quot;, fila[1],
@@ -149,7 +149,7 @@ public class ReportService {
      * @return lista de filas con cada asignacion activa y los datos de su vehiculo y ruta
      */
     public List&lt;Map&lt;String, Object&gt;&gt; activeAssignmentsByDriver(Long conductorId) {
-<span class="fc" id="L152">        return asignacionRutaRepository.activeAssignmentsByDriver(conductorId).stream()</span>
+<span class="fc" id="L152">        return routeAssignmentRepository.activeAssignmentsByDriver(conductorId).stream()</span>
 <span class="fc" id="L153">                .map(fila -&gt; mapa(</span>
                         &quot;asignacion_id&quot;, fila[0],
                         &quot;vehiculo_placa&quot;, fila[1],

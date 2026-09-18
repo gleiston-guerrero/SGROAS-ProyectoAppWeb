@@ -35,19 +35,39 @@ import java.time.Duration;
 <span class="fc" id="L35">                .findAndAddModules()</span>
 <span class="fc" id="L36">                .build();</span>
 
-<span class="fc" id="L38">        Jackson2JsonRedisSerializer&lt;Object&gt; serializer =</span>
+        // Sin esto, Jackson2JsonRedisSerializer&lt;Object&gt; deserializa cualquier
+        // valor cacheado como un LinkedHashMap generico en vez del tipo real
+        // (Page, records de DTO, etc.): no lanza excepcion, simplemente
+        // devuelve el tipo equivocado en el segundo hit de cache (verificado
+        // en CacheRedisSerializationTest). activateDefaultTyping incrusta el
+        // nombre de la clase real en el JSON para que la reconstruya bien,
+        // restringido a los paquetes propios de la app para no habilitar
+        // deserializacion polimorfica insegura sobre clases arbitrarias.
+<span class="fc" id="L46">        var validator = com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator.builder()</span>
+<span class="fc" id="L47">                .allowIfSubType(&quot;ec.edu.uteq.sgroas.&quot;)</span>
+<span class="fc" id="L48">                .allowIfSubType(&quot;java.util.&quot;)</span>
+<span class="fc" id="L49">                .allowIfSubType(&quot;java.time.&quot;)</span>
+<span class="fc" id="L50">                .allowIfSubType(&quot;java.lang.&quot;)</span>
+<span class="fc" id="L51">                .build();</span>
+<span class="fc" id="L52">        mapper.activateDefaultTyping(</span>
+                validator,
+                ObjectMapper.DefaultTyping.EVERYTHING,
+                com.fasterxml.jackson.annotation.JsonTypeInfo.As.PROPERTY
+        );
+
+<span class="fc" id="L58">        Jackson2JsonRedisSerializer&lt;Object&gt; serializer =</span>
                 new Jackson2JsonRedisSerializer&lt;&gt;(mapper, Object.class);
 
-<span class="fc" id="L41">        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()</span>
-<span class="fc" id="L42">                .entryTtl(Duration.ofSeconds(defaultTtl))</span>
-<span class="fc" id="L43">                .disableCachingNullValues()</span>
-<span class="fc" id="L44">                .serializeValuesWith(</span>
-<span class="fc" id="L45">                        RedisSerializationContext.SerializationPair.fromSerializer(serializer)</span>
+<span class="fc" id="L61">        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()</span>
+<span class="fc" id="L62">                .entryTtl(Duration.ofSeconds(defaultTtl))</span>
+<span class="fc" id="L63">                .disableCachingNullValues()</span>
+<span class="fc" id="L64">                .serializeValuesWith(</span>
+<span class="fc" id="L65">                        RedisSerializationContext.SerializationPair.fromSerializer(serializer)</span>
                 );
 
-<span class="fc" id="L48">        return RedisCacheManager.builder(redisConnectionFactory)</span>
-<span class="fc" id="L49">                .cacheDefaults(config)</span>
-<span class="fc" id="L50">                .build();</span>
+<span class="fc" id="L68">        return RedisCacheManager.builder(redisConnectionFactory)</span>
+<span class="fc" id="L69">                .cacheDefaults(config)</span>
+<span class="fc" id="L70">                .build();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

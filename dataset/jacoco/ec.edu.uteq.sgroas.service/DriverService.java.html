@@ -6,7 +6,9 @@ import ec.edu.uteq.sgroas.entity.Driver;
 import ec.edu.uteq.sgroas.entity.DriverStatus;
 import ec.edu.uteq.sgroas.repository.DriverRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -19,20 +21,57 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DriverService {
 
-    private final DriverRepository conductorRepository;
+    private final DriverRepository driverRepository;
+
+    // Self-injected via ObjectProvider (lazy, avoids a circular-dependency
+    // error at construction time) so that calling listActiveCached() goes
+    // through the Spring-managed proxy instead of a plain `this.` call --
+    // @Cacheable only intercepts calls that go through the proxy, never a
+    // same-class internal call, so without this the cache would silently
+    // never be hit in production.
+    private final ObjectProvider&lt;DriverService&gt; self;
 
     /**
      * Returns a paginated list of active drivers, optionally filtered by search text.
+     * Only the unfiltered case (no search text) is cached: it is the common,
+     * repeatable query (e.g. the initial list view / load tests), while a
+     * free-text search is effectively unbounded in key space and would just
+     * fill the cache with one-off entries.
      * @param search optional text filter applied to driver data.
      * @param pageable pagination and sorting configuration.
      * @return page of driver response records.
      */
     public Page&lt;DriverResponse&gt; list(String search, Pageable pageable) {
-<span class="fc bfc" id="L31" title="All 4 branches covered.">        if (search == null || search.isBlank()) {</span>
-<span class="fc" id="L32">            return conductorRepository.findByActiveTrue(pageable).map(this::mapearAResponse);</span>
+<span class="fc bfc" id="L45" title="All 4 branches covered.">        if (search == null || search.isBlank()) {</span>
+<span class="fc" id="L46">            CachedDriverPage cached = self.getObject().listActiveCached(pageable);</span>
+<span class="fc" id="L47">            return new org.springframework.data.domain.PageImpl&lt;&gt;(</span>
+<span class="fc" id="L48">                    cached.content(), pageable, cached.totalElements());</span>
         }
-<span class="fc" id="L34">        return conductorRepository.searchActive(search.trim().toLowerCase(), pageable)</span>
-<span class="fc" id="L35">                .map(this::mapearAResponse);</span>
+<span class="fc" id="L50">        return driverRepository.searchActive(search.trim().toLowerCase(), pageable)</span>
+<span class="fc" id="L51">                .map(this::mapToResponse);</span>
+    }
+
+    /**
+     * Cached path for the unfiltered active-driver listing, keyed by page
+     * number and size. Evicted on create/update/delete (see the
+     * {@code @CacheEvict} methods below), so a cache hit is only ever
+     * served between writes.
+     * &lt;p&gt;Returns {@link CachedDriverPage}, not {@code Page&lt;DriverResponse&gt;}:
+     * {@code PageImpl} has no usable constructor for Jackson, so caching it
+     * directly through {@code Jackson2JsonRedisSerializer} throws
+     * {@code InvalidDefinitionException} on the very first read-back from
+     * Redis (verified in {@code CacheRedisSerializationTest}). A plain
+     * record round-trips correctly.
+     * @param pageable pagination and sorting configuration.
+     * @return content and total count for the requested page.
+     */
+    @Cacheable(value = &quot;conductores&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
+    public CachedDriverPage listActiveCached(Pageable pageable) {
+<span class="fc" id="L70">        Page&lt;DriverResponse&gt; page = driverRepository.findByActiveTrue(pageable).map(this::mapToResponse);</span>
+<span class="fc" id="L71">        return new CachedDriverPage(page.getContent(), page.getTotalElements());</span>
+    }
+
+<span class="fc" id="L74">    public record CachedDriverPage(List&lt;DriverResponse&gt; content, long totalElements) {</span>
     }
 
     /**
@@ -42,8 +81,8 @@ public class DriverService {
      * @throws IllegalArgumentException if no active driver exists with that id.
      */
     public DriverResponse findById(Long id) {
-<span class="fc" id="L45">        Driver conductor = getActiveDriver(id);</span>
-<span class="fc" id="L46">        return mapearAResponse(conductor);</span>
+<span class="fc" id="L84">        Driver conductor = getActiveDriver(id);</span>
+<span class="fc" id="L85">        return mapToResponse(conductor);</span>
     }
 
     /**
@@ -54,26 +93,26 @@ public class DriverService {
      */
     @CacheEvict(value = &quot;conductores&quot;, allEntries = true)
     public DriverResponse create(DriverRequest request) {
-<span class="fc" id="L57">        validateUniqueNationalId(request.nationalId());</span>
-<span class="fc" id="L58">        validateUniqueLicense(request.licenseNumber());</span>
+<span class="fc" id="L96">        validateUniqueNationalId(request.nationalId());</span>
+<span class="fc" id="L97">        validateUniqueLicense(request.licenseNumber());</span>
 
-<span class="fc" id="L60">        Driver conductor = Driver.builder()</span>
-<span class="fc" id="L61">                .firstNames(request.firstNames())</span>
-<span class="fc" id="L62">                .lastNames(request.lastNames())</span>
-<span class="fc" id="L63">                .nationalId(request.nationalId())</span>
-<span class="fc" id="L64">                .licenseNumber(request.licenseNumber())</span>
-<span class="fc" id="L65">                .licenseType(request.licenseType())</span>
-<span class="fc" id="L66">                .licenseExpiry(request.licenseExpiry())</span>
-<span class="fc" id="L67">                .phone(request.phone())</span>
-<span class="fc" id="L68">                .email(request.email())</span>
-<span class="fc" id="L69">                .status(toStatus(request.status()))</span>
-<span class="fc" id="L70">                .active(true)</span>
-<span class="fc" id="L71">                .createdAt(Instant.now())</span>
-<span class="fc" id="L72">                .updatedAt(Instant.now())</span>
-<span class="fc" id="L73">                .build();</span>
+<span class="fc" id="L99">        Driver conductor = Driver.builder()</span>
+<span class="fc" id="L100">                .firstNames(request.firstNames())</span>
+<span class="fc" id="L101">                .lastNames(request.lastNames())</span>
+<span class="fc" id="L102">                .nationalId(request.nationalId())</span>
+<span class="fc" id="L103">                .licenseNumber(request.licenseNumber())</span>
+<span class="fc" id="L104">                .licenseType(request.licenseType())</span>
+<span class="fc" id="L105">                .licenseExpiry(request.licenseExpiry())</span>
+<span class="fc" id="L106">                .phone(request.phone())</span>
+<span class="fc" id="L107">                .email(request.email())</span>
+<span class="fc" id="L108">                .status(toStatus(request.status()))</span>
+<span class="fc" id="L109">                .active(true)</span>
+<span class="fc" id="L110">                .createdAt(Instant.now())</span>
+<span class="fc" id="L111">                .updatedAt(Instant.now())</span>
+<span class="fc" id="L112">                .build();</span>
 
-<span class="fc" id="L75">        Driver conductorGuardado = conductorRepository.save(conductor);</span>
-<span class="fc" id="L76">        return mapearAResponse(conductorGuardado);</span>
+<span class="fc" id="L114">        Driver conductorGuardado = driverRepository.save(conductor);</span>
+<span class="fc" id="L115">        return mapToResponse(conductorGuardado);</span>
     }
 
     /**
@@ -85,31 +124,31 @@ public class DriverService {
      */
     @CacheEvict(value = &quot;conductores&quot;, allEntries = true)
     public DriverResponse update(Long id, DriverRequest request) {
-<span class="fc" id="L88">        Driver conductor = getActiveDriver(id);</span>
+<span class="fc" id="L127">        Driver conductor = getActiveDriver(id);</span>
 
-<span class="fc bfc" id="L90" title="All 2 branches covered.">        if (!conductor.getNationalId().equals(request.nationalId())</span>
-<span class="pc bpc" id="L91" title="1 of 2 branches missed.">                &amp;&amp; conductorRepository.existsByNationalId(request.nationalId())) {</span>
-<span class="fc" id="L92">            throw new IllegalArgumentException(&quot;Ya existe un conductor con esa cedula&quot;);</span>
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if (!conductor.getNationalId().equals(request.nationalId())</span>
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">                &amp;&amp; driverRepository.existsByNationalId(request.nationalId())) {</span>
+<span class="fc" id="L131">            throw new IllegalArgumentException(&quot;Ya existe un conductor con esa cedula&quot;);</span>
         }
 
-<span class="fc bfc" id="L95" title="All 2 branches covered.">        if (!conductor.getLicenseNumber().equals(request.licenseNumber())</span>
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">                &amp;&amp; conductorRepository.existsByLicenseNumber(request.licenseNumber())) {</span>
-<span class="fc" id="L97">            throw new IllegalArgumentException(&quot;Ya existe un conductor con ese numero de licencia&quot;);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">        if (!conductor.getLicenseNumber().equals(request.licenseNumber())</span>
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">                &amp;&amp; driverRepository.existsByLicenseNumber(request.licenseNumber())) {</span>
+<span class="fc" id="L136">            throw new IllegalArgumentException(&quot;Ya existe un conductor con ese numero de licencia&quot;);</span>
         }
 
-<span class="fc" id="L100">        conductor.setFirstNames(request.firstNames());</span>
-<span class="fc" id="L101">        conductor.setLastNames(request.lastNames());</span>
-<span class="fc" id="L102">        conductor.setNationalId(request.nationalId());</span>
-<span class="fc" id="L103">        conductor.setLicenseNumber(request.licenseNumber());</span>
-<span class="fc" id="L104">        conductor.setLicenseType(request.licenseType());</span>
-<span class="fc" id="L105">        conductor.setLicenseExpiry(request.licenseExpiry());</span>
-<span class="fc" id="L106">        conductor.setPhone(request.phone());</span>
-<span class="fc" id="L107">        conductor.setEmail(request.email());</span>
-<span class="fc" id="L108">        conductor.setStatus(toStatus(request.status()));</span>
-<span class="fc" id="L109">        conductor.setUpdatedAt(Instant.now());</span>
+<span class="fc" id="L139">        conductor.setFirstNames(request.firstNames());</span>
+<span class="fc" id="L140">        conductor.setLastNames(request.lastNames());</span>
+<span class="fc" id="L141">        conductor.setNationalId(request.nationalId());</span>
+<span class="fc" id="L142">        conductor.setLicenseNumber(request.licenseNumber());</span>
+<span class="fc" id="L143">        conductor.setLicenseType(request.licenseType());</span>
+<span class="fc" id="L144">        conductor.setLicenseExpiry(request.licenseExpiry());</span>
+<span class="fc" id="L145">        conductor.setPhone(request.phone());</span>
+<span class="fc" id="L146">        conductor.setEmail(request.email());</span>
+<span class="fc" id="L147">        conductor.setStatus(toStatus(request.status()));</span>
+<span class="fc" id="L148">        conductor.setUpdatedAt(Instant.now());</span>
 
-<span class="fc" id="L111">        Driver conductorActualizado = conductorRepository.save(conductor);</span>
-<span class="fc" id="L112">        return mapearAResponse(conductorActualizado);</span>
+<span class="fc" id="L150">        Driver conductorActualizado = driverRepository.save(conductor);</span>
+<span class="fc" id="L151">        return mapToResponse(conductorActualizado);</span>
     }
 
     /**
@@ -118,62 +157,62 @@ public class DriverService {
      */
     @CacheEvict(value = &quot;conductores&quot;, allEntries = true)
     public void deactivate(Long id) {
-<span class="fc" id="L121">        Driver conductor = getActiveDriver(id);</span>
-<span class="fc" id="L122">        conductor.setActive(false);</span>
-<span class="fc" id="L123">        conductor.setStatus(DriverStatus.INACTIVO);</span>
-<span class="fc" id="L124">        conductor.setUpdatedAt(Instant.now());</span>
-<span class="fc" id="L125">        conductorRepository.save(conductor);</span>
-<span class="fc" id="L126">    }</span>
+<span class="fc" id="L160">        Driver conductor = getActiveDriver(id);</span>
+<span class="fc" id="L161">        conductor.setActive(false);</span>
+<span class="fc" id="L162">        conductor.setStatus(DriverStatus.INACTIVO);</span>
+<span class="fc" id="L163">        conductor.setUpdatedAt(Instant.now());</span>
+<span class="fc" id="L164">        driverRepository.save(conductor);</span>
+<span class="fc" id="L165">    }</span>
 
     private Driver getActiveDriver(Long id) {
-<span class="fc" id="L129">        return conductorRepository.findById(id)</span>
-<span class="fc" id="L130">                .filter(Driver::getActive)</span>
-<span class="fc" id="L131">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
+<span class="fc" id="L168">        return driverRepository.findById(id)</span>
+<span class="fc" id="L169">                .filter(Driver::getActive)</span>
+<span class="fc" id="L170">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
     }
 
     private void validateUniqueNationalId(String nationalId) {
-<span class="fc bfc" id="L135" title="All 2 branches covered.">        if (conductorRepository.existsByNationalId(nationalId)) {</span>
-<span class="fc" id="L136">            throw new IllegalArgumentException(&quot;Ya existe un conductor con esa cedula&quot;);</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (driverRepository.existsByNationalId(nationalId)) {</span>
+<span class="fc" id="L175">            throw new IllegalArgumentException(&quot;Ya existe un conductor con esa cedula&quot;);</span>
         }
-<span class="fc" id="L138">    }</span>
+<span class="fc" id="L177">    }</span>
 
     private void validateUniqueLicense(String licenseNumber) {
-<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (conductorRepository.existsByLicenseNumber(licenseNumber)) {</span>
-<span class="fc" id="L142">            throw new IllegalArgumentException(&quot;Ya existe un conductor con ese numero de licencia&quot;);</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        if (driverRepository.existsByLicenseNumber(licenseNumber)) {</span>
+<span class="fc" id="L181">            throw new IllegalArgumentException(&quot;Ya existe un conductor con ese numero de licencia&quot;);</span>
         }
-<span class="fc" id="L144">    }</span>
+<span class="fc" id="L183">    }</span>
 
     private DriverStatus toStatus(String status) {
         try {
-<span class="fc" id="L148">            return DriverStatus.valueOf(status.toUpperCase());</span>
-<span class="fc" id="L149">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L150">            throw new IllegalArgumentException(&quot;Estado de conductor no valido&quot;);</span>
+<span class="fc" id="L187">            return DriverStatus.valueOf(status.toUpperCase());</span>
+<span class="fc" id="L188">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L189">            throw new IllegalArgumentException(&quot;Estado de conductor no valido&quot;);</span>
         }
     }
 
     private Boolean licenseExpiring(LocalDate licenseExpiry) {
-<span class="fc" id="L155">        LocalDate hoy = LocalDate.now();</span>
-<span class="fc" id="L156">        LocalDate limite = hoy.plusDays(30);</span>
+<span class="fc" id="L194">        LocalDate hoy = LocalDate.now();</span>
+<span class="fc" id="L195">        LocalDate limite = hoy.plusDays(30);</span>
 
-<span class="fc bfc" id="L158" title="All 4 branches covered.">        return !licenseExpiry.isBefore(hoy) &amp;&amp; !licenseExpiry.isAfter(limite);</span>
+<span class="fc bfc" id="L197" title="All 4 branches covered.">        return !licenseExpiry.isBefore(hoy) &amp;&amp; !licenseExpiry.isAfter(limite);</span>
     }
 
-    private DriverResponse mapearAResponse(Driver conductor) {
-<span class="fc" id="L162">        return new DriverResponse(</span>
-<span class="fc" id="L163">                conductor.getId(),</span>
-<span class="fc" id="L164">                conductor.getFirstNames(),</span>
-<span class="fc" id="L165">                conductor.getLastNames(),</span>
-<span class="fc" id="L166">                conductor.getNationalId(),</span>
-<span class="fc" id="L167">                conductor.getLicenseNumber(),</span>
-<span class="fc" id="L168">                conductor.getLicenseType(),</span>
-<span class="fc" id="L169">                conductor.getLicenseExpiry(),</span>
-<span class="fc" id="L170">                conductor.getPhone(),</span>
-<span class="fc" id="L171">                conductor.getEmail(),</span>
-<span class="fc" id="L172">                conductor.getStatus().name(),</span>
-<span class="fc" id="L173">                conductor.getActive(),</span>
-<span class="fc" id="L174">                licenseExpiring(conductor.getLicenseExpiry()),</span>
-<span class="fc" id="L175">                conductor.getCreatedAt(),</span>
-<span class="fc" id="L176">                conductor.getUpdatedAt()</span>
+    private DriverResponse mapToResponse(Driver conductor) {
+<span class="fc" id="L201">        return new DriverResponse(</span>
+<span class="fc" id="L202">                conductor.getId(),</span>
+<span class="fc" id="L203">                conductor.getFirstNames(),</span>
+<span class="fc" id="L204">                conductor.getLastNames(),</span>
+<span class="fc" id="L205">                conductor.getNationalId(),</span>
+<span class="fc" id="L206">                conductor.getLicenseNumber(),</span>
+<span class="fc" id="L207">                conductor.getLicenseType(),</span>
+<span class="fc" id="L208">                conductor.getLicenseExpiry(),</span>
+<span class="fc" id="L209">                conductor.getPhone(),</span>
+<span class="fc" id="L210">                conductor.getEmail(),</span>
+<span class="fc" id="L211">                conductor.getStatus().name(),</span>
+<span class="fc" id="L212">                conductor.getActive(),</span>
+<span class="fc" id="L213">                licenseExpiring(conductor.getLicenseExpiry()),</span>
+<span class="fc" id="L214">                conductor.getCreatedAt(),</span>
+<span class="fc" id="L215">                conductor.getUpdatedAt()</span>
         );
     }
 }

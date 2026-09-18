@@ -105,7 +105,7 @@ public class AbdUnitService {
 
     private void validateUniqueness(String placa, String numeroDisco, Integer idExcluir) {
 <span class="fc bfc" id="L107" title="All 2 branches covered.">        if (idExcluir == null) {</span>
-<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (unidadRepository.existsByPlacaIgnoreCase(placa)) {</span>
+<span class="fc bfc" id="L108" title="All 2 branches covered.">            if (unidadRepository.existsByLicensePlateIgnoreCase(placa)) {</span>
 <span class="fc" id="L109">                throw new IllegalArgumentException(&quot;Ya existe una unidad con la placa &quot; + placa);</span>
             }
 <span class="fc bfc" id="L111" title="All 2 branches covered.">            if (unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {</span>
@@ -117,7 +117,7 @@ public class AbdUnitService {
 <span class="pc" id="L117">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Unit no encontrada: &quot; + idExcluir));</span>
 <span class="fc bfc" id="L118" title="All 2 branches covered.">        boolean cambioPlaca = !actual.getPlaca().equalsIgnoreCase(placa);</span>
 <span class="fc bfc" id="L119" title="All 2 branches covered.">        boolean cambioDisco = !actual.getNumeroDisco().equalsIgnoreCase(numeroDisco);</span>
-<span class="fc bfc" id="L120" title="All 4 branches covered.">        if (cambioPlaca &amp;&amp; unidadRepository.existsByPlacaIgnoreCase(placa)) {</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">        if (cambioPlaca &amp;&amp; unidadRepository.existsByLicensePlateIgnoreCase(placa)) {</span>
 <span class="fc" id="L121">            throw new IllegalArgumentException(&quot;Ya existe una unidad con la placa &quot; + placa);</span>
         }
 <span class="fc bfc" id="L123" title="All 4 branches covered.">        if (cambioDisco &amp;&amp; unidadRepository.existsByNumeroDiscoIgnoreCase(numeroDisco)) {</span>

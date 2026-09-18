@@ -348,6 +348,41 @@ documentación real de los métodos faltantes: **248/248 (100%)**).
 
 **Commit:** d2b88b7
 
+**Actualización (2026-09-17):** los fixes de P2/P5 de esta fecha añadieron
+métodos/constructores nuevos (todos documentados). Cifra vigente:
+```
+$ python3 scripts/check-javadoc.py
+Javadoc coverage: 249/249 (100.0%)
+OK: Javadoc >= 90%
+```
+
+**Actualización (2026-09-17) — auditoría rigurosa: JaCoCo real regenerado
+con Docker, 293→298 tests, y una desincronización de proceso corregida:**
+**Cerrado por: Luis Tejada**
+
+El informe citaba "293 pruebas JUnit 5" con JaCoCo 95,49/88,38/95,94% —
+cifras de antes de los fixes de P2/P5. Se regeneró la suite completa
+contra PostgreSQL real (Docker, volumen local de prueba, sin credenciales
+de producción): 298 tests, 0 fallos, 0 errores. Cifras reales nuevas:
+instrucciones 95,52%, ramas 88,38% (sin cambio), líneas 95,97%. Se
+propagaron al informe y se recompiló el PDF (97 páginas, 0 errores). De
+paso se encontró que `dataset/jacoco/` (lo que verifica el manifiesto) es
+una copia manual de `docs/mediciones/jacoco/` (lo único que el build
+regenera) que no se había resincronizado tras los fixes de hoy — se
+corrigió y se regeneró `MANIFEST.sha256`. Detalle completo en
+`VERIFICACION.md` (sección P6).
+
+**Archivos modificados:**
+- `docs/informe-final/resumen.tex`, `cap1-introduccion.tex`,
+  `cap2-marco-teorico.tex`, `capitulos/cap8-evaluacion.tex`,
+  `capitulos/cap12-conclusiones.tex`, `capitulos/capA-anexo-resultados.tex`,
+  `anexos.tex` -- 293→298 tests, 95,49→95,52% instrucciones,
+  95,94→95,97% líneas.
+- `docs/informe-final/main.pdf` -- recompilado.
+- `dataset/jacoco/` -- resincronizado con `docs/mediciones/jacoco/`.
+- `dataset/MANIFEST.sha256`, `dataset/MANIFEST.csv` -- regenerados
+  (298 entradas).
+
 ---
 
 ## P7 — Captions de figuras/tablas en inglés (commit 33e25e5)

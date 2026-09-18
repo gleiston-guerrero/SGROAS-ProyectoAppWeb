@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class IncidentController {
 
-    private final IncidentService incidenteService;
+    private final IncidentService incidentService;
 
     /**
      * Recupera la lista paginada de incidentes registrados en el sistema.
@@ -28,7 +28,7 @@ public class IncidentController {
     public ResponseEntity&lt;Page&lt;IncidentResponse&gt;&gt; list(
             @PageableDefault(size = 10, sort = &quot;id&quot;) Pageable pageable
     ) {
-<span class="fc" id="L31">        return ResponseEntity.ok(incidenteService.list(pageable));</span>
+<span class="fc" id="L31">        return ResponseEntity.ok(incidentService.list(pageable));</span>
     }
 
     /**
@@ -38,7 +38,7 @@ public class IncidentController {
      */
     @GetMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;IncidentResponse&gt; findById(@PathVariable Long id) {
-<span class="fc" id="L41">        return ResponseEntity.ok(incidenteService.findById(id));</span>
+<span class="fc" id="L41">        return ResponseEntity.ok(incidentService.findById(id));</span>
     }
 
     /**
@@ -50,7 +50,7 @@ public class IncidentController {
     public ResponseEntity&lt;IncidentResponse&gt; create(
             @Valid @RequestBody IncidentRequest request
     ) {
-<span class="fc" id="L53">        IncidentResponse response = incidenteService.create(request);</span>
+<span class="fc" id="L53">        IncidentResponse response = incidentService.create(request);</span>
 <span class="fc" id="L54">        return ResponseEntity.status(HttpStatus.CREATED).body(response);</span>
     }
 
@@ -65,7 +65,7 @@ public class IncidentController {
             @PathVariable Long id,
             @Valid @RequestBody IncidentRequest request
     ) {
-<span class="fc" id="L68">        return ResponseEntity.ok(incidenteService.update(id, request));</span>
+<span class="fc" id="L68">        return ResponseEntity.ok(incidentService.update(id, request));</span>
     }
 
     /**
@@ -75,7 +75,7 @@ public class IncidentController {
      */
     @DeleteMapping(&quot;/{id}&quot;)
     public ResponseEntity&lt;Void&gt; deactivate(@PathVariable Long id) {
-<span class="fc" id="L78">        incidenteService.deactivate(id);</span>
+<span class="fc" id="L78">        incidentService.deactivate(id);</span>
 <span class="fc" id="L79">        return ResponseEntity.noContent().build();</span>
     }
 }
