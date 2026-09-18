@@ -298,6 +298,74 @@ record `CachedDriverPage(List<DriverResponse> content, long totalElements)`,
 serializable/deserializable de verdad, y `list()` reconstruye el `Page` real
 (`new PageImpl<>(...)`) fuera de la ruta cacheada, después de leer del caché.
 
+**Actualización (2026-09-17 tarde) — auditoría rigurosa: el mismo bug (y
+uno peor) estaba presente en otros 4 servicios, sin documentar hasta
+ahora.** Al revisar sistemáticamente qué más podía depender del fix de
+`DriverService`, se encontró que `IncidentService`, `RouteService` y
+`VehicleService` llamaban a su propio `listCached(pageable)` de forma
+directa (`this.` implícito, no vía proxy) — el mismo bug de
+auto-invocación, nunca detectado porque no había ningún test que
+verificara que el repositorio se invoca una sola vez en llamadas
+repetidas (como sí existe para `DriverService` desde el fix anterior).
+Además, un defecto de corrección real, más grave que el de caché:
+
+```java
+// ANTES, en los 3 servicios:
+public Page<XResponse> list(Pageable pageable) {
+    List<XResponse> contenido = listCached(pageable);
+    return new PageImpl<>(contenido, pageable, contenido.size());
+}
+```
+`contenido.size()` es el tamaño de la página actual (p.ej. 10), no el
+total real de registros — `Page.getTotalElements()`/`getTotalPages()`
+quedaban mal calculados en producción para Incidentes, Rutas y Vehículos,
+independientemente del bug de caché.
+
+`RouteAssignmentService` tenía un tercer defecto, distinto: su
+`listCached()` nunca se llamaba desde ningún lado — `list()` consultaba el
+repositorio directamente. Confirmado sin llamadores en todo el árbol:
+```
+$ grep -rn "\.listCached(" src/main/java src/test/java
+(0 resultados antes del fix)
+```
+Este es exactamente el método que responde `GET /api/asignaciones`, el
+endpoint verificado en vivo en la sección "P9" más abajo.
+
+**Corrección aplicada, igual en los cuatro servicios** (mismo patrón que
+`DriverService`): auto-inyección de `ObjectProvider<XService>` para que la
+llamada pase por el proxy de Spring, y un record `CachedXPage(List<XResponse>
+content, long totalElements)` en vez de `Page<XResponse>` cacheado
+directamente (mismo motivo que `DriverService`: `PageImpl` no es
+serializable por Jackson). Verificado:
+
+```
+$ ./mvnw test -Dtest=CacheRedisSerializationTest,IncidentServiceTest,RouteServiceTest,VehicleServiceTest,RouteAssignmentServiceTest
+[INFO] Tests run: 38, Failures: 0, Errors: 0, Skipped: 0
+```
+
+`CacheRedisSerializationTest` se extendió con
+`withFix_cachedIncidentPageRoundTripsAsRealType`, probando que el mismo
+patrón (`List<DTO>` + `long`) sobrevive el ciclo real de
+serialización/deserialización de Redis para el nuevo record — los otros
+tres (`CachedRoutePage`, `CachedVehiclePage`, `CachedAssignmentPage`) usan
+exactamente la misma forma, ya probada.
+
+Suite completa contra PostgreSQL real (Docker), tras el fix:
+```
+$ ./mvnw test
+Tests run: 299, Failures: 0, Errors: 0, Skipped: 0
+```
+
+**Archivos modificados:**
+- `src/main/java/ec/edu/uteq/sgroas/service/IncidentService.java`,
+  `RouteService.java`, `VehicleService.java`, `RouteAssignmentService.java`
+  — auto-inyección de proxy + `CachedXPage` en vez de `Page` cacheado.
+- `src/test/java/ec/edu/uteq/sgroas/service/IncidentServiceTest.java`,
+  `RouteServiceTest.java`, `VehicleServiceTest.java`,
+  `RouteAssignmentServiceTest.java` — mock de `ObjectProvider<XService>`.
+- `src/test/java/ec/edu/uteq/sgroas/config/CacheRedisSerializationTest.java`
+  — nueva prueba para `CachedIncidentPage`.
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)
@@ -909,6 +977,25 @@ Se propagaron estas cifras y el conteo de 298 tests a
 y se recompiló el PDF (`pdflatex`+`biber`+2×`pdflatex`): 97 páginas, 0
 errores, 0 referencias sin resolver — mismo resultado que antes de este
 cambio, ahora con datos vigentes.
+
+**Segunda actualización (2026-09-17, misma tarde) — 298→299 tests tras
+arreglar el cache de Incident/Route/Vehicle/RouteAssignment (ver sección
+"P2"):**
+```
+$ ./mvnw test
+Tests run: 299, Failures: 0, Errors: 0, Skipped: 0
+```
+Cifras reales recalculadas de nuevo:
+```
+Instrucciones: 95.67% (7385/7719)   [antes: 95.52%]
+Ramas:         88.38% (251/284)     [sin cambio]
+Lineas:        96.19% (1313/1365)   [antes: 95.97%]
+```
+Se propagaron otra vez a los mismos archivos del informe y se recompiló
+el PDF: 97 páginas, 0 errores, 0 referencias sin resolver.
+`dataset/jacoco/` se resincronizó de nuevo con `docs/mediciones/jacoco/`
+(mismo procedimiento que la vez anterior) y `MANIFEST.sha256` se
+regeneró (302 entradas).
 
 **Hallazgo de proceso real, encontrado y corregido en esta misma pasada:**
 `dataset/jacoco/` (lo que verifica `MANIFEST.sha256`/P10) es una copia

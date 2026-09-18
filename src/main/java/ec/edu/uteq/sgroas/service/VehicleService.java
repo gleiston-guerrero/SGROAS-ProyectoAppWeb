@@ -6,6 +6,7 @@ import ec.edu.uteq.sgroas.entity.VehicleStatus;
 import ec.edu.uteq.sgroas.entity.Vehicle;
 import ec.edu.uteq.sgroas.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -22,26 +23,39 @@ public class VehicleService {
 
     private final VehicleRepository vehicleRepository;
 
+    // Self-injected via ObjectProvider so that calling listCached() goes
+    // through the Spring-managed proxy instead of a plain `this.` call --
+    // @Cacheable only intercepts calls that go through the proxy, never a
+    // same-class internal call. Without this the cache never activated in
+    // production (found during a rigorous audit, same defect as DriverService).
+    private final ObjectProvider<VehicleService> self;
+
     /**
      * Returns a paginated list of active vehicles.
      * @param pageable pagination and sorting configuration.
      * @return page of vehicle response records.
      */
     public Page<VehicleResponse> list(Pageable pageable) {
-        List<VehicleResponse> contenido = listCached(pageable);
-        return new PageImpl<>(contenido, pageable, contenido.size());
+        CachedVehiclePage cached = self.getObject().listCached(pageable);
+        return new PageImpl<>(cached.content(), pageable, cached.totalElements());
     }
 
     /**
      * Returns the cached list of active vehicles for the given pageable, keyed by page.
+     * <p>Returns {@link CachedVehiclePage}, not {@code Page<VehicleResponse>}:
+     * {@code PageImpl} has no usable constructor for Jackson, so caching it
+     * directly through {@code Jackson2JsonRedisSerializer} throws on the
+     * first read-back from Redis. A plain record round-trips correctly.
      * @param pageable pagination and sorting configuration.
-     * @return list of vehicle response records.
+     * @return content and total count for the requested page.
      */
     @Cacheable(value = "vehiculos", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
-    public List<VehicleResponse> listCached(Pageable pageable) {
-        return vehicleRepository.findByActiveTrue(pageable)
-                .map(this::mapToResponse)
-                .getContent();
+    public CachedVehiclePage listCached(Pageable pageable) {
+        Page<VehicleResponse> page = vehicleRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+        return new CachedVehiclePage(page.getContent(), page.getTotalElements());
+    }
+
+    public record CachedVehiclePage(List<VehicleResponse> content, long totalElements) {
     }
 
     /**

@@ -89,6 +89,42 @@ que Jackson pueda usar para reconstruirlo, ni siquiera arreglando el mapper.
 
 ---
 
+**Actualización (2026-09-17 tarde) — auditoría rigurosa: el mismo bug (y
+uno peor) en otros 4 servicios:**
+**Cerrado por: Luis Tejada**
+
+Al revisar qué más dependía del fix de `DriverService` se encontró que
+`IncidentService`, `RouteService` y `VehicleService` tenían el mismo bug
+de auto-invocación (`listCached(pageable)` llamado como `this.` implícito,
+nunca a través del proxy de Spring, así que `@Cacheable` nunca se
+activaba). Además, un defecto de corrección real y más grave: los tres
+calculaban `Page.getTotalElements()` como `contenido.size()` (el tamaño
+de la página actual, no el total real) -- la paginación de Incidentes,
+Rutas y Vehículos estaba mal en producción, independientemente del cache.
+`RouteAssignmentService` tenía un tercer defecto: su `listCached()` nunca
+se llamaba desde ningún lado (`list()` iba directo al repositorio),
+confirmado con `grep -rn "\.listCached(" src/main/java src/test/java`
+(0 resultados antes del fix) -- es el método detrás de
+`GET /api/asignaciones`, el endpoint de la evidencia en vivo de P9.
+
+**Archivos modificados:**
+- `src/main/java/ec/edu/uteq/sgroas/service/IncidentService.java`,
+  `RouteService.java`, `VehicleService.java`, `RouteAssignmentService.java`
+  -- mismo patrón que `DriverService`: auto-inyección de
+  `ObjectProvider<XService>` + record `CachedXPage` en vez de `Page`
+  cacheado directamente.
+- Tests correspondientes con mock de `ObjectProvider`.
+- `CacheRedisSerializationTest.java` -- nueva prueba
+  `withFix_cachedIncidentPageRoundTripsAsRealType`.
+
+Verificado con la suite completa contra PostgreSQL real (Docker): 299
+tests, 0 fallos, 0 errores. JaCoCo real recalculado (95,67% instrucciones,
+88,38% ramas sin cambio, 96,19% líneas) y propagado al informe, PDF
+recompilado (97 páginas, 0 errores). Detalle completo en
+`VERIFICACION.md` (secciones P2 y P6).
+
+---
+
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7)
 **Cerrado por: María del Rosario Escudero Plaza**
 

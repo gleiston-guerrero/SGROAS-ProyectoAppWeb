@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,9 @@ class RouteServiceTest {
 
     @Mock
     private RouteRepository routeRepository;
+
+    @Mock
+    private ObjectProvider<RouteService> self;
 
     @InjectMocks
     private RouteService routeService;
@@ -57,6 +61,7 @@ class RouteServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(routeService);
         when(routeRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(rutaEjemplo())));
 

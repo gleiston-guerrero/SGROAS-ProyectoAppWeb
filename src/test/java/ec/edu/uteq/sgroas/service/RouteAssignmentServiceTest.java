@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -39,6 +40,9 @@ class RouteAssignmentServiceTest {
 
     @Mock
     private RouteRepository routeRepository;
+
+    @Mock
+    private ObjectProvider<RouteAssignmentService> self;
 
     @InjectMocks
     private RouteAssignmentService routeAssignmentService;
@@ -93,6 +97,7 @@ class RouteAssignmentServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(routeAssignmentService);
         when(routeAssignmentRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(asignacionEjemplo())));
 

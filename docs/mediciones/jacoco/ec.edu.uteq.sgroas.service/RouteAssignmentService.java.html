@@ -8,6 +8,7 @@ import ec.edu.uteq.sgroas.repository.DriverRepository;
 import ec.edu.uteq.sgroas.repository.RouteRepository;
 import ec.edu.uteq.sgroas.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,14 @@ public class RouteAssignmentService {
     private final VehicleRepository vehicleRepository;
     private final RouteRepository routeRepository;
 
+    // Self-injected via ObjectProvider so that calling listCached() goes
+    // through the Spring-managed proxy instead of a plain `this.` call --
+    // @Cacheable only intercepts calls that go through the proxy, never a
+    // same-class internal call. Before this fix, list() never even called
+    // listCached() -- it queried the repository directly, leaving the
+    // @Cacheable method completely dead code (found during a rigorous audit).
+    private final ObjectProvider&lt;RouteAssignmentService&gt; self;
+
     /**
      * Returns a paginated list of active route assignments.
      * @param pageable pagination and sorting configuration.
@@ -35,22 +44,27 @@ public class RouteAssignmentService {
      */
     @Transactional(readOnly = true)
     public Page&lt;RouteAssignmentResponse&gt; list(Pageable pageable) {
-<span class="fc" id="L38">        Page&lt;RouteAssignment&gt; page = routeAssignmentRepository.findByActiveTrue(pageable);</span>
-<span class="fc" id="L39">        List&lt;RouteAssignmentResponse&gt; contenido = page.map(this::mapToResponse).getContent();</span>
-<span class="fc" id="L40">        return new PageImpl&lt;&gt;(contenido, pageable, page.getTotalElements());</span>
+<span class="fc" id="L47">        CachedAssignmentPage cached = self.getObject().listCached(pageable);</span>
+<span class="fc" id="L48">        return new PageImpl&lt;&gt;(cached.content(), pageable, cached.totalElements());</span>
     }
 
     /**
      * Returns the cached list of active assignments for the given pageable, keyed by page.
+     * &lt;p&gt;Returns {@link CachedAssignmentPage}, not {@code Page&lt;RouteAssignmentResponse&gt;}:
+     * {@code PageImpl} has no usable constructor for Jackson, so caching it
+     * directly through {@code Jackson2JsonRedisSerializer} throws on the
+     * first read-back from Redis. A plain record round-trips correctly.
      * @param pageable pagination and sorting configuration.
-     * @return list of assignment response records.
+     * @return content and total count for the requested page.
      */
     @Cacheable(value = &quot;asignaciones&quot;, key = &quot;#pageable.pageNumber + '-' + #pageable.pageSize&quot;)
     @Transactional(readOnly = true)
-    public List&lt;RouteAssignmentResponse&gt; listCached(Pageable pageable) {
-<span class="nc" id="L51">        return routeAssignmentRepository.findByActiveTrue(pageable)</span>
-<span class="nc" id="L52">                .map(this::mapToResponse)</span>
-<span class="nc" id="L53">                .getContent();</span>
+    public CachedAssignmentPage listCached(Pageable pageable) {
+<span class="fc" id="L63">        Page&lt;RouteAssignmentResponse&gt; page = routeAssignmentRepository.findByActiveTrue(pageable).map(this::mapToResponse);</span>
+<span class="fc" id="L64">        return new CachedAssignmentPage(page.getContent(), page.getTotalElements());</span>
+    }
+
+<span class="fc" id="L67">    public record CachedAssignmentPage(List&lt;RouteAssignmentResponse&gt; content, long totalElements) {</span>
     }
 
     /**
@@ -60,8 +74,8 @@ public class RouteAssignmentService {
      */
     @Transactional(readOnly = true)
     public RouteAssignmentResponse findById(Long id) {
-<span class="fc" id="L63">        RouteAssignment asignacion = getActiveAssignment(id);</span>
-<span class="fc" id="L64">        return mapToResponse(asignacion);</span>
+<span class="fc" id="L77">        RouteAssignment asignacion = getActiveAssignment(id);</span>
+<span class="fc" id="L78">        return mapToResponse(asignacion);</span>
     }
 
     /**
@@ -71,33 +85,33 @@ public class RouteAssignmentService {
      */
     @CacheEvict(value = &quot;asignaciones&quot;, allEntries = true)
     public RouteAssignmentResponse create(RouteAssignmentRequest request) {
-<span class="fc" id="L74">        Driver conductor = driverRepository.findById(request.driverId())</span>
-<span class="fc" id="L75">                .filter(Driver::getActive)</span>
-<span class="fc" id="L76">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
+<span class="fc" id="L88">        Driver conductor = driverRepository.findById(request.driverId())</span>
+<span class="fc" id="L89">                .filter(Driver::getActive)</span>
+<span class="fc" id="L90">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
 
-<span class="fc" id="L78">        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())</span>
-<span class="fc" id="L79">                .filter(Vehicle::getActive)</span>
-<span class="fc" id="L80">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle no encontrado&quot;));</span>
+<span class="fc" id="L92">        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())</span>
+<span class="fc" id="L93">                .filter(Vehicle::getActive)</span>
+<span class="fc" id="L94">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle no encontrado&quot;));</span>
 
-<span class="fc" id="L82">        Route ruta = routeRepository.findById(request.routeId())</span>
-<span class="fc" id="L83">                .filter(Route::getActive)</span>
-<span class="fc" id="L84">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Route no encontrada&quot;));</span>
+<span class="fc" id="L96">        Route ruta = routeRepository.findById(request.routeId())</span>
+<span class="fc" id="L97">                .filter(Route::getActive)</span>
+<span class="fc" id="L98">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Route no encontrada&quot;));</span>
 
-<span class="fc" id="L86">        RouteAssignment asignacion = RouteAssignment.builder()</span>
-<span class="fc" id="L87">                .driver(conductor)</span>
-<span class="fc" id="L88">                .vehicle(vehiculo)</span>
-<span class="fc" id="L89">                .route(ruta)</span>
-<span class="fc" id="L90">                .assignmentDate(request.assignmentDate())</span>
-<span class="fc" id="L91">                .startDate(request.startDate())</span>
-<span class="fc" id="L92">                .endDate(request.endDate())</span>
-<span class="fc" id="L93">                .status(toStatus(request.status()))</span>
-<span class="fc" id="L94">                .active(true)</span>
-<span class="fc" id="L95">                .createdAt(Instant.now())</span>
-<span class="fc" id="L96">                .updatedAt(Instant.now())</span>
-<span class="fc" id="L97">                .build();</span>
+<span class="fc" id="L100">        RouteAssignment asignacion = RouteAssignment.builder()</span>
+<span class="fc" id="L101">                .driver(conductor)</span>
+<span class="fc" id="L102">                .vehicle(vehiculo)</span>
+<span class="fc" id="L103">                .route(ruta)</span>
+<span class="fc" id="L104">                .assignmentDate(request.assignmentDate())</span>
+<span class="fc" id="L105">                .startDate(request.startDate())</span>
+<span class="fc" id="L106">                .endDate(request.endDate())</span>
+<span class="fc" id="L107">                .status(toStatus(request.status()))</span>
+<span class="fc" id="L108">                .active(true)</span>
+<span class="fc" id="L109">                .createdAt(Instant.now())</span>
+<span class="fc" id="L110">                .updatedAt(Instant.now())</span>
+<span class="fc" id="L111">                .build();</span>
 
-<span class="fc" id="L99">        RouteAssignment asignacionGuardada = routeAssignmentRepository.save(asignacion);</span>
-<span class="fc" id="L100">        return mapToResponse(asignacionGuardada);</span>
+<span class="fc" id="L113">        RouteAssignment asignacionGuardada = routeAssignmentRepository.save(asignacion);</span>
+<span class="fc" id="L114">        return mapToResponse(asignacionGuardada);</span>
     }
 
     /**
@@ -108,31 +122,31 @@ public class RouteAssignmentService {
      */
     @CacheEvict(value = &quot;asignaciones&quot;, allEntries = true)
     public RouteAssignmentResponse update(Long id, RouteAssignmentRequest request) {
-<span class="fc" id="L111">        RouteAssignment asignacion = getActiveAssignment(id);</span>
+<span class="fc" id="L125">        RouteAssignment asignacion = getActiveAssignment(id);</span>
 
-<span class="fc" id="L113">        Driver conductor = driverRepository.findById(request.driverId())</span>
-<span class="fc" id="L114">                .filter(Driver::getActive)</span>
-<span class="pc" id="L115">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
+<span class="fc" id="L127">        Driver conductor = driverRepository.findById(request.driverId())</span>
+<span class="fc" id="L128">                .filter(Driver::getActive)</span>
+<span class="pc" id="L129">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Driver no encontrado&quot;));</span>
 
-<span class="fc" id="L117">        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())</span>
-<span class="fc" id="L118">                .filter(Vehicle::getActive)</span>
-<span class="pc" id="L119">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle no encontrado&quot;));</span>
+<span class="fc" id="L131">        Vehicle vehiculo = vehicleRepository.findById(request.vehicleId())</span>
+<span class="fc" id="L132">                .filter(Vehicle::getActive)</span>
+<span class="pc" id="L133">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Vehicle no encontrado&quot;));</span>
 
-<span class="fc" id="L121">        Route ruta = routeRepository.findById(request.routeId())</span>
-<span class="fc" id="L122">                .filter(Route::getActive)</span>
-<span class="pc" id="L123">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Route no encontrada&quot;));</span>
+<span class="fc" id="L135">        Route ruta = routeRepository.findById(request.routeId())</span>
+<span class="fc" id="L136">                .filter(Route::getActive)</span>
+<span class="pc" id="L137">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Route no encontrada&quot;));</span>
 
-<span class="fc" id="L125">        asignacion.setDriver(conductor);</span>
-<span class="fc" id="L126">        asignacion.setVehicle(vehiculo);</span>
-<span class="fc" id="L127">        asignacion.setRoute(ruta);</span>
-<span class="fc" id="L128">        asignacion.setAssignmentDate(request.assignmentDate());</span>
-<span class="fc" id="L129">        asignacion.setStartDate(request.startDate());</span>
-<span class="fc" id="L130">        asignacion.setEndDate(request.endDate());</span>
-<span class="fc" id="L131">        asignacion.setStatus(toStatus(request.status()));</span>
-<span class="fc" id="L132">        asignacion.setUpdatedAt(Instant.now());</span>
+<span class="fc" id="L139">        asignacion.setDriver(conductor);</span>
+<span class="fc" id="L140">        asignacion.setVehicle(vehiculo);</span>
+<span class="fc" id="L141">        asignacion.setRoute(ruta);</span>
+<span class="fc" id="L142">        asignacion.setAssignmentDate(request.assignmentDate());</span>
+<span class="fc" id="L143">        asignacion.setStartDate(request.startDate());</span>
+<span class="fc" id="L144">        asignacion.setEndDate(request.endDate());</span>
+<span class="fc" id="L145">        asignacion.setStatus(toStatus(request.status()));</span>
+<span class="fc" id="L146">        asignacion.setUpdatedAt(Instant.now());</span>
 
-<span class="fc" id="L134">        RouteAssignment asignacionActualizada = routeAssignmentRepository.save(asignacion);</span>
-<span class="fc" id="L135">        return mapToResponse(asignacionActualizada);</span>
+<span class="fc" id="L148">        RouteAssignment asignacionActualizada = routeAssignmentRepository.save(asignacion);</span>
+<span class="fc" id="L149">        return mapToResponse(asignacionActualizada);</span>
     }
 
     /**
@@ -141,43 +155,43 @@ public class RouteAssignmentService {
      */
     @CacheEvict(value = &quot;asignaciones&quot;, allEntries = true)
     public void deactivate(Long id) {
-<span class="fc" id="L144">        RouteAssignment asignacion = getActiveAssignment(id);</span>
-<span class="fc" id="L145">        asignacion.setActive(false);</span>
-<span class="fc" id="L146">        asignacion.setStatus(AssignmentStatus.CANCELADA);</span>
-<span class="fc" id="L147">        asignacion.setUpdatedAt(Instant.now());</span>
-<span class="fc" id="L148">        routeAssignmentRepository.save(asignacion);</span>
-<span class="fc" id="L149">    }</span>
+<span class="fc" id="L158">        RouteAssignment asignacion = getActiveAssignment(id);</span>
+<span class="fc" id="L159">        asignacion.setActive(false);</span>
+<span class="fc" id="L160">        asignacion.setStatus(AssignmentStatus.CANCELADA);</span>
+<span class="fc" id="L161">        asignacion.setUpdatedAt(Instant.now());</span>
+<span class="fc" id="L162">        routeAssignmentRepository.save(asignacion);</span>
+<span class="fc" id="L163">    }</span>
 
     private RouteAssignment getActiveAssignment(Long id) {
-<span class="fc" id="L152">        return routeAssignmentRepository.findWithDetails(id)</span>
-<span class="fc" id="L153">                .filter(RouteAssignment::getActive)</span>
-<span class="fc" id="L154">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
+<span class="fc" id="L166">        return routeAssignmentRepository.findWithDetails(id)</span>
+<span class="fc" id="L167">                .filter(RouteAssignment::getActive)</span>
+<span class="fc" id="L168">                .orElseThrow(() -&gt; new IllegalArgumentException(&quot;Asignacion no encontrada&quot;));</span>
     }
 
     private AssignmentStatus toStatus(String status) {
         try {
-<span class="fc" id="L159">            return AssignmentStatus.valueOf(status.toUpperCase());</span>
-<span class="fc" id="L160">        } catch (IllegalArgumentException e) {</span>
-<span class="fc" id="L161">            throw new IllegalArgumentException(&quot;Estado de asignacion no valido&quot;);</span>
+<span class="fc" id="L173">            return AssignmentStatus.valueOf(status.toUpperCase());</span>
+<span class="fc" id="L174">        } catch (IllegalArgumentException e) {</span>
+<span class="fc" id="L175">            throw new IllegalArgumentException(&quot;Estado de asignacion no valido&quot;);</span>
         }
     }
 
     private RouteAssignmentResponse mapToResponse(RouteAssignment asignacion) {
-<span class="fc" id="L166">        return new RouteAssignmentResponse(</span>
-<span class="fc" id="L167">                asignacion.getId(),</span>
-<span class="fc" id="L168">                asignacion.getDriver().getId(),</span>
-<span class="fc" id="L169">                asignacion.getDriver().getFirstNames() + &quot; &quot; + asignacion.getDriver().getLastNames(),</span>
-<span class="fc" id="L170">                asignacion.getVehicle().getId(),</span>
-<span class="fc" id="L171">                asignacion.getVehicle().getPlate(),</span>
-<span class="fc" id="L172">                asignacion.getRoute().getId(),</span>
-<span class="fc" id="L173">                asignacion.getRoute().getName(),</span>
-<span class="fc" id="L174">                asignacion.getAssignmentDate(),</span>
-<span class="fc" id="L175">                asignacion.getStartDate(),</span>
-<span class="fc" id="L176">                asignacion.getEndDate(),</span>
-<span class="fc" id="L177">                asignacion.getStatus().name(),</span>
-<span class="fc" id="L178">                asignacion.getActive(),</span>
-<span class="fc" id="L179">                asignacion.getCreatedAt(),</span>
-<span class="fc" id="L180">                asignacion.getUpdatedAt()</span>
+<span class="fc" id="L180">        return new RouteAssignmentResponse(</span>
+<span class="fc" id="L181">                asignacion.getId(),</span>
+<span class="fc" id="L182">                asignacion.getDriver().getId(),</span>
+<span class="fc" id="L183">                asignacion.getDriver().getFirstNames() + &quot; &quot; + asignacion.getDriver().getLastNames(),</span>
+<span class="fc" id="L184">                asignacion.getVehicle().getId(),</span>
+<span class="fc" id="L185">                asignacion.getVehicle().getPlate(),</span>
+<span class="fc" id="L186">                asignacion.getRoute().getId(),</span>
+<span class="fc" id="L187">                asignacion.getRoute().getName(),</span>
+<span class="fc" id="L188">                asignacion.getAssignmentDate(),</span>
+<span class="fc" id="L189">                asignacion.getStartDate(),</span>
+<span class="fc" id="L190">                asignacion.getEndDate(),</span>
+<span class="fc" id="L191">                asignacion.getStatus().name(),</span>
+<span class="fc" id="L192">                asignacion.getActive(),</span>
+<span class="fc" id="L193">                asignacion.getCreatedAt(),</span>
+<span class="fc" id="L194">                asignacion.getUpdatedAt()</span>
         );
     }
 }

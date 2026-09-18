@@ -10,6 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,9 @@ class IncidentServiceTest {
 
     @Mock
     private RouteAssignmentRepository routeAssignmentRepository;
+
+    @Mock
+    private ObjectProvider<IncidentService> self;
 
     @InjectMocks
     private IncidentService incidentService;
@@ -93,6 +97,7 @@ class IncidentServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
+        when(self.getObject()).thenReturn(incidentService);
         when(incidentRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(incidenteEjemplo())));
 

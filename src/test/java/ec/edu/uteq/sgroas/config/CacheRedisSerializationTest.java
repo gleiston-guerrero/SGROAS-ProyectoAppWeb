@@ -6,7 +6,9 @@ import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import ec.edu.uteq.sgroas.dto.DriverResponse;
+import ec.edu.uteq.sgroas.dto.IncidentResponse;
 import ec.edu.uteq.sgroas.service.DriverService.CachedDriverPage;
+import ec.edu.uteq.sgroas.service.IncidentService.CachedIncidentPage;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -103,6 +105,31 @@ class CacheRedisSerializationTest {
         Object roundTrip = serializer.deserialize(bytes);
 
         assertInstanceOf(CachedDriverPage.class, roundTrip);
+        assertEquals(cached, roundTrip);
+    }
+
+    /**
+     * Same fix, applied to IncidentService/RouteService/VehicleService/
+     * RouteAssignmentService (found during a rigorous audit: all four had
+     * the same self-invocation bug as DriverService, and three of them
+     * also miscalculated totalElements as the current page's size instead
+     * of the real total). Only one representative record is round-tripped
+     * here since all four follow the exact same {@code List<DTO> + long}
+     * shape as {@link CachedDriverPage}, already proven above.
+     */
+    @Test
+    void withFix_cachedIncidentPageRoundTripsAsRealType() {
+        Jackson2JsonRedisSerializer<Object> serializer =
+                new Jackson2JsonRedisSerializer<>(mapperWithFix(), Object.class);
+        IncidentResponse incident = new IncidentResponse(1L, 1L, "Carlos", "AVERIA_MECANICA",
+                "Falla de motor", java.time.LocalDateTime.now(), "Quito", "ALTA", "ABIERTO",
+                true, Instant.now(), Instant.now());
+        CachedIncidentPage cached = new CachedIncidentPage(List.of(incident), 1);
+
+        byte[] bytes = serializer.serialize(cached);
+        Object roundTrip = serializer.deserialize(bytes);
+
+        assertInstanceOf(CachedIncidentPage.class, roundTrip);
         assertEquals(cached, roundTrip);
     }
 }

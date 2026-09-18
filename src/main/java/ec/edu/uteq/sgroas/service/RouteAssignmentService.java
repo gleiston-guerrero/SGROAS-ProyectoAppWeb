@@ -8,6 +8,7 @@ import ec.edu.uteq.sgroas.repository.DriverRepository;
 import ec.edu.uteq.sgroas.repository.RouteRepository;
 import ec.edu.uteq.sgroas.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,14 @@ public class RouteAssignmentService {
     private final VehicleRepository vehicleRepository;
     private final RouteRepository routeRepository;
 
+    // Self-injected via ObjectProvider so that calling listCached() goes
+    // through the Spring-managed proxy instead of a plain `this.` call --
+    // @Cacheable only intercepts calls that go through the proxy, never a
+    // same-class internal call. Before this fix, list() never even called
+    // listCached() -- it queried the repository directly, leaving the
+    // @Cacheable method completely dead code (found during a rigorous audit).
+    private final ObjectProvider<RouteAssignmentService> self;
+
     /**
      * Returns a paginated list of active route assignments.
      * @param pageable pagination and sorting configuration.
@@ -35,22 +44,27 @@ public class RouteAssignmentService {
      */
     @Transactional(readOnly = true)
     public Page<RouteAssignmentResponse> list(Pageable pageable) {
-        Page<RouteAssignment> page = routeAssignmentRepository.findByActiveTrue(pageable);
-        List<RouteAssignmentResponse> contenido = page.map(this::mapToResponse).getContent();
-        return new PageImpl<>(contenido, pageable, page.getTotalElements());
+        CachedAssignmentPage cached = self.getObject().listCached(pageable);
+        return new PageImpl<>(cached.content(), pageable, cached.totalElements());
     }
 
     /**
      * Returns the cached list of active assignments for the given pageable, keyed by page.
+     * <p>Returns {@link CachedAssignmentPage}, not {@code Page<RouteAssignmentResponse>}:
+     * {@code PageImpl} has no usable constructor for Jackson, so caching it
+     * directly through {@code Jackson2JsonRedisSerializer} throws on the
+     * first read-back from Redis. A plain record round-trips correctly.
      * @param pageable pagination and sorting configuration.
-     * @return list of assignment response records.
+     * @return content and total count for the requested page.
      */
     @Cacheable(value = "asignaciones", key = "#pageable.pageNumber + '-' + #pageable.pageSize")
     @Transactional(readOnly = true)
-    public List<RouteAssignmentResponse> listCached(Pageable pageable) {
-        return routeAssignmentRepository.findByActiveTrue(pageable)
-                .map(this::mapToResponse)
-                .getContent();
+    public CachedAssignmentPage listCached(Pageable pageable) {
+        Page<RouteAssignmentResponse> page = routeAssignmentRepository.findByActiveTrue(pageable).map(this::mapToResponse);
+        return new CachedAssignmentPage(page.getContent(), page.getTotalElements());
+    }
+
+    public record CachedAssignmentPage(List<RouteAssignmentResponse> content, long totalElements) {
     }
 
     /**
