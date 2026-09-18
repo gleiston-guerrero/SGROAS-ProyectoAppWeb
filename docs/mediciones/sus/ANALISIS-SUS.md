@@ -1,6 +1,6 @@
 # Analisis de usabilidad (SUS) - Bloque C.3
 
-**Tarea K2** | Fecha de generacion: 2026-09-17
+**Tarea K2** | Fecha de generacion: 2026-09-18
 
 ## Instrumento
 
@@ -31,7 +31,7 @@ System Usability Scale (Brooke, 1996): 10 items Likert 1-5. Puntuacion por parti
 | IC 95% | **[53.1; 72.9]** |
 | Minimo | 47.5 |
 | Maximo | 90.0 |
-| Calificacion adjetiva (Bangor et al., 2009) | Bueno |
+| Calificacion adjetiva (Bangor et al., 2009) | OK |
 | Zona de aceptabilidad | Marginal (50-70) |
 | Umbral de usabilidad (>= 70) | NO CUMPLE |
 

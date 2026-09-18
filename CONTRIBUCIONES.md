@@ -709,6 +709,36 @@ se habían corregido:**
 
 ---
 
+**Actualización (2026-09-18) — bug real en la etiqueta adjetiva de Bangor:**
+**Cerrado por: Luis Tejada**
+
+`scripts/sus/brooke.py` (`interpretar_adjetiva`) etiquetaba la media SUS
+(63,0) como "Bueno" pese a calcular su propia zona de aceptabilidad como
+"Marginal (50-70)" -- contradicción interna real: en la escala de Bangor
+et al. (2009), el rango 50-70 corresponde a "OK", no a "Bueno" (que
+empieza en 70-72). El error estaba en el código (devolvía "Bueno" para
+dos rangos distintos, 70-85 y 50-70), no solo en el texto.
+
+**Archivos modificados:**
+- `scripts/sus/brooke.py` -- corrige la etiqueta del rango 50-70 a "OK".
+- `docs/mediciones/sus/estadisticas-sus.json`, `ANALISIS-SUS.md`
+  (regenerados con `python3 scripts/sus-analysis.py`) y sus copias en
+  `dataset/sus/`.
+- `docs/mediciones/sus/REPORT.md` y `dataset/sus/REPORT.md` (corregidos
+  a mano; ningún script los regenera).
+- `docs/informe-final/capitulos/cap8-evaluacion.tex` y
+  `cap9-discusion.tex` -- la prosa citaba "Bueno" en el mismo párrafo que
+  decía "marginal"; ya dice "OK".
+
+`scripts/update-sus.py` tiene la misma etiqueta duplicada a mano, pero
+está marcado "DO NOT RUN" (evidencia congelada del incidente de
+P11-P15) y ningún pipeline lo invoca -- no se tocó a propósito.
+
+Verificado: informe recompilado (98 páginas, 0 errores). Detalle
+completo en `VERIFICACION.md`, sección P8.
+
+---
+
 ## P9 — Postman CRUD asignaciones (commit 20a487f)
 **Cerrado por: Luis Tejada**
 

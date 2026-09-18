@@ -11,7 +11,7 @@
 | Desviación típica | 13,88 |
 | Error estándar | 4,39 |
 | IC 95 % (t = 2,262, gl = 9) | **[53,07; 72,93]** |
-| Calificación (escala adjetiva de Bangor et al., 2009) | **Bueno** (rango 52,7–72,5) |
+| Calificación (escala adjetiva de Bangor et al., 2009) | **OK** (rango 52,7-72,5) |
 | Zona de aceptabilidad (Bangor et al.) | Marginal (50–70) |
 
 ## Puntuación por participante
@@ -39,6 +39,6 @@ la suma se multiplica por 2,5.
 - Modo: cada participante operó la aplicación SGROAS y respondió el formulario SUS por sí mismo
 - Aplicación accesada en `http://localhost:4200` (frontend) con backend en `http://localhost:8080`
 - Matriz de datos crudos: `docs/mediciones/sus/sus-raw.csv`
-- Interpretación: la media (63,0) corresponde a la calificación adjetiva *Bueno* de Bangor et al.
+- Interpretación: la media (63,0) corresponde a la calificación adjetiva *OK* de Bangor et al.
   (2009); se ubica en la zona de aceptabilidad *marginal* (50–70) y por debajo del umbral de 70
   que Bangor et al. asocian a sistemas aceptables, por lo que se documenta como área de mejora.

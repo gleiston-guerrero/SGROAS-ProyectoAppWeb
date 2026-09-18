@@ -32,13 +32,21 @@ def interpretar_adjetiva(media: float) -> Tuple[str, str]:
     """Calificacion adjetiva y zona de aceptabilidad (Bangor et al., 2009).
 
     Devuelve (adjetivo, zona_aceptabilidad).
+
+    Bug real corregido (2026-09-18, senalado por una re-evaluacion externa):
+    esta funcion devolvia "Bueno" tanto para el rango 70-85 como para el
+    50-70, contradiciendo la propia zona de aceptabilidad que la misma
+    funcion calculaba ("Marginal (50-70)" con la etiqueta "Bueno" al lado,
+    algo que no tiene sentido). En la escala de Bangor et al. (2009), 63.0
+    (dentro de 50-70) corresponde a la calificacion "OK", no a "Bueno"
+    (que empieza alrededor de 70-72).
     """
     if media >= 85:
         return "Excelente", "Aceptable (>= 70)"
     if media >= 70:
         return "Bueno", "Aceptable (>= 70)"
     if media >= 50:
-        return "Bueno", "Marginal (50-70)"
+        return "OK", "Marginal (50-70)"
     if media >= 35:
         return "Regular", "No aceptable"
     return "Pobre", "No aceptable"

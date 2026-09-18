@@ -1485,6 +1485,35 @@ ejecutarse).
 - Tabla `tab:sus-demografia` en `docs/informe-final/cap5-materiales-metodos.tex`
   (sección "Participantes SUS")
 
+**Nota de auditoría (2026-09-18) — bug real en la etiqueta adjetiva de
+Bangor, encontrado por una re-evaluación externa:** `scripts/sus/brooke.py`
+(`interpretar_adjetiva`) devolvía la etiqueta **"Bueno" tanto para el rango
+70-85 como para el 50-70** — un error de código, no solo de redacción: la
+media SUS (63,0, dentro de 50-70) se etiquetaba "Bueno" mientras la misma
+función calculaba correctamente su zona como "Marginal (50-70)",
+contradicción que aparecía en `docs/informe-final/capitulos/cap8-evaluacion.tex`,
+`cap9-discusion.tex`, `docs/mediciones/sus/ANALISIS-SUS.md`,
+`estadisticas-sus.json` y `REPORT.md` (y sus copias en `dataset/sus/`).
+En la escala de Bangor et al. (2009), 50-70 corresponde a **"OK"**, no a
+"Bueno" (que empieza alrededor de 70-72).
+
+Corregido en la fuente (`brooke.py`), regenerado desde el CSV crudo con
+`python3 scripts/sus-analysis.py`, sincronizado `dataset/sus/` con
+`docs/mediciones/sus/`, y corregidos a mano los dos `REPORT.md` (no los
+regenera ningún script) y los dos capítulos LaTeX que citaban la
+etiqueta en prosa. Verificado:
+```
+$ python3 scripts/sus-analysis.py | tail -3
+$ grep -n "adjetiva" docs/mediciones/sus/estadisticas-sus.json
+  "adjetiva": "OK"
+```
+Informe recompilado (98 páginas, 0 errores, 0 referencias sin resolver).
+`scripts/update-sus.py` tiene la misma etiqueta duplicada a mano
+("Bueno"/"Regular"/"Malo") pero está marcado explícitamente
+"DO NOT RUN" (es evidencia congelada del incidente de P11-P15 ya
+documentado más abajo) y no lo invoca ningún pipeline — no se tocó, para
+no alterar la evidencia histórica que preserva a propósito.
+
 ---
 
 ## P9 — Endpoint de asignaciones con sesión (0.7)
