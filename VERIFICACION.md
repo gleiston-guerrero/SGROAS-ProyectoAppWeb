@@ -2772,12 +2772,9 @@ documentación antes de mover el tag por última vez:**
    por la regla existente (solo cubría `docs/informe-final/*`, no
    `docs/informe-final.*` a nivel raíz de `docs/`).
 
-```
-$ git rev-parse v1.1.0^{commit}
-[valor tras este commit]
-$ git rev-parse HEAD
-[valor tras este commit]
-$ git rev-parse origin/main
-[valor tras este commit]
-```
-(Los tres deben coincidir tras mover el tag una última vez a este commit.)
+La confirmación de que `v1.1.0`/`HEAD`/`origin/main` coinciden en el
+commit final, después de moverlo, se agrega en un commit posterior muy
+breve (solo esa confirmación, sin más cambios) para no caer en la misma
+trampa que motivó esta ronda de correcciones: no se puede citar el propio
+hash de un commit dentro de sí mismo, así que la verificación real tiene
+que ir en el commit siguiente.
