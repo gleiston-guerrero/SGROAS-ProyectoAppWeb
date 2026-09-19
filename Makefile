@@ -91,8 +91,8 @@ verify:
 	@echo "=== SGROAS Verification ==="
 	@echo ""
 	@echo "[P1] Checking hardcoded secrets..."
-	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties docker-compose.yml 2>/dev/null | grep -v "CHANGE_ME" || true
-	@! grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml 2>/dev/null | grep -v '$$' || true
+	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties docker-compose.yml 2>/dev/null | grep -v "CHANGE_ME"
+	@! grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml 2>/dev/null | grep -v '$$'
 	@echo "[P1] OK"
 	@echo ""
 	@echo "[P2] Checking raw k6 runs (hot x5 + cold x5) reproducible contrast..."
@@ -103,7 +103,8 @@ verify:
 	@echo ""
 	@echo "[P4] Checking cookie Secure(true)..."
 	@! grep -n "\.secure(cookieSecure)" src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java 2>/dev/null
-	@grep -c "\.secure(true)" src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java | xargs -I{} echo "  Found {} .secure(true) calls"
+	@test $$(grep -c "\.secure(true)" src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java) -ge 2
+	@echo "  Found $$(grep -c '\.secure(true)' src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java) .secure(true) calls"
 	@echo "[P4] OK"
 	@echo ""
 	@echo "[P5] Checking Spanish field names in entities..."

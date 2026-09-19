@@ -199,6 +199,22 @@ archivos del historial de git (reescribir historia es una operación
 destructiva que no se hizo sin acuerdo explícito), pero los tokens que
 contienen están probadamente inertes.
 
+**Corrección real (2026-09-18) — el check de P1 en `Makefile` nunca podía
+fallar, señalado por una re-evaluación externa:** las dos líneas del
+check de secretos terminaban en `|| true`, así que el resultado del
+`grep` se descartaba por completo — `make verify` reportaba `[P1] OK` sin
+importar lo que hubiera en el árbol. Corregido eliminando `|| true`.
+Prueba de mutación (revertida, no se deja en el repositorio): se agregó
+temporalmente la línea `FAKE_SECRET: password123` a `docker-compose.yml`
+y se corrió `make verify`:
+```
+[P1] Checking hardcoded secrets...
+docker-compose.yml:60:    driver: bridgeFAKE_SECRET: password123
+make: *** [Makefile:94: verify] Error 1
+```
+Ahora sí falla con un secreto real presente. Con el árbol restaurado
+(`git status` limpio), `make verify` vuelve a dar `[P1] OK`.
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (1.2)
@@ -691,6 +707,22 @@ propiedad externa es un riesgo si algun entorno quedara con
 `app.cookie.secure=false` por error; `.secure(true)` fijo es la opcion mas
 segura y no depende de configuracion. Las 5 llamadas `.secure(true)` que se
 mantienen cubren access_token y refresh_token en login, refresh y logout.
+
+**Corrección real (2026-09-18) — el check de P4 en `Makefile` tampoco
+podía fallar, señalado por una re-evaluación externa:** la línea pasaba
+el resultado de `grep -c` por `xargs -I{} echo`, así que solo imprimía el
+conteo como texto informativo — `echo` siempre sale con éxito, sin
+importar el número (hasta un conteo de 0 hubiera dado `[P4] OK`).
+Corregido con un `test $$(...) -ge 2` que sí falla si el conteo cae por
+debajo de 2. Prueba de mutación (revertida): se redujeron temporalmente
+los `.secure(true)` de `AuthController.java` de 5 a 1 y se corrió
+`make verify`:
+```
+[P4] Checking cookie Secure(true)...
+make: *** [Makefile:106: verify] Error 1
+```
+Ahora sí falla. Con el archivo restaurado (`git status` limpio), vuelve
+a dar `[P4] OK` con las 5 llamadas reales.
 
 **Archivos:**
 - `src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java` — `.secure(true)` + `.httpOnly(true)`

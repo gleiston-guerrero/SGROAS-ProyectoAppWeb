@@ -1121,15 +1121,21 @@ $ git log --format='%an <%ae> %ad' --date=short 110d5a1..HEAD | grep -iE "escude
 
 Luis Tejada afirma que, según la rúbrica del examen suspenso, para los
 integrantes que ya aprobaron individualmente seguir haciendo commits en
-esta etapa es opcional. **Esta evaluación es automatizada y no incluye una
-defensa oral**, por lo que esta afirmación sobre el contenido de la rúbrica
-no puede sustentarse verbalmente en ningún momento posterior: queda
-registrada aquí como una declaración de Luis Tejada, sin el respaldo de una
-cita textual del documento de rúbrica (que no se adjuntó a este
-repositorio). Lo que sí es objetivamente verificable con el comando de
-arriba es que ninguno de los dos hizo trabajo en esta ronda; lo que no es
-verificable desde este repositorio es si la rúbrica realmente exime de esa
-obligación a quienes ya aprobaron. Por eso, de aquí en adelante todo el
+esta etapa es opcional. Queda registrada aquí como una declaración de
+Luis Tejada, sin el respaldo de una cita textual del documento de rúbrica
+(que no se adjuntó a este repositorio).
+
+**Corrección (2026-09-18):** una versión anterior de este párrafo
+afirmaba que "esta evaluación es automatizada y no incluye una defensa
+oral". Esa afirmación era incorrecta y se retira: la guía del examen
+suspenso sí asigna un 25% de la nota individual a la defensa, y quien
+rinde el suspenso (Luis Tejada) sí la sustenta. Lo que sí es
+objetivamente verificable con el comando de arriba es que ninguno de los
+dos hizo trabajo en esta ronda; lo que no es verificable desde este
+repositorio es si la rúbrica realmente exime a quienes ya aprobaron de
+seguir haciendo commits — eso queda como una declaración de Luis Tejada,
+no como un hecho verificado, y puede sustentarse o ampliarse en la
+defensa oral si el docente lo pregunta. Por eso, de aquí en adelante todo el
 trabajo de corrección de esta ronda del examen suspenso (auditoría externa
 del 2026-09-16/17, ver sección anterior) fue ejecutado en solitario por
 Luis Alejandro Tejada Bajaña.
