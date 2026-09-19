@@ -121,13 +121,24 @@ reconstrucción de una versión anterior de este documento, corregida
 tras una re-evaluación externa que señaló, con razón, que esos JSON no
 tenían la estructura de una exportación real de k6) el resultado es
 honesto y menos favorable de lo que parecía: no hay diferencia
-significativa entre frío y caliente, y el tamaño del efecto es pequeño,
-incluso con signo variable entre corridas (K11 y K14 muestran la
-caliente más lenta que la fría). Esto es consistente con el diagnóstico
-ya declarado más arriba: en el plan gratuito de Render la variabilidad
-de red/CPU domina sobre cualquier ahorro de consultar Redis en vez de
-PostgreSQL, al punto de que con $n=5$ no se puede distinguir el efecto
-de caché del ruido de red. La única corrida que sí mostró una diferencia
+significativa entre frío y caliente. De las cinco corridas, la
+condición caliente resultó igual o más lenta que la fría en **tres de
+cinco** (K11: 239{,}71 vs.\ 203{,}39; K12: 211{,}21 vs.\ 205{,}00; K14:
+258{,}02 vs.\ 225{,}76) y más rápida solo en dos (K10, K13). Si la caché
+redujera la latencia de forma consistente, la condición caliente
+debería ganar en casi todas las corridas, no en 2 de 5.
+
+La razón más plausible no es que la caché esté rota, sino que su efecto
+real es demasiado pequeño para distinguirlo del ruido de la propia
+medición: todas las diferencias observadas son de apenas 15--35\,ms,
+mientras que la variabilidad de red/CPU del plan gratuito de Render
+(ya documentada más arriba, con picos de segundos completos bajo carga)
+es un orden de magnitud mayor. Es análogo a intentar medir si alguien
+camina más rápido con zapatos nuevos usando una cinta métrica que tiembla
+$\pm 2$ metros: si el efecto real es de unos centímetros, el temblor del
+instrumento lo esconde por completo, y las lecturas terminan pareciendo
+aleatorias. Con $n=5$ por condición no se puede distinguir el efecto de
+caché del ruido de red. La única corrida que sí mostró una diferencia
 grande (K9, frío 514{,}75\,ms vs.\ caliente mediana 191{,}59\,ms) sigue
 siendo real, pero no representativa de las cinco corridas siguientes:
 la caché no está rota (los tiempos calientes rara vez superan los
