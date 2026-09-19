@@ -102,6 +102,35 @@ la búsqueda real. Corregido usando `grep -F` (cadena literal) en vez de
 `grep -v` con un patrón regex mal escapado. Detalle y comando corregido
 en `VERIFICACION.md` (sección P1).
 
+**Corrección adicional (2026-09-19) — el check de P1 en `Makefile` tenía
+una SEGUNDA línea que tampoco podía fallar nunca, y el de P4 contaba un
+comentario como llamada real:** una re-evaluación externa señaló ambos
+defectos con precisión. `Makefile:95` usaba `grep -v '$$'`, que dentro
+de un Makefile se traduce a `grep -v '$'` en la shell -- `$` es el ancla
+de fin de línea, así que descartaba absolutamente toda línea, siempre.
+Corregido a `grep -v '\$$'` (el `$` literal, escapado). El check de P4
+(`Makefile:106`) contaba una mención de `.secure(true)` dentro de un
+comentario de auditoría en `AuthController.java` como si fuera una
+llamada real, así que con 3 de las 4 llamadas reales borradas seguía
+pasando. Corregido excluyendo líneas de comentario antes de contar, y
+subiendo el umbral al número real (4). Ambos probados con mutación real
+(revertida, no se deja en el repositorio): P1 falla con una contraseña
+hardcodeada real en `docker-compose.yml`, P4 falla con 3 de 4 cookies
+sin `Secure` aunque sobreviva el comentario. Detalle completo en
+`VERIFICACION.md` (secciones P1 y P4).
+
+**Corrección adicional (2026-09-19) — captions en inglés con el rótulo
+"Figura"/"Tabla" en español:** `babel[spanish]` fija `\figurename`/
+`\tablename` a "Figura"/"Tabla" al inicio del documento, así que cada
+caption en inglés (ya corregidos en una ronda anterior) aparecía como
+"Figura X: <texto en inglés>". Corregido en `main.tex` con
+`\AtBeginDocument{\renewcommand{\figurename}{Figure}\renewcommand{\tablename}{Table}}`
+(un `\renewcommand` normal en el preámbulo no basta, porque babel fija
+esos nombres después, al seleccionar el idioma). Verificado: 0
+apariciones de "Figura "/"Tabla " en las 100 páginas del PDF
+recompilado, "Listing" ya estaba en inglés desde antes (no depende de
+babel). Detalle completo en `VERIFICACION.md` (sección P7).
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (commit 51202f5)

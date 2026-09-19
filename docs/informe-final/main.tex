@@ -18,6 +18,18 @@
 \usepackage[colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue]{hyperref}
 \usepackage[backend=biber, style=ieee, doi=true, url=true]{biblatex}
 \addbibresource{refs.bib}
+% Todos los captions de figuras/tablas del informe estan en ingles (P7);
+% \figurename/\tablename de babel[spanish] seguian imprimiendo "Figura"/
+% "Tabla" delante de esos captions en ingles. babel fija esos nombres al
+% principio de \begin{document} (\selectlanguage), asi que un
+% \renewcommand en el preambulo se sobreescribe; se usa \AtBeginDocument
+% para que el nuestro se aplique despues. Se fuerza el rotulo a ingles
+% para que coincida con el idioma real del contenido, igual que ya
+% ocurre con "Listing" (paquete listings, no afectado por babel).
+\AtBeginDocument{%
+  \renewcommand{\figurename}{Figure}%
+  \renewcommand{\tablename}{Table}%
+}
 \setstretch{1.5}
 \setlength{\parindent}{1.5cm}
 \setlength{\parskip}{6pt}

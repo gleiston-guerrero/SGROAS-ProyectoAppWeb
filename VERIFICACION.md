@@ -215,6 +215,28 @@ make: *** [Makefile:94: verify] Error 1
 Ahora sí falla con un secreto real presente. Con el árbol restaurado
 (`git status` limpio), `make verify` vuelve a dar `[P1] OK`.
 
+**Corrección real (2026-09-19) — quedaba una segunda línea que tampoco
+podía fallar:** eliminar `|| true` arregló la línea 94, pero la línea 95
+(`grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml | grep -v '$$'`)
+seguía sin poder fallar nunca, señalado por otra re-evaluación externa.
+Dentro de un `Makefile`, `$$` se traduce a un `$` literal antes de que
+la shell lo vea, así que el comando real era `grep -v '$'` — y `$` en una
+expresión regular es el ancla de fin de línea, que **toda** línea
+cumple, así que `grep -v '$'` descarta absolutamente todo, siempre,
+independientemente del contenido. La intención original era excluir las
+líneas que usan una variable (`${SPRING_DATASOURCE_PASSWORD}`, con un
+`$` literal), pero al no escapar el `$` como carácter literal (`\$`) se
+convirtió en el ancla. Corregido a `grep -v '\$$'` (que la shell recibe
+como `grep -v '\$'`, el `$` literal). Prueba de mutación (revertida): se
+cambió temporalmente `SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}`
+por `SPRING_DATASOURCE_PASSWORD=hardcoded123` en `docker-compose.yml`:
+```
+[P1] Checking hardcoded secrets...
+38:      SPRING_DATASOURCE_PASSWORD=hardcoded123
+make: *** [Makefile:95: verify] Error 1
+```
+Ahora sí falla. Árbol restaurado (`git status` limpio) tras la prueba.
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (1.2)
@@ -777,7 +799,30 @@ los `.secure(true)` de `AuthController.java` de 5 a 1 y se corrió
 make: *** [Makefile:106: verify] Error 1
 ```
 Ahora sí falla. Con el archivo restaurado (`git status` limpio), vuelve
-a dar `[P4] OK` con las 5 llamadas reales.
+a dar `[P4] OK`.
+
+**Corrección real (2026-09-19) — el conteo de "5 llamadas reales" de
+arriba estaba inflado por un comentario, señalado por otra
+re-evaluación externa:** `AuthController.java` tiene una nota de
+auditoría (línea 42) que **menciona** ".secure(true)" dentro de un
+comentario explicando una decisión de diseño — `grep -c "\.secure(true)"`
+no distingue código real de texto de comentario, así que contaba 5
+(4 llamadas reales + 1 mención en comentario) en vez de 4. Con el umbral
+en `-ge 2`, el check seguía pasando aunque se borraran 3 de las 4
+llamadas reales (dejando 1 real + 1 comentario = 2). Corregido filtrando
+las líneas de comentario antes de contar
+(`grep -v '//' ... | grep -c "\.secure(true)"`) y subiendo el umbral a
+`-ge 4` (el número real de usos: access/refresh token en login, refresh
+y logout). Prueba de mutación (revertida): con 3 de las 4 llamadas
+reales cambiadas a `.secure(false)` (dejando solo 1 real, más el
+comentario, que ya no se cuenta):
+```
+[P4] Checking cookie Secure(true)...
+make: *** [Makefile:106: verify] Error 1
+```
+Ahora sí falla incluso cuando sobrevive el comentario. Árbol restaurado
+(`git status` limpio) tras la prueba; con el código real (4 llamadas),
+`[P4] OK` — "Found 4 .secure(true) calls".
 
 **Archivos:**
 - `src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java` — `.secure(true)` + `.httpOnly(true)`
