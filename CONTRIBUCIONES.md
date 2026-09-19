@@ -743,6 +743,36 @@ señaló dos defectos de contenido en las propias figuras (no en su texto de
 
 ---
 
+**Actualización (2026-09-18) — 2 screenshots del anexo con mensajes de
+commit en español "horneados" en los píxeles:**
+**Cerrado por: Luis Tejada**
+
+`fig-ci-actions-3-green.jpeg` y `fig-render-deploy-succeeded-live.jpeg`
+mostraban la UI de GitHub/Render (en inglés) pero los mensajes de commit
+visibles en pantalla estaban en español (commits anteriores a esta
+ronda). El `grep` de captions no puede detectar esto porque el texto está
+dentro de la imagen, no en el `\caption{...}`.
+
+**Archivos modificados:**
+- `docs/informe-final/figuras/fig-ci-actions-3-green.png` (nuevo,
+  reemplaza al `.jpeg`) -- captura real de GitHub Actions con corridas
+  verdes consecutivas y mensajes en inglés (commits de esta misma ronda
+  de correcciones).
+- `docs/informe-final/figuras/fig-render-deploy-succeeded-live.png`
+  (nuevo, reemplaza al `.jpeg`) -- capturada tras disparar un "Manual
+  Deploy" real en Render para el commit `4722c1f` (mensaje en inglés),
+  con estado `Live` confirmado en pantalla.
+- `docs/informe-final/anexos.tex` -- referencias e IDs de commit en los
+  `\caption` actualizados a los reales de las nuevas capturas.
+- `README.md` -- conteo de páginas actualizado (99→100).
+
+No se editó ni se recortó el contenido de ninguna captura: son
+screenshots reales, sin editar, del estado actual del repositorio.
+Informe recompilado (100 páginas, 0 errores). Detalle completo en
+`VERIFICACION.md`, sección P7.
+
+---
+
 ## P8 — Script demografía SUS (commit 5fa09b4)
 **Cerrado por: Luis Tejada (script) y María del Rosario Escudero Plaza (datos crudos)**
 

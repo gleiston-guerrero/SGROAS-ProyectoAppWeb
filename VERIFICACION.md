@@ -1581,6 +1581,40 @@ un PNG):
 Ambos scripts se agregaron al target `docs` del Makefile para que dejen de
 ser artefactos huérfanos.
 
+**Corrección real (2026-09-18) — 2 de los 3 screenshots del anexo tenían
+texto en español "horneado" en los píxeles:** una re-evaluación externa
+había señalado (en una ronda previa del proyecto) que algunas capturas de
+pantalla del CI/despliegue en `anexos.tex` contenían texto en español
+imposible de detectar con el `grep` de captions (porque está dentro de la
+imagen, no en el `\caption{...}`). Revisadas las 3 figuras una por una:
+
+- `fig-ci-actions-3-green.jpeg`: la UI de GitHub es en inglés, pero los
+  **mensajes de commit** mostrados en la lista de corridas eran en
+  español (commits antiguos, de antes de esta ronda de correcciones).
+- `fig-render-deploy-succeeded-live.jpeg`: mismo problema, el mensaje del
+  commit deployado estaba en español.
+- `fig-render-live-url.jpeg`: sin texto en español, no necesitó cambio.
+
+Se recapturaron las dos primeras contra el estado real y actual del
+repositorio — no se inventó ni se editó nada, es evidencia en vivo más
+reciente: GitHub Actions ya tiene decenas de corridas verdes consecutivas
+con mensajes en inglés (todos los commits de esta ronda de auditoría), y
+se disparó un "Manual Deploy" real en Render para el commit `4722c1f`
+(mensaje en inglés), verificado en pantalla con estado `Live`:
+
+```
+$ git log --oneline -3
+4722c1f fix(P2): 5 corridas reales de cache (K10-K14) con Mann-Whitney + d de Cliff
+a1677fb fix(P1,P4): checks del Makefile ya pueden fallar; corrige afirmacion sobre defensa oral
+3109436 docs(EV-1): agrega salida vigente y literal de make verify (2026-09-18)
+```
+
+Las nuevas capturas (`fig-ci-actions-3-green.png`,
+`fig-render-deploy-succeeded-live.png`) reemplazan a las `.jpeg`
+anteriores en `anexos.tex`, con los captions actualizados citando los
+commits reales visibles en cada imagen. Informe recompilado (100
+páginas, 0 errores, 0 referencias sin resolver).
+
 ---
 
 ## P8 — Demografía SUS con trazabilidad CSV (0.7)
