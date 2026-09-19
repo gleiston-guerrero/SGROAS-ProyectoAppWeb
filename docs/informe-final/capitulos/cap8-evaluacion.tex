@@ -90,6 +90,38 @@ en vez de PostgreSQL, así que la caché no basta por sí sola para cumplir el
 umbral de rendimiento en ese entorno. El umbral sí se cumple en el entorno
 local sin throttling (serie K1).
 
+\textbf{Contraste con 5 corridas (K10--K14), análisis no paramétrico:}
+K9 fue una sola corrida piloto ($n=1$ en frío); la guía exige cinco
+corridas por escenario analizadas con métodos no paramétricos. Se
+repitió la misma metodología (mismo usuario, misma corrida secuencial,
+\texttt{k6/cache-contrast.js}) cinco veces contra la URL pública, cada
+una con una clave de caché distinta (\texttt{page size} 11 a 15) para
+garantizar un \emph{miss} real e independiente en cada corrida
+(\texttt{docs/mediciones/perf/k10}--\texttt{k14-cache-contrast.json}).
+Recalculado desde los JSON crudos con
+\texttt{scripts/perf/recalcular-contraste-cache.py}
+(Mann-Whitney + $d$ de Cliff, \texttt{scripts/perf/nonparametric.py}):
+
+\begin{center}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Corrida & K10 & K11 & K12 & K13 & K14 \\
+\midrule
+Frío (avg, ms) & 1729.65 & 408.35 & 491.88 & 225.18 & 233.83 \\
+Caliente (avg, ms) & 388.69 & 309.35 & 209.31 & 209.31 & 200.94 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+$U = 4{,}0$, $z = -1{,}78$, $p = 0{,}0758$ (bilateral), $d$ de Cliff $=
+0{,}68$ (efecto grande). Con $n=5$ por condición el contraste no alcanza
+significancia al 5\,\% ($p > 0{,}05$), pero el tamaño del efecto es
+grande y consistente en dirección con K9: en las cinco corridas la
+media fría fue mayor que la caliente, sin excepción. La falta de
+significancia formal es un límite honesto del tamaño muestral pequeño
+(el mismo patrón que \texttt{ANALISIS-k6.md} ya declara para el
+contraste K1 local), no evidencia de que la caché no funcione.
+
 \section{Seguridad (Bloque C.2) — RQ2}
 \label{sec:sec}
 

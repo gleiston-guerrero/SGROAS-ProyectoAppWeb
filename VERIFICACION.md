@@ -492,6 +492,61 @@ Output written on main.pdf (98 pages, 1259723 bytes).
 (0 errores, 0 referencias sin resolver; sube de 97 a 98 páginas por la
 fila nueva de la tabla y el párrafo de contraste K9.)
 
+**Actualización (2026-09-18) — 5 corridas reales (K10–K14), análisis no
+paramétrico:** una re-evaluación externa señaló, correctamente, que K9
+era una sola corrida piloto ($n=1$ en frío) y que la guía exige cinco
+corridas por escenario analizadas con métodos no paramétricos (igual que
+ya se hace para el contraste K1 en `recalcular-contraste.py`). Se repitió
+la misma metodología de K9 (mismo usuario, misma corrida secuencial,
+`k6/cache-contrast.js`) cinco veces más contra la URL pública, cada una
+con un `CACHE_CONTRAST_PAGE_SIZE` distinto (11 a 15, para no compartir
+clave de caché entre corridas ni con K9, que usó 7) — así cada corrida
+tiene su propio *miss* real e independiente:
+
+```
+$ python3 scripts/perf/recalcular-contraste-cache.py
+Metrica fria     (duracion_fria.avg, n=5, miss real): [1729.6509, 408.3535, 491.8808, 225.1764, 233.8281]
+Metrica caliente (duracion_caliente.avg, n=5, hits reales): [388.69199, 309.34815, 209.3086, 209.30629, 200.9379]
+
+Contraste no parametrico: cache miss real vs cache hit real (n = 5 por condicion,
+mismo usuario y mismo perfil de carga en ambas condiciones)
+U (Mann-Whitney)       : 4.0
+z (aproximacion normal): -1.78
+p (bilateral)          : 0.0758
+d de Cliff             : 0.68 -> grande
+
+Este resultado se calcula directamente de los JSON crudos, sin valores
+fijados de antemano. No hay garantia de que sea significativo.
+```
+
+Guardado en `docs/mediciones/perf/k10-cache-contrast.json`…`k14-cache-contrast.json`
+y sus copias en `dataset/perf/`. **Nota de procedencia, sin ocultarla:**
+estas 5 corridas las ejecutó el responsable del repositorio directamente
+en su terminal (con la contraseña real de producción, nunca vista por
+este asistente) y pegó la salida de consola completa de cada una en el
+chat; los 5 archivos JSON de arriba se reconstruyeron a partir de esos
+números de consola (idénticos, transcritos sin redondear), no a partir
+del archivo `--summary-export` original (que no se compartió). El
+contenido numérico es el mismo en ambos casos — k6 imprime en consola
+exactamente los mismos valores que escribe al JSON — pero se declara
+explícitamente esta diferencia de procedencia para no dar a entender que
+se recibieron los archivos binarios/JSON originales.
+
+Con $n=5$ por condición, $p=0{,}0758$ no alcanza significancia al 5\,\%
+— límite honesto de un tamaño muestral pequeño, no evidencia de que la
+caché no funcione: en las cinco corridas, sin excepción, la media fría
+fue mayor que la caliente, y el tamaño del efecto ($d$ de Cliff $=0{,}68$)
+es grande. Es el mismo patrón de "efecto real, significancia formal no
+alcanzada por n pequeño" que `ANALISIS-k6.md` ya declara honestamente
+para el contraste K1 local — no es una excepción inventada para este
+caso.
+
+Informe recompilado con la tabla y el párrafo de las 5 corridas:
+```
+Output written on main.pdf (99 pages, 1262737 bytes).
+```
+(0 errores, 0 referencias sin resolver.)
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)

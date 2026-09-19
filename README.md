@@ -49,7 +49,7 @@ make audit
 # Artefactos docs (versions + figuras k6)
 make docs
 
-# Compilar el informe (genera docs/informe-final/main.pdf, 98 páginas)
+# Compilar el informe (genera docs/informe-final/main.pdf, 99 páginas)
 make pdf
 
 # Pipeline completo end-to-end (up, test, bench K1-K3, audit, jacoco, docs, pdf)
@@ -63,7 +63,7 @@ Sistema disponible en `https://sgroas-backend.onrender.com` (Render Free, datos 
 
 ## Compilación del informe técnico
 
-El informe se compila desde el directorio `docs/informe-final/` (98 páginas),
+El informe se compila desde el directorio `docs/informe-final/` (99 páginas),
 con `pdflatex` + `biber` (4 invocaciones: tres pasadas de `pdflatex` y una de `biber`):
 
 ```bash
@@ -130,7 +130,7 @@ reproducirlos y comprobarlos:
 
 ## Informe final (Entrega Final v1.0.1)
 
-Documento académico completo — **98 páginas** con anexos y capturas CI/Render: [`docs/informe-final.pdf`](docs/informe-final.pdf) · Fuente LaTeX: [`docs/informe-final/main.tex`](docs/informe-final/main.tex) + `refs.bib` · Wrapper para Listing 1 p.17: [`docs/informe-final.tex`](docs/informe-final.tex).
+Documento académico completo — **99 páginas** con anexos y capturas CI/Render: [`docs/informe-final.pdf`](docs/informe-final.pdf) · Fuente LaTeX: [`docs/informe-final/main.tex`](docs/informe-final/main.tex) + `refs.bib` · Wrapper para Listing 1 p.17: [`docs/informe-final.tex`](docs/informe-final.tex).
 
 ### Compilación del informe
 

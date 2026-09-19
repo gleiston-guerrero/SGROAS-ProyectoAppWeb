@@ -1,0 +1,37 @@
+{
+  "root_group": {
+    "checks": {
+      "status es 200": {
+        "name": "status es 200",
+        "passes": 11,
+        "fails": 0
+      }
+    }
+  },
+  "metrics": {
+    "duracion_fria": {
+      "avg": 225.1764,
+      "med": 225.1764,
+      "min": 225.1764,
+      "max": 225.1764,
+      "p(50)": 225.1764,
+      "p(90)": 225.1764,
+      "p(95)": 225.1764,
+      "p(99)": 225.1764
+    },
+    "duracion_caliente": {
+      "avg": 209.30629,
+      "med": 193.87955,
+      "min": 169.3699,
+      "max": 378.9631,
+      "p(50)": 193.87955,
+      "p(90)": 226.46251,
+      "p(95)": 302.712805,
+      "p(99)": 363.713041
+    }
+  },
+  "meta": {
+    "cache_contrast_page_size": 14,
+    "base_url": "https://sgroas-backend.onrender.com"
+  }
+}

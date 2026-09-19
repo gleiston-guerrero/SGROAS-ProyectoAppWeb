@@ -216,6 +216,41 @@ completo en `VERIFICACION.md`, sección P2.
 
 ---
 
+**Actualización (2026-09-18) — 5 corridas reales (K10-K14), analizadas
+con Mann-Whitney + d de Cliff:**
+**Cerrado por: Luis Tejada**
+
+K9 era una sola corrida piloto ($n=1$ en frío); la guía exige cinco
+corridas por escenario con análisis no paramétrico. Se repitió la misma
+metodología de K9 cinco veces más contra producción, cada una con una
+clave de caché distinta (`page size` 11-15) para garantizar un miss real
+e independiente por corrida.
+
+**Archivos modificados:**
+- `docs/mediciones/perf/k10`-`k14-cache-contrast.json` y sus copias en
+  `dataset/perf/` (nuevos).
+- `scripts/perf/recalcular-contraste-cache.py` (nuevo) -- recalcula el
+  contraste desde los JSON crudos con `nonparametric.py` (mismo patrón
+  que `recalcular-contraste.py` para K1).
+- `docs/informe-final/capitulos/cap8-evaluacion.tex` -- tabla y párrafo
+  con las 5 corridas y el resultado del contraste.
+- `README.md` -- conteo de páginas actualizado (98→99).
+
+**Resultado:** $U=4{,}0$, $p=0{,}0758$, $d$ de Cliff $=0{,}68$ (efecto
+grande). Con $n=5$ no alcanza significancia al 5%, pero en las cinco
+corridas, sin excepción, la fría fue mayor que la caliente -- el mismo
+patrón de "efecto real, n insuficiente para significancia formal" que
+`ANALISIS-k6.md` ya declara para K1. **Nota de procedencia:** las 5
+corridas las ejecutó Luis Tejada en su terminal (contraseña real nunca
+vista por este asistente); los JSON se reconstruyeron a partir de la
+salida de consola pegada en el chat (números idénticos a los que k6
+escribe en el `--summary-export`), no del archivo binario original, y
+esto se declara explícitamente en `VERIFICACION.md` para no confundir
+la procedencia del dato. Informe recompilado (99 páginas, 0 errores).
+Detalle completo en `VERIFICACION.md`, sección P2.
+
+---
+
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
 **Cerrado por: María del Rosario Escudero Plaza (corridas 1) y Luis Alejandro Tejada Bajaña (perfil tableta)**
 
