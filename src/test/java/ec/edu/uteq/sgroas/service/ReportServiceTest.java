@@ -39,13 +39,13 @@ class ReportServiceTest {
     @InjectMocks
     private ReportService reportService;
 
-    private Object[] filaGeneral() {
+    private Object[] generalRow() {
         return new Object[] {10L, 8L, 6L, 5L, 4L, 3L, 9L, 7L, 2L, 1L};
     }
 
     @Test
     void generalStatisticsMapsAllTenTotals() {
-        when(incidentRepository.generalStatistics()).thenReturn(List.<Object[]>of(filaGeneral()));
+        when(incidentRepository.generalStatistics()).thenReturn(List.<Object[]>of(generalRow()));
 
         List<Map<String, Object>> resultado = reportService.generalStatistics();
 

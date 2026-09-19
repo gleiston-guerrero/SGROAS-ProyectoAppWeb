@@ -32,7 +32,7 @@ class DriverServiceTest {
     @InjectMocks
     private DriverService driverService;
 
-    private Driver conductorBase() {
+    private Driver baseDriver() {
         return Driver.builder()
                 .id(1L)
                 .firstNames("Carlos Alberto")
@@ -172,7 +172,7 @@ class DriverServiceTest {
                 org.springframework.data.domain.PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
-                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(baseDriver())));
 
         var pagina = driverService.list(null, pageable);
 
@@ -187,7 +187,7 @@ class DriverServiceTest {
                 org.springframework.data.domain.PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
-                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(baseDriver())));
 
         var pagina = driverService.list("   ", pageable);
 
@@ -200,7 +200,7 @@ class DriverServiceTest {
         org.springframework.data.domain.PageRequest pageable =
                 org.springframework.data.domain.PageRequest.of(0, 10);
         when(driverRepository.searchActive("carlos", pageable))
-                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(conductorBase())));
+                .thenReturn(new org.springframework.data.domain.PageImpl<>(List.of(baseDriver())));
 
         var pagina = driverService.list("  Carlos ", pageable);
 
@@ -211,7 +211,7 @@ class DriverServiceTest {
 
     @Test
     void updateWithDuplicateNationalIdThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(baseDriver()));
         when(driverRepository.existsByNationalId("0999999999")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
@@ -225,7 +225,7 @@ class DriverServiceTest {
 
     @Test
     void updateWithDuplicateLicenseThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(baseDriver()));
         when(driverRepository.existsByLicenseNumber("LIC-999-2026")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
@@ -239,8 +239,8 @@ class DriverServiceTest {
 
     @Test
     void updateModifiesAndSaves() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
-        when(driverRepository.save(any(Driver.class))).thenReturn(conductorBase());
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(baseDriver()));
+        when(driverRepository.save(any(Driver.class))).thenReturn(baseDriver());
 
         DriverResponse response = driverService.update(1L, requestBase());
 
@@ -253,7 +253,7 @@ class DriverServiceTest {
 
     @Test
     void deactivateMarksInactive() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorBase()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(baseDriver()));
 
         driverService.deactivate(1L);
 
@@ -263,7 +263,7 @@ class DriverServiceTest {
 
     @Test
     void expiredLicenseShouldMarkLicenseExpiringFalse() {
-        Driver vencido = conductorBase();
+        Driver vencido = baseDriver();
         vencido.setLicenseExpiry(LocalDate.now().minusDays(5));
         when(driverRepository.findById(1L)).thenReturn(Optional.of(vencido));
 
@@ -274,7 +274,7 @@ class DriverServiceTest {
 
     @Test
     void farLicenseShouldMarkLicenseExpiringFalse() {
-        Driver lejana = conductorBase();
+        Driver lejana = baseDriver();
         lejana.setLicenseExpiry(LocalDate.now().plusDays(60));
         when(driverRepository.findById(1L)).thenReturn(Optional.of(lejana));
 

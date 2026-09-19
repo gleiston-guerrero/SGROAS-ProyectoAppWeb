@@ -36,34 +36,34 @@ class AbdScheduleServiceTest {
     @InjectMocks
     private AbdScheduleService service;
 
-    private City ciudad() {
+    private City sampleCity() {
         return City.builder().idCiudad(1).nombre("Quevedo").build();
     }
 
     private Terminal terminal(int id, String nombre) {
-        return Terminal.builder().idTerminal(id).nombre(nombre).ciudad(ciudad()).build();
+        return Terminal.builder().idTerminal(id).nombre(nombre).ciudad(sampleCity()).build();
     }
 
-    private AbdRoute ruta() {
+    private AbdRoute sampleRoute() {
         return AbdRoute.builder().idRuta(1)
                 .terminalOrigen(terminal(1, "T1")).terminalDestino(terminal(2, "T2"))
                 .precioPasaje(new BigDecimal("2.50")).build();
     }
 
-    private Unit unidad(String estado) {
+    private Unit sampleUnit(String estado) {
         return Unit.builder().idUnidad(1).placa("ABC-1234").numeroDisco("001")
                 .modelo("Hiace").capacidad(14).anioFabricacion(2020).estado(estado).build();
     }
 
-    private AbdDriver conductor() {
+    private AbdDriver sampleDriver() {
         return AbdDriver.builder().idConductor(1).cedula("1200000001")
                 .nombres("Carlos").licencia("E").telefono("0988888888").build();
     }
 
-    private Schedule programacion() {
+    private Schedule sampleSchedule() {
         return Schedule.builder().idProgramacion(1).fecha(LocalDate.now())
                 .horaSalida(LocalTime.of(8, 0)).horaEstimadaLlegada(LocalTime.of(10, 0))
-                .estado("Programado").ruta(ruta()).unidad(unidad("Activo")).conductor(conductor()).build();
+                .estado("Programado").ruta(sampleRoute()).unidad(sampleUnit("Activo")).conductor(sampleDriver()).build();
     }
 
     private AbdDtos.ScheduleRequest request(String estado) {
@@ -74,7 +74,7 @@ class AbdScheduleServiceTest {
     @Test
     void listWithoutFiltersUsesFindAll() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(programacionRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(programacion())));
+        when(programacionRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(sampleSchedule())));
 
         assertEquals(1, service.list(null, null, null, null, null, pageable).getTotalElements());
         verify(programacionRepository).findAll(pageable);
@@ -94,7 +94,7 @@ class AbdScheduleServiceTest {
     void listWithFiltersUsesSearch() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(programacionRepository.searchWithFilters(any(), any(), any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(List.of(programacion())));
+                .thenReturn(new PageImpl<>(List.of(sampleSchedule())));
 
         assertEquals(1, service.list("Programado", 1, 1,
                 LocalDate.now().minusDays(1), LocalDate.now(), pageable).getTotalElements());
@@ -102,10 +102,10 @@ class AbdScheduleServiceTest {
 
     @Test
     void createOkWithDefaultStatus() {
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad("Activo")));
-        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(conductor()));
-        when(programacionRepository.save(any(Schedule.class))).thenReturn(programacion());
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit("Activo")));
+        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(sampleDriver()));
+        when(programacionRepository.save(any(Schedule.class))).thenReturn(sampleSchedule());
 
         assertNotNull(service.create(request(null)));
     }
@@ -124,31 +124,31 @@ class AbdScheduleServiceTest {
         when(rutaAbdRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> service.create(request(null)));
 
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
         when(unidadRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> service.create(request(null)));
 
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad("Activo")));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit("Activo")));
         when(conductorAbdRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> service.create(request(null)));
     }
 
     @Test
     void createWithInactiveUnitFails() {
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad("Inactivo")));
-        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(conductor()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit("Inactivo")));
+        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(sampleDriver()));
 
         assertThrows(IllegalStateException.class, () -> service.create(request(null)));
     }
 
     @Test
     void updateWithoutStatusKeepsAndWithStatusChanges() {
-        Schedule p = programacion();
+        Schedule p = sampleSchedule();
         when(programacionRepository.findById(1)).thenReturn(Optional.of(p));
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad("Activo")));
-        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(conductor()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit("Activo")));
+        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(sampleDriver()));
         when(programacionRepository.save(any(Schedule.class))).thenAnswer(i -> i.getArgument(0));
 
         assertEquals("Programado", service.update(1, request(null)).estado());
@@ -160,10 +160,10 @@ class AbdScheduleServiceTest {
         when(programacionRepository.findById(99)).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class, () -> service.update(99, request(null)));
 
-        when(programacionRepository.findById(1)).thenReturn(Optional.of(programacion()));
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad("En Mantenimiento")));
-        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(conductor()));
+        when(programacionRepository.findById(1)).thenReturn(Optional.of(sampleSchedule()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit("En Mantenimiento")));
+        when(conductorAbdRepository.findById(1)).thenReturn(Optional.of(sampleDriver()));
         assertThrows(IllegalStateException.class, () -> service.update(1, request(null)));
     }
 

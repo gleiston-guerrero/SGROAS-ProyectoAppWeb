@@ -42,7 +42,7 @@ class RouteControllerTest {
                 .build();
     }
 
-    private RouteResponse responseEjemplo() {
+    private RouteResponse sampleResponse() {
         return new RouteResponse(
                 1L, "R-001", "Quito - Guayaquil", "Quito", "Guayaquil",
                 420.0, 480, "ACTIVA", true, Instant.now(), Instant.now()
@@ -52,7 +52,7 @@ class RouteControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(routeService.list(any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/rutas"))
                 .andExpect(status().isOk());
@@ -60,7 +60,7 @@ class RouteControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(routeService.findById(1L)).thenReturn(responseEjemplo());
+        when(routeService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/rutas/1"))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class RouteControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(routeService.create(any())).thenReturn(responseEjemplo());
+        when(routeService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/rutas")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -90,7 +90,7 @@ class RouteControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(routeService.update(any(), any())).thenReturn(responseEjemplo());
+        when(routeService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/rutas/1")
                         .contentType(MediaType.APPLICATION_JSON)

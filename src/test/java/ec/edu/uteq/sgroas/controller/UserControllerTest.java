@@ -42,7 +42,7 @@ class UserControllerTest {
                 .build();
     }
 
-    private UserResponse responseEjemplo() {
+    private UserResponse sampleResponse() {
         return new UserResponse(
                 1L, "Administrador SGROAS", "admin@sgroas.com",
                 "ROLE_ADMIN", true, Instant.now(), Instant.now()
@@ -52,7 +52,7 @@ class UserControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(userService.list(any(), any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/usuarios"))
                 .andExpect(status().isOk());
@@ -60,7 +60,7 @@ class UserControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(userService.findById(1L)).thenReturn(responseEjemplo());
+        when(userService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/usuarios/1"))
                 .andExpect(status().isOk())
@@ -69,7 +69,7 @@ class UserControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(userService.create(any())).thenReturn(responseEjemplo());
+        when(userService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/usuarios")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +87,7 @@ class UserControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(userService.update(any(), any())).thenReturn(responseEjemplo());
+        when(userService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/usuarios/1")
                         .contentType(MediaType.APPLICATION_JSON)

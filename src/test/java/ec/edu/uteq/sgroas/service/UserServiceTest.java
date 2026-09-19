@@ -42,7 +42,7 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private User usuarioEjemplo() {
+    private User sampleUser() {
         return User.builder()
                 .id(1L)
                 .name("Carlos Mendoza")
@@ -55,7 +55,7 @@ class UserServiceTest {
                 .build();
     }
 
-    private UserRequest requestEjemplo() {
+    private UserRequest sampleRequest() {
         return new UserRequest("Carlos Mendoza", "carlos@sgroas.com", "123456", "ROLE_ADMIN");
     }
 
@@ -63,7 +63,7 @@ class UserServiceTest {
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(userRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(usuarioEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleUser())));
 
         Page<UserResponse> pagina = userService.list(null, pageable);
 
@@ -75,7 +75,7 @@ class UserServiceTest {
     void listWithSearchUsesSearchActive() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(userRepository.searchActive("carlos", pageable))
-                .thenReturn(new PageImpl<>(List.of(usuarioEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleUser())));
 
         Page<UserResponse> pagina = userService.list("  Carlos  ", pageable);
 
@@ -88,7 +88,7 @@ class UserServiceTest {
     void listWithBlankSearchUsesFindByActiveTrue() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(userRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(usuarioEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleUser())));
 
         Page<UserResponse> pagina = userService.list("   ", pageable);
 
@@ -99,7 +99,7 @@ class UserServiceTest {
 
     @Test
     void findByIdReturnsUser() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
 
         UserResponse response = userService.findById(1L);
 
@@ -127,7 +127,7 @@ class UserServiceTest {
         when(verificationCodeService.generate("carlos@sgroas.com",
                 VerificationCodeService.Type.VERIFICACION)).thenReturn("123456");
 
-        UserResponse response = userService.create(requestEjemplo());
+        UserResponse response = userService.create(sampleRequest());
 
         assertEquals("carlos@sgroas.com", response.email());
         verify(userRepository).save(argThat(u ->
@@ -141,12 +141,12 @@ class UserServiceTest {
         when(userRepository.existsByEmail("carlos@sgroas.com")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> userService.create(requestEjemplo()));
+                () -> userService.create(sampleRequest()));
     }
 
     @Test
     void resendActivationShouldSendNewCode() {
-        User sinVerificar = usuarioEjemplo();
+        User sinVerificar = sampleUser();
         sinVerificar.setVerified(false);
         when(userRepository.findById(1L)).thenReturn(Optional.of(sinVerificar));
         when(verificationCodeService.canResend("carlos@sgroas.com",
@@ -162,7 +162,7 @@ class UserServiceTest {
 
     @Test
     void resendActivationWithAlreadyVerifiedAccountShouldThrowException() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
 
         assertThrows(IllegalArgumentException.class,
                 () -> userService.resendActivationCode(1L));
@@ -170,7 +170,7 @@ class UserServiceTest {
 
     @Test
     void resendActivationWithinWaitPeriodShouldThrowException() {
-        User sinVerificar = usuarioEjemplo();
+        User sinVerificar = sampleUser();
         sinVerificar.setVerified(false);
         when(userRepository.findById(1L)).thenReturn(Optional.of(sinVerificar));
         when(verificationCodeService.canResend("carlos@sgroas.com",
@@ -191,10 +191,10 @@ class UserServiceTest {
 
     @Test
     void updateModifiesAndReturns() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
-        when(userRepository.save(any(User.class))).thenReturn(usuarioEjemplo());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser());
 
-        UserResponse response = userService.update(1L, requestEjemplo());
+        UserResponse response = userService.update(1L, sampleRequest());
 
         assertEquals(1L, response.id());
         verify(userRepository).save(any(User.class));
@@ -202,8 +202,8 @@ class UserServiceTest {
 
     @Test
     void updateWithoutPasswordKeepsPasswordHash() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
-        when(userRepository.save(any(User.class))).thenReturn(usuarioEjemplo());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser());
 
         UserRequest request = new UserRequest(
                 "Carlos Mendoza", "carlos@sgroas.com", null, "ROLE_ADMIN");
@@ -216,8 +216,8 @@ class UserServiceTest {
 
     @Test
     void updateWithBlankPasswordKeepsPasswordHash() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
-        when(userRepository.save(any(User.class))).thenReturn(usuarioEjemplo());
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
+        when(userRepository.save(any(User.class))).thenReturn(sampleUser());
 
         UserRequest request = new UserRequest(
                 "Carlos Mendoza", "carlos@sgroas.com", "   ", "ROLE_ADMIN");
@@ -233,12 +233,12 @@ class UserServiceTest {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class,
-                () -> userService.update(99L, requestEjemplo()));
+                () -> userService.update(99L, sampleRequest()));
     }
 
     @Test
     void deactivateMarksInactive() {
-        when(userRepository.findById(1L)).thenReturn(Optional.of(usuarioEjemplo()));
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
 
         userService.deactivate(1L);
 

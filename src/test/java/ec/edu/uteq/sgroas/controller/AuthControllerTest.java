@@ -60,7 +60,7 @@ class AuthControllerTest {
         );
     }
 
-    private User usuarioActivo() {
+    private User activeUser() {
         return User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -80,7 +80,7 @@ class AuthControllerTest {
         when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(jwtService.getExpirationMs()).thenReturn(3600000L);
         when(userRepository.findByEmail("admin@sgroas.com"))
-                .thenReturn(Optional.of(usuarioActivo()));
+                .thenReturn(Optional.of(activeUser()));
 
         mockMvc().perform(get("/api/auth/me")
                         .cookie(new jakarta.servlet.http.Cookie("access_token", "access-token")))
@@ -96,7 +96,7 @@ class AuthControllerTest {
         when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");
         when(jwtService.getExpirationMs()).thenReturn(3600000L);
         when(userRepository.findByEmail("admin@sgroas.com"))
-                .thenReturn(Optional.of(usuarioActivo()));
+                .thenReturn(Optional.of(activeUser()));
 
         mockMvc().perform(get("/api/auth/me")
                         .header("Authorization", "Bearer access-token"))
@@ -131,7 +131,7 @@ class AuthControllerTest {
 
     @Test
     void meWithInactiveUserShouldReturn401() throws Exception {
-        User inactivo = usuarioActivo();
+        User inactivo = activeUser();
         inactivo.setActive(false);
         when(tokenService.accessTokenEnBlacklist("access-token")).thenReturn(false);
         when(jwtService.extractEmail("access-token")).thenReturn("admin@sgroas.com");

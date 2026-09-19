@@ -44,7 +44,7 @@ class RouteAssignmentControllerTest {
                 .build();
     }
 
-    private RouteAssignmentResponse responseEjemplo() {
+    private RouteAssignmentResponse sampleResponse() {
         return new RouteAssignmentResponse(
                 1L, 1L, "Carlos Mendoza", 1L, "GTU-001", 1L,
                 "Quito - Guayaquil", LocalDate.now(), LocalDate.now(),
@@ -56,7 +56,7 @@ class RouteAssignmentControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(routeAssignmentService.list(any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/asignaciones"))
                 .andExpect(status().isOk());
@@ -64,7 +64,7 @@ class RouteAssignmentControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(routeAssignmentService.findById(1L)).thenReturn(responseEjemplo());
+        when(routeAssignmentService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/asignaciones/1"))
                 .andExpect(status().isOk())
@@ -73,7 +73,7 @@ class RouteAssignmentControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(routeAssignmentService.create(any())).thenReturn(responseEjemplo());
+        when(routeAssignmentService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/asignaciones")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -94,7 +94,7 @@ class RouteAssignmentControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(routeAssignmentService.update(any(), any())).thenReturn(responseEjemplo());
+        when(routeAssignmentService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/asignaciones/1")
                         .contentType(MediaType.APPLICATION_JSON)

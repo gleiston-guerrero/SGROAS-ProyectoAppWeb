@@ -47,7 +47,7 @@ class RouteAssignmentServiceTest {
     @InjectMocks
     private RouteAssignmentService routeAssignmentService;
 
-    private Driver conductorEjemplo() {
+    private Driver sampleDriver() {
         return Driver.builder()
                 .id(1L).firstNames("Carlos").lastNames("Mendoza")
                 .nationalId("1200000001").licenseNumber("LIC-001")
@@ -58,7 +58,7 @@ class RouteAssignmentServiceTest {
                 .build();
     }
 
-    private Vehicle vehiculoEjemplo() {
+    private Vehicle sampleVehicle() {
         return Vehicle.builder()
                 .id(1L).plate("GTU-001").brand("Toyota").model("Hiace")
                 .year(2020).capacity(14).engineNumber("MOT")
@@ -68,7 +68,7 @@ class RouteAssignmentServiceTest {
                 .build();
     }
 
-    private Route rutaEjemplo() {
+    private Route sampleRoute() {
         return Route.builder()
                 .id(1L).code("R-001").name("Quito-Guayaquil")
                 .origin("Quito").destination("Guayaquil").distanceKm(420.0)
@@ -77,17 +77,17 @@ class RouteAssignmentServiceTest {
                 .build();
     }
 
-    private RouteAssignment asignacionEjemplo() {
+    private RouteAssignment sampleAssignment() {
         return RouteAssignment.builder()
-                .id(1L).driver(conductorEjemplo()).vehicle(vehiculoEjemplo())
-                .route(rutaEjemplo()).assignmentDate(LocalDate.now())
+                .id(1L).driver(sampleDriver()).vehicle(sampleVehicle())
+                .route(sampleRoute()).assignmentDate(LocalDate.now())
                 .startDate(LocalDate.now()).endDate(LocalDate.now().plusDays(1))
                 .status(AssignmentStatus.ACTIVA).active(true)
                 .createdAt(Instant.now()).updatedAt(Instant.now())
                 .build();
     }
 
-    private RouteAssignmentRequest requestEjemplo() {
+    private RouteAssignmentRequest sampleRequest() {
         return new RouteAssignmentRequest(
                 1L, 1L, 1L, LocalDate.now(), LocalDate.now(),
                 LocalDate.now().plusDays(1), "ACTIVA"
@@ -99,7 +99,7 @@ class RouteAssignmentServiceTest {
         PageRequest pageable = PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(routeAssignmentService);
         when(routeAssignmentRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(asignacionEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleAssignment())));
 
         Page<RouteAssignmentResponse> pagina = routeAssignmentService.list(pageable);
 
@@ -112,7 +112,7 @@ class RouteAssignmentServiceTest {
     @Test
     void findByIdReturnsAssignment() {
         when(routeAssignmentRepository.findWithDetails(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
 
         RouteAssignmentResponse response = routeAssignmentService.findById(1L);
 
@@ -130,13 +130,13 @@ class RouteAssignmentServiceTest {
 
     @Test
     void createSavesAndReturns() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(sampleVehicle()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
         when(routeAssignmentRepository.save(any(RouteAssignment.class)))
-                .thenReturn(asignacionEjemplo());
+                .thenReturn(sampleAssignment());
 
-        RouteAssignmentResponse response = routeAssignmentService.create(requestEjemplo());
+        RouteAssignmentResponse response = routeAssignmentService.create(sampleRequest());
 
         assertNotNull(response);
         assertEquals(1L, response.id());
@@ -148,33 +148,33 @@ class RouteAssignmentServiceTest {
         when(driverRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> routeAssignmentService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(sampleRequest()));
     }
 
     @Test
     void createWithoutVehicleThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
         when(vehicleRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> routeAssignmentService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(sampleRequest()));
     }
 
     @Test
     void createWithoutRouteThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(sampleVehicle()));
         when(routeRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(IllegalArgumentException.class,
-                () -> routeAssignmentService.create(requestEjemplo()));
+                () -> routeAssignmentService.create(sampleRequest()));
     }
 
     @Test
     void createWithInvalidStatusThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(sampleVehicle()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
 
         RouteAssignmentRequest request = new RouteAssignmentRequest(
                 1L, 1L, 1L, LocalDate.now(), LocalDate.now(),
@@ -188,14 +188,14 @@ class RouteAssignmentServiceTest {
     @Test
     void updateModifiesAndReturns() {
         when(routeAssignmentRepository.findWithDetails(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculoEjemplo()));
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
+        when(vehicleRepository.findById(1L)).thenReturn(Optional.of(sampleVehicle()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
         when(routeAssignmentRepository.save(any(RouteAssignment.class)))
-                .thenReturn(asignacionEjemplo());
+                .thenReturn(sampleAssignment());
 
-        RouteAssignmentResponse response = routeAssignmentService.update(1L, requestEjemplo());
+        RouteAssignmentResponse response = routeAssignmentService.update(1L, sampleRequest());
 
         assertEquals(1L, response.id());
         verify(routeAssignmentRepository).save(any(RouteAssignment.class));
@@ -204,7 +204,7 @@ class RouteAssignmentServiceTest {
     @Test
     void deactivateChangesStatus() {
         when(routeAssignmentRepository.findWithDetails(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
 
         routeAssignmentService.deactivate(1L);
 

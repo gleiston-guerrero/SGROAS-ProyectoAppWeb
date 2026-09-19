@@ -42,7 +42,7 @@ class VehicleControllerTest {
                 .build();
     }
 
-    private VehicleResponse responseEjemplo() {
+    private VehicleResponse sampleResponse() {
         return new VehicleResponse(
                 1L, "GTU-001", "Toyota", "Hiace", 2020, 14,
                 "MOT-123", "CHAS-123", "Blanco", "ACTIVO", true,
@@ -53,7 +53,7 @@ class VehicleControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(vehicleService.list(any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/vehiculos"))
                 .andExpect(status().isOk());
@@ -61,7 +61,7 @@ class VehicleControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(vehicleService.findById(1L)).thenReturn(responseEjemplo());
+        when(vehicleService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/vehiculos/1"))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class VehicleControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(vehicleService.create(any())).thenReturn(responseEjemplo());
+        when(vehicleService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/vehiculos")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class VehicleControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(vehicleService.update(any(), any())).thenReturn(responseEjemplo());
+        when(vehicleService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/vehiculos/1")
                         .contentType(MediaType.APPLICATION_JSON)

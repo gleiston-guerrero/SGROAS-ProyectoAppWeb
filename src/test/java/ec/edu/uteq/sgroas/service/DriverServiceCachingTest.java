@@ -52,7 +52,7 @@ class DriverServiceCachingTest {
     @MockBean
     private DriverRepository driverRepository;
 
-    private Driver conductor() {
+    private Driver sampleDriver() {
         return Driver.builder()
                 .id(1L)
                 .firstNames("Carlos Alberto")
@@ -74,7 +74,7 @@ class DriverServiceCachingTest {
     void secondUnfilteredCallIsServedFromCacheNotFromRepository() {
         Pageable pageable = PageRequest.of(0, 10);
         when(driverRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(conductor())));
+                .thenReturn(new PageImpl<>(List.of(sampleDriver())));
 
         var first = driverService.list(null, pageable);
         var second = driverService.list(null, pageable);
@@ -88,7 +88,7 @@ class DriverServiceCachingTest {
     void searchedCallIsNeverCached() {
         Pageable pageable = PageRequest.of(0, 10);
         when(driverRepository.searchActive("carlos", pageable))
-                .thenReturn(new PageImpl<>(List.of(conductor())));
+                .thenReturn(new PageImpl<>(List.of(sampleDriver())));
 
         driverService.list("Carlos", pageable);
         driverService.list("Carlos", pageable);

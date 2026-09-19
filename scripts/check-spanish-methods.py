@@ -173,6 +173,18 @@ def _scan_main(main_dir):
 
 
 def _scan_test(test_dir):
+    """Escanea src/test.
+
+    Corregido (2026-09-18, senalado por una re-evaluacion externa con un
+    conteo AST): la version anterior SOLO miraba metodos precedidos por
+    @Test (dentro de 6 lineas), dejando totalmente fuera del conteo los
+    helpers privados, @BeforeEach/@AfterEach, metodos de utilidad, etc.
+    de las clases de test -- de ahi que el checker declarara 0/299 cuando
+    un conteo AST real encontro 43/369. Ahora usa el mismo METHOD_PATTERN
+    de _scan_main (con el mismo fix de no contar una linea dos veces como
+    tipo y como metodo) para cubrir TODOS los metodos declarados, no solo
+    los anotados con @Test.
+    """
     methods_total, methods_bad = 0, []
     types_total, types_bad = 0, []
     if not os.path.isdir(test_dir):
@@ -188,16 +200,13 @@ def _scan_test(test_dir):
                 name = t.group(6)
                 if is_spanish(name, TEST_RE):
                     types_bad.append(f"{rel}:{i + 1}: {name}")
-            if not TEST_ANN_PATTERN.match(line):
                 continue
-            for k in range(i, min(i + 6, len(lines))):
-                m = TEST_METHOD_PATTERN.match(lines[k])
-                if m:
-                    methods_total += 1
-                    name = m.group(2)
-                    if is_spanish(name, TEST_RE):
-                        methods_bad.append(f"{rel}:{i + 1}: {name}")
-                    break
+            m = METHOD_PATTERN.match(line)
+            if m and m.group(4) not in _JAVA_KEYWORDS_NOT_METHODS:
+                methods_total += 1
+                name = m.group(4)
+                if is_spanish(name, TEST_RE):
+                    methods_bad.append(f"{rel}:{i + 1}: {name}")
     return methods_total, methods_bad, types_total, types_bad
 
 

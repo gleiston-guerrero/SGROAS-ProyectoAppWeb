@@ -35,7 +35,7 @@ class RouteServiceTest {
     @InjectMocks
     private RouteService routeService;
 
-    private Route rutaEjemplo() {
+    private Route sampleRoute() {
         return Route.builder()
                 .id(1L)
                 .code("R-001")
@@ -51,7 +51,7 @@ class RouteServiceTest {
                 .build();
     }
 
-    private RouteRequest requestEjemplo() {
+    private RouteRequest sampleRequest() {
         return new RouteRequest(
                 "R-001", "Quito - Guayaquil", "Quito", "Guayaquil",
                 420.0, 480, "ACTIVA"
@@ -63,7 +63,7 @@ class RouteServiceTest {
         PageRequest pageable = PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(routeService);
         when(routeRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(rutaEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleRoute())));
 
         Page<RouteResponse> pagina = routeService.list(pageable);
 
@@ -73,7 +73,7 @@ class RouteServiceTest {
 
     @Test
     void findByIdReturnsRoute() {
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
 
         RouteResponse response = routeService.findById(1L);
 
@@ -92,9 +92,9 @@ class RouteServiceTest {
     @Test
     void createSavesAndReturns() {
         when(routeRepository.existsByCode("R-001")).thenReturn(false);
-        when(routeRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
+        when(routeRepository.save(any(Route.class))).thenReturn(sampleRoute());
 
-        RouteResponse response = routeService.create(requestEjemplo());
+        RouteResponse response = routeService.create(sampleRequest());
 
         assertEquals("R-001", response.code());
         verify(routeRepository).save(any(Route.class));
@@ -105,7 +105,7 @@ class RouteServiceTest {
         when(routeRepository.existsByCode("R-001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> routeService.create(requestEjemplo()));
+                () -> routeService.create(sampleRequest()));
     }
 
     @Test
@@ -122,17 +122,17 @@ class RouteServiceTest {
 
     @Test
     void updateModifiesAndReturns() {
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
-        when(routeRepository.save(any(Route.class))).thenReturn(rutaEjemplo());
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
+        when(routeRepository.save(any(Route.class))).thenReturn(sampleRoute());
 
-        RouteResponse response = routeService.update(1L, requestEjemplo());
+        RouteResponse response = routeService.update(1L, sampleRequest());
 
         assertEquals(1L, response.id());
     }
 
     @Test
     void updateWithDuplicateCodeThrowsException() {
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
         when(routeRepository.existsByCode("R-999")).thenReturn(true);
 
         RouteRequest request = new RouteRequest(
@@ -146,7 +146,7 @@ class RouteServiceTest {
 
     @Test
     void deactivateChangesStatus() {
-        when(routeRepository.findById(1L)).thenReturn(Optional.of(rutaEjemplo()));
+        when(routeRepository.findById(1L)).thenReturn(Optional.of(sampleRoute()));
 
         routeService.deactivate(1L);
 

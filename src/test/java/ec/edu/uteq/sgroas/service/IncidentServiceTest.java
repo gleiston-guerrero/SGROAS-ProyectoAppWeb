@@ -40,7 +40,7 @@ class IncidentServiceTest {
     @InjectMocks
     private IncidentService incidentService;
 
-    private RouteAssignment asignacionEjemplo() {
+    private RouteAssignment sampleAssignment() {
         Driver conductor = Driver.builder()
                 .id(1L).firstNames("Carlos").lastNames("Mendoza")
                 .nationalId("1200000001").licenseNumber("LIC-001")
@@ -70,10 +70,10 @@ class IncidentServiceTest {
                 .build();
     }
 
-    private Incident incidenteEjemplo() {
+    private Incident sampleIncident() {
         return Incident.builder()
                 .id(1L)
-                .assignment(asignacionEjemplo())
+                .assignment(sampleAssignment())
                 .reportedBy("Carlos Mendoza")
                 .type(IncidentType.AVERIA_MECANICA)
                 .description("Falla en el motor")
@@ -87,7 +87,7 @@ class IncidentServiceTest {
                 .build();
     }
 
-    private IncidentRequest requestEjemplo() {
+    private IncidentRequest sampleRequest() {
         return new IncidentRequest(
                 1L, "Carlos Mendoza", "AVERIA_MECANICA", "Falla en el motor",
                 LocalDateTime.now(), "Km 12 Via Quito", "MEDIA", "REPORTADO"
@@ -99,7 +99,7 @@ class IncidentServiceTest {
         PageRequest pageable = PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(incidentService);
         when(incidentRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(incidenteEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleIncident())));
 
         Page<IncidentResponse> pagina = incidentService.list(pageable);
 
@@ -109,7 +109,7 @@ class IncidentServiceTest {
 
     @Test
     void findByIdReturnsIncident() {
-        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(sampleIncident()));
 
         IncidentResponse response = incidentService.findById(1L);
 
@@ -128,11 +128,11 @@ class IncidentServiceTest {
     @Test
     void createSavesAndReturns() {
         when(routeAssignmentRepository.findById(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
         when(incidentRepository.save(any(Incident.class)))
-                .thenReturn(incidenteEjemplo());
+                .thenReturn(sampleIncident());
 
-        IncidentResponse response = incidentService.create(requestEjemplo());
+        IncidentResponse response = incidentService.create(sampleRequest());
 
         assertNotNull(response);
         assertEquals("MEDIA", response.severity());
@@ -155,7 +155,7 @@ class IncidentServiceTest {
     @Test
     void createWithInvalidTypeThrowsException() {
         when(routeAssignmentRepository.findById(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
 
         IncidentRequest request = new IncidentRequest(
                 1L, "Carlos Mendoza", "TIPO_INVALIDO", "Falla",
@@ -169,7 +169,7 @@ class IncidentServiceTest {
     @Test
     void createWithInvalidSeverityThrowsException() {
         when(routeAssignmentRepository.findById(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
 
         IncidentRequest request = new IncidentRequest(
                 1L, "Carlos Mendoza", "AVERIA_MECANICA", "Falla",
@@ -183,7 +183,7 @@ class IncidentServiceTest {
     @Test
     void createWithInvalidStatusThrowsException() {
         when(routeAssignmentRepository.findById(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
 
         IncidentRequest request = new IncidentRequest(
                 1L, "Carlos Mendoza", "AVERIA_MECANICA", "Falla",
@@ -196,13 +196,13 @@ class IncidentServiceTest {
 
     @Test
     void updateModifiesAndReturns() {
-        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(sampleIncident()));
         when(routeAssignmentRepository.findById(1L))
-                .thenReturn(Optional.of(asignacionEjemplo()));
+                .thenReturn(Optional.of(sampleAssignment()));
         when(incidentRepository.save(any(Incident.class)))
-                .thenReturn(incidenteEjemplo());
+                .thenReturn(sampleIncident());
 
-        IncidentResponse response = incidentService.update(1L, requestEjemplo());
+        IncidentResponse response = incidentService.update(1L, sampleRequest());
 
         assertEquals(1L, response.id());
         verify(incidentRepository).save(any(Incident.class));
@@ -210,7 +210,7 @@ class IncidentServiceTest {
 
     @Test
     void deactivateChangesStatus() {
-        when(incidentRepository.findById(1L)).thenReturn(Optional.of(incidenteEjemplo()));
+        when(incidentRepository.findById(1L)).thenReturn(Optional.of(sampleIncident()));
 
         incidentService.deactivate(1L);
 

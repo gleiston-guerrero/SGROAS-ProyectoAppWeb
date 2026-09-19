@@ -43,14 +43,14 @@ class AbdDriverControllerTest {
                 .build();
     }
 
-    private AbdDriver conductor() {
+    private AbdDriver sampleDriver() {
         return AbdDriver.builder().idConductor(1).cedula("1200000001")
                 .nombres("Carlos").licencia("E").build();
     }
 
     @Test
     void listWithoutSearchUsesFindAll() throws Exception {
-        when(conductorAbdRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(conductor())));
+        when(conductorAbdRepository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(List.of(sampleDriver())));
 
         mockMvc().perform(get("/api/abd/conductores")).andExpect(status().isOk());
 
@@ -70,7 +70,7 @@ class AbdDriverControllerTest {
     @Test
     void listWithSearchUsesSearch() throws Exception {
         when(conductorAbdRepository.search(eq("carlos"), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(conductor())));
+                .thenReturn(new PageImpl<>(List.of(sampleDriver())));
 
         mockMvc().perform(get("/api/abd/conductores").param("search", " Carlos "))
                 .andExpect(status().isOk());

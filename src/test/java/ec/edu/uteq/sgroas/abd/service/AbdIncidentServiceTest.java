@@ -35,16 +35,16 @@ class AbdIncidentServiceTest {
     @InjectMocks
     private AbdIncidentService service;
 
-    private Unit unidad() {
+    private Unit sampleUnit() {
         return Unit.builder().idUnidad(1).placa("ABC-1234").numeroDisco("001")
                 .modelo("Hiace").capacidad(14).anioFabricacion(2020).estado("Activo").build();
     }
 
-    private AbdIncident incidente(String nivel) {
+    private AbdIncident sampleIncidentEntity(String nivel) {
         return AbdIncident.builder().idIncidente(1).tipo("Choque")
                 .descripcion("Choque leve").nivelSugerido(nivel)
                 .fechaIncidente(LocalDateTime.now()).evidencia("foto.jpg")
-                .estado("Reportado").unidad(unidad()).build();
+                .estado("Reportado").unidad(sampleUnit()).build();
     }
 
     private AbdDtos.AbdIncidentRequest request(String nivel, String evidencia, String estado) {
@@ -54,7 +54,7 @@ class AbdIncidentServiceTest {
     @Test
     void listWithoutFiltersUsesFindAll() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(incidenteRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(incidente("BAJO"))));
+        when(incidenteRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(sampleIncidentEntity("BAJO"))));
 
         assertEquals(1, service.list(null, "  ", null, pageable).getTotalElements());
     }
@@ -63,7 +63,7 @@ class AbdIncidentServiceTest {
     void listWithSearchUsesSearch() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(incidenteRepository.searchWithFilters(any(), any(), any(), any()))
-                .thenReturn(new PageImpl<>(List.of(incidente("MEDIO"))));
+                .thenReturn(new PageImpl<>(List.of(sampleIncidentEntity("MEDIO"))));
 
         assertEquals(1, service.list("Reportado", "MEDIO", "choque", pageable).getTotalElements());
     }
@@ -72,7 +72,7 @@ class AbdIncidentServiceTest {
     void listOnlyStatusUsesFindByStatus() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(incidenteRepository.findByStatusIgnoreCase(eq("reportado"), eq(pageable)))
-                .thenReturn(new PageImpl<>(List.of(incidente("BAJO"))));
+                .thenReturn(new PageImpl<>(List.of(sampleIncidentEntity("BAJO"))));
 
         assertEquals(1, service.list("Reportado", null, null, pageable).getTotalElements());
     }
@@ -81,15 +81,15 @@ class AbdIncidentServiceTest {
     void listOnlyLevelUsesFindByLevel() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(incidenteRepository.findBySuggestedLevelIgnoreCase(eq("alto"), eq(pageable)))
-                .thenReturn(new PageImpl<>(List.of(incidente("ALTO"))));
+                .thenReturn(new PageImpl<>(List.of(sampleIncidentEntity("ALTO"))));
 
         assertEquals(1, service.list(null, "ALTO", null, pageable).getTotalElements());
     }
 
     @Test
     void createHighLevelGeneratesAlert() {
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad()));
-        when(incidenteRepository.save(any(AbdIncident.class))).thenReturn(incidente("ALTO"));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit()));
+        when(incidenteRepository.save(any(AbdIncident.class))).thenReturn(sampleIncidentEntity("ALTO"));
 
         assertNotNull(service.create(request("ALTO", "foto.jpg", null)));
         verify(alertaRepository).save(any());
@@ -97,8 +97,8 @@ class AbdIncidentServiceTest {
 
     @Test
     void createLowLevelDoesNotGenerateAlert() {
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad()));
-        when(incidenteRepository.save(any(AbdIncident.class))).thenReturn(incidente("BAJO"));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit()));
+        when(incidenteRepository.save(any(AbdIncident.class))).thenReturn(sampleIncidentEntity("BAJO"));
 
         assertNotNull(service.create(request("BAJO", null, "Reportado")));
         verify(alertaRepository, never()).save(any());
@@ -113,9 +113,9 @@ class AbdIncidentServiceTest {
 
     @Test
     void updateWithEvidenceAndStatus() {
-        AbdIncident i = incidente("MEDIO");
+        AbdIncident i = sampleIncidentEntity("MEDIO");
         when(incidenteRepository.findById(1)).thenReturn(Optional.of(i));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit()));
         when(incidenteRepository.save(any(AbdIncident.class))).thenAnswer(a -> a.getArgument(0));
 
         AbdDtos.AbdIncidentResponse r = service.update(1, request("MEDIO", "nueva.jpg", "Cerrado"));
@@ -126,9 +126,9 @@ class AbdIncidentServiceTest {
 
     @Test
     void updateWithoutEvidenceOrStatusKeeps() {
-        AbdIncident i = incidente("MEDIO");
+        AbdIncident i = sampleIncidentEntity("MEDIO");
         when(incidenteRepository.findById(1)).thenReturn(Optional.of(i));
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidad()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit()));
         when(incidenteRepository.save(any(AbdIncident.class))).thenAnswer(a -> a.getArgument(0));
 
         AbdDtos.AbdIncidentResponse r = service.update(1, request("MEDIO", null, null));
@@ -143,7 +143,7 @@ class AbdIncidentServiceTest {
         assertThrows(IllegalArgumentException.class,
                 () -> service.update(99, request("BAJO", null, null)));
 
-        when(incidenteRepository.findById(1)).thenReturn(Optional.of(incidente("BAJO")));
+        when(incidenteRepository.findById(1)).thenReturn(Optional.of(sampleIncidentEntity("BAJO")));
         when(unidadRepository.findById(1)).thenReturn(Optional.empty());
         assertThrows(IllegalArgumentException.class,
                 () -> service.update(1, request("BAJO", null, null)));

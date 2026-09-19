@@ -33,7 +33,7 @@ class TokenServiceTest {
     private TokenService tokenService;
 
     @BeforeEach
-    void configurarValueOperations() {
+    void setsUpValueOperations() {
         lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 

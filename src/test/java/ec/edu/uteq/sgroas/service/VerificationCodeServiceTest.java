@@ -44,7 +44,7 @@ class VerificationCodeServiceTest {
         }
     }
 
-    private VerificationCode registro(String codigoClaro) {
+    private VerificationCode verificationRecord(String codigoClaro) {
         return VerificationCode.builder()
                 .id(1L)
                 .email(EMAIL)
@@ -82,7 +82,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void canResendWithRecentCodeShouldBeFalse() {
-        VerificationCode reciente = registro("123456");
+        VerificationCode reciente = verificationRecord("123456");
         reciente.setCreatedAt(Instant.now().minusSeconds(10));
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(reciente));
@@ -92,7 +92,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void canResendWithOldCodeShouldBeTrue() {
-        VerificationCode antiguo = registro("123456");
+        VerificationCode antiguo = verificationRecord("123456");
         antiguo.setCreatedAt(Instant.now().minusSeconds(120));
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(antiguo));
@@ -103,7 +103,7 @@ class VerificationCodeServiceTest {
     @Test
     void validateCorrectCodeMarksItUsed() {
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
-                EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(registro("123456")));
+                EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(verificationRecord("123456")));
 
         service.validate(EMAIL, Type.VERIFICACION, "123456");
 
@@ -112,7 +112,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void validateIncorrectCodeIncrementsAttemptsAndFails() {
-        VerificationCode reg = registro("123456");
+        VerificationCode reg = verificationRecord("123456");
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(reg));
 
@@ -132,7 +132,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void validateAlreadyUsedCodeFails() {
-        VerificationCode usado = registro("123456");
+        VerificationCode usado = verificationRecord("123456");
         usado.setUsed(true);
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(usado));
@@ -143,7 +143,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void validateExpiredCodeFails() {
-        VerificationCode expirado = registro("123456");
+        VerificationCode expirado = verificationRecord("123456");
         expirado.setExpiresAt(Instant.now().minusSeconds(60));
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(expirado));
@@ -154,7 +154,7 @@ class VerificationCodeServiceTest {
 
     @Test
     void validateWithExhaustedAttemptsFails() {
-        VerificationCode agotado = registro("123456");
+        VerificationCode agotado = verificationRecord("123456");
         agotado.setAttempts(5);
         when(repository.findFirstByEmailAndTypeOrderByCreatedAtDesc(
                 EMAIL, Type.VERIFICACION.name())).thenReturn(Optional.of(agotado));

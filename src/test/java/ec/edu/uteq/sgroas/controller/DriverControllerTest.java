@@ -43,7 +43,7 @@ class DriverControllerTest {
                 .build();
     }
 
-    private DriverResponse responseEjemplo() {
+    private DriverResponse sampleResponse() {
         return new DriverResponse(
                 1L, "Carlos Alberto", "Mendoza Vera", "1200000001", "LIC-001-2026",
                 "E", LocalDate.now().plusDays(20), "0988888888",
@@ -55,7 +55,7 @@ class DriverControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(driverService.list(any(), any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/conductores"))
                 .andExpect(status().isOk());
@@ -63,7 +63,7 @@ class DriverControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(driverService.findById(1L)).thenReturn(responseEjemplo());
+        when(driverService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/conductores/1"))
                 .andExpect(status().isOk())
@@ -72,7 +72,7 @@ class DriverControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(driverService.create(any())).thenReturn(responseEjemplo());
+        when(driverService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/conductores")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ class DriverControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(driverService.update(any(), any())).thenReturn(responseEjemplo());
+        when(driverService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/conductores/1")
                         .contentType(MediaType.APPLICATION_JSON)

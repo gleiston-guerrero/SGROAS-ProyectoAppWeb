@@ -43,7 +43,7 @@ class JwtServiceTest {
         ReflectionTestUtils.setField(jwtService, "jwtAudience", "sgroas-frontend");
     }
 
-    private User usuarioEjemplo() {
+    private User sampleUser() {
         return User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -56,7 +56,7 @@ class JwtServiceTest {
 
     @Test
     void generateTokenAllowsExtractingData() {
-        String token = jwtService.generateToken(usuarioEjemplo());
+        String token = jwtService.generateToken(sampleUser());
 
         assertNotNull(token);
         assertNotNull(jwtService.extractJti(token));
@@ -68,7 +68,7 @@ class JwtServiceTest {
 
     @Test
     void tokenWithDifferentEmailShouldBeInvalid() {
-        String token = jwtService.generateToken(usuarioEjemplo());
+        String token = jwtService.generateToken(sampleUser());
 
         assertFalse(jwtService.isTokenValid(token, "otro@sgroas.com"));
     }
@@ -77,7 +77,7 @@ class JwtServiceTest {
     void expiredTokenShouldBeRejected() {
         ReflectionTestUtils.setField(jwtService, "jwtExpirationMs", -1000L);
 
-        String token = jwtService.generateToken(usuarioEjemplo());
+        String token = jwtService.generateToken(sampleUser());
 
         assertThrows(io.jsonwebtoken.ExpiredJwtException.class,
                 () -> jwtService.isTokenValid(token, "admin@sgroas.com"));
@@ -85,7 +85,7 @@ class JwtServiceTest {
 
     @Test
     void extractExpirationShouldBeFuture() {
-        String token = jwtService.generateToken(usuarioEjemplo());
+        String token = jwtService.generateToken(sampleUser());
 
         assertTrue(jwtService.extractExpiration(token).after(new Date()));
     }

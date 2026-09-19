@@ -917,9 +917,70 @@ denominador inflado ni por léxico incompleto, sino porque los
 identificadores que antes eran reales en español ya no existen en el
 código.
 
+**Nota de auditoría (2026-09-18) — quinto bug real, esta vez de alcance:**
+una re-evaluación externa con un conteo AST propio (no basado en este
+checker) encontró `src/main` 6/297 (2,0%) y `src/test` 43/369 (11,7%),
+muy por encima del 0/299 declarado arriba. Investigado: `_scan_test`
+**solo miraba métodos precedidos por `@Test`** (dentro de 6 líneas) — los
+helpers privados de las clases de test (métodos "fábrica" como
+`conductor()`, `usuarioEjemplo()`, `responseEjemplo()`, `@BeforeEach`,
+etc.) nunca entraban al conteo, así que quedaban completamente fuera del
+denominador y del numerador. De ahí el "0/299": no es que no hubiera
+nombres reales en español, es que el escáner nunca los miraba.
+
+Corregido: `_scan_test` ahora usa el mismo `METHOD_PATTERN` que
+`_scan_main` (con el mismo fix de no contar dos veces una línea que ya
+casó como tipo), cubriendo **todos** los métodos declarados en
+`src/test`, no solo los `@Test`. Con el escaneo real y completo:
+```
+$ python3 scripts/check-spanish-methods.py
+[OK] Metodos en src/main: 0/442 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 45/1425 en espanol (3.16%, umbral 5%)
+    (45 helpers privados listados, todos con nombres tipo *Ejemplo/*Base
+     o dominio en espanol: conductor, unidad, incidente, ruta, ciudad,
+     programacion, registro, etc.)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+```
+El total real de métodos en `src/test` (1425, contando todo lo
+declarado) es mucho mayor al denominador anterior (299, solo `@Test`),
+lo que también explica gran parte de la discrepancia con el 369 del
+conteo AST externo (metodologías de conteo distintas, no fabricación).
+
+**Corrección real, no solo documentada (otra vez):** se renombraron los
+45 helpers a inglés en los 20 archivos de test donde aparecían
+(`sampleDriver`, `sampleUnit`, `sampleIncidentEntity`, `sampleRoute`,
+`sampleCity`, `sampleSchedule`, `sampleUser`, `sampleResponse`,
+`sampleRequest`, `sampleVehicle`, `sampleAssignment`,
+`verificationRecord`, etc.), con cuidado de no tocar los setters de
+builder de Lombok que comparten el mismo nombre que el campo de entidad
+(p. ej. `.unidad(unidad())` → `.unidad(sampleUnit())`: el `.unidad(` del
+builder se deja igual porque es el campo de la entidad `Schedule`, ya
+decidido no renombrar; solo cambia la llamada al helper de test).
+Verificado con `perl` de expresión negativa (`(?<!\.)\bunidad\(`) que
+solo capturó las llamadas al helper, nunca al setter.
+
+Resultado final tras el rename, con el escaneo ya completo (todos los
+métodos de test, no solo `@Test`):
+```
+$ python3 scripts/check-spanish-methods.py
+[OK] Metodos en src/main: 0/442 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/1425 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/1867 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/181 en espanol (0.00%, umbral 5%)
+
+OK: todas las categorias por debajo del umbral del 5%
+```
+Verificado: `./mvnw test` completo contra PostgreSQL real: 299 pruebas,
+0 fallos, 0 errores. JaCoCo idéntico (95.67%/88.38%/96.19%).
+
 (Salida anterior, 2026-09-17: 476/132/298/45/774/177 declarados como
 "0.00%" en las cuatro categorías — ese "0.00%" no se sostenía por las
-razones de arriba; ahora sí se sostiene, con evidencia de cada paso.)
+razones de arriba; ahora sí se sostiene, con evidencia de cada paso, y
+con un escaneo de `src/test` que cubre todos los métodos declarados, no
+solo los `@Test`.)
 
 **Nota de auditoria (2026-09-17) — segundo bug real del checker, encontrado
 por una re-evaluación externa y confirmado con una mutación:** el

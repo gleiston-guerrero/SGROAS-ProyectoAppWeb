@@ -598,6 +598,30 @@ incompleto. Detalle completo en `VERIFICACION.md`, sección P5.
 
 ---
 
+**Actualización (2026-09-18) — quinto bug real, de alcance: `_scan_test`
+solo miraba métodos `@Test`:**
+**Cerrado por: Luis Tejada**
+
+Un conteo AST externo encontró `src/test` en 43/369 (11,7%), muy por
+encima del "0/299" declarado. Causa real: el escaneo de `src/test` solo
+miraba métodos precedidos por `@Test`, dejando fuera todos los helpers
+privados (`conductor()`, `usuarioEjemplo()`, `responseEjemplo()`, etc.).
+Corregido para escanear todos los métodos declarados, igual que
+`src/main`. Con el escaneo completo aparecieron 45 helpers reales en
+español en 20 archivos de test (3,16% de 1425 métodos, sigue bajo el
+umbral) -- se renombraron todos a inglés, con cuidado de no tocar los
+setters de builder de Lombok que comparten nombre con el campo de
+entidad (verificado con una expresión de exclusión que solo captura la
+llamada al helper, nunca `.campo(`).
+
+Resultado final: `check-spanish-methods.py` da 0/1867 (0.00%) real,
+combinado, con un escaneo que ahora cubre todo lo declarado en
+`src/test`, no solo `@Test`. Verificado: 299 pruebas, 0 fallos, 0
+errores; JaCoCo idéntico. Detalle completo en `VERIFICACION.md`, sección
+P5.
+
+---
+
 ## P6 — Javadoc >= 90% (commit d2b88b7)
 **Cerrado por: Luis Tejada**
 

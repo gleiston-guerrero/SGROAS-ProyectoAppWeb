@@ -28,21 +28,21 @@ class AbdUnitServiceTest {
     @InjectMocks
     private AbdUnitService service;
 
-    private Unit unidadEjemplo() {
+    private Unit sampleUnit() {
         return Unit.builder()
                 .idUnidad(1).placa("ABC-1234").numeroDisco("001")
                 .modelo("Hiace").capacidad(14).anioFabricacion(2020)
                 .estado("Activo").build();
     }
 
-    private AbdDtos.UnitRequest requestEjemplo(String estado) {
+    private AbdDtos.UnitRequest sampleRequest(String estado) {
         return new AbdDtos.UnitRequest("ABC-1234", "001", "Hiace", 14, 2020, estado);
     }
 
     @Test
     void listWithoutFiltersUsesFindAll() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(unidadRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(unidadEjemplo())));
+        when(unidadRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(sampleUnit())));
 
         Page<AbdDtos.UnitResponse> page = service.list(null, null, pageable);
 
@@ -65,7 +65,7 @@ class AbdUnitServiceTest {
     void listWithFiltersUsesSearch() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(unidadRepository.searchWithFilters(eq("activo"), eq("abc"), any()))
-                .thenReturn(new PageImpl<>(List.of(unidadEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleUnit())));
 
         Page<AbdDtos.UnitResponse> page = service.list("  Activo ", " ABC ", pageable);
 
@@ -75,7 +75,7 @@ class AbdUnitServiceTest {
 
     @Test
     void findByIdOkAndNotFound() {
-        when(unidadRepository.findById(1)).thenReturn(Optional.of(unidadEjemplo()));
+        when(unidadRepository.findById(1)).thenReturn(Optional.of(sampleUnit()));
         assertEquals("ABC-1234", service.findById(1).placa());
 
         when(unidadRepository.findById(99)).thenReturn(Optional.empty());
@@ -86,9 +86,9 @@ class AbdUnitServiceTest {
     void createWithNullStatusUsesActiveByDefault() {
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
         when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(false);
-        when(unidadRepository.save(any(Unit.class))).thenReturn(unidadEjemplo());
+        when(unidadRepository.save(any(Unit.class))).thenReturn(sampleUnit());
 
-        AbdDtos.UnitResponse r = service.create(requestEjemplo(null));
+        AbdDtos.UnitResponse r = service.create(sampleRequest(null));
 
         assertNotNull(r);
         verify(unidadRepository).save(any(Unit.class));
@@ -98,7 +98,7 @@ class AbdUnitServiceTest {
     void createWithDuplicatePlateFails() {
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.create(requestEjemplo("Activo")));
+        assertThrows(IllegalArgumentException.class, () -> service.create(sampleRequest("Activo")));
         verify(unidadRepository, never()).save(any());
     }
 
@@ -107,16 +107,16 @@ class AbdUnitServiceTest {
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(false);
         when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.create(requestEjemplo("Activo")));
+        assertThrows(IllegalArgumentException.class, () -> service.create(sampleRequest("Activo")));
     }
 
     @Test
     void updateWithoutStatusKeepsCurrent() {
-        Unit actual = unidadEjemplo();
+        Unit actual = sampleUnit();
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
         when(unidadRepository.save(any(Unit.class))).thenReturn(actual);
 
-        AbdDtos.UnitResponse r = service.update(1, requestEjemplo(null));
+        AbdDtos.UnitResponse r = service.update(1, sampleRequest(null));
 
         assertEquals("Activo", r.estado());
         verify(unidadRepository, never()).existsByLicensePlateIgnoreCase(any());
@@ -124,7 +124,7 @@ class AbdUnitServiceTest {
 
     @Test
     void updateWithStatusChangesIt() {
-        Unit actual = unidadEjemplo();
+        Unit actual = sampleUnit();
         actual.setPlaca("XYZ-9999");
         actual.setNumeroDisco("009");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
@@ -132,36 +132,36 @@ class AbdUnitServiceTest {
         when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(false);
         when(unidadRepository.save(any(Unit.class))).thenAnswer(i -> i.getArgument(0));
 
-        AbdDtos.UnitResponse r = service.update(1, requestEjemplo("Inactivo"));
+        AbdDtos.UnitResponse r = service.update(1, sampleRequest("Inactivo"));
 
         assertEquals("Inactivo", r.estado());
     }
 
     @Test
     void updateWithDuplicatePlateFails() {
-        Unit actual = unidadEjemplo();
+        Unit actual = sampleUnit();
         actual.setPlaca("OTRA-0000");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
         when(unidadRepository.existsByLicensePlateIgnoreCase("ABC-1234")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.update(1, requestEjemplo("Activo")));
+        assertThrows(IllegalArgumentException.class, () -> service.update(1, sampleRequest("Activo")));
     }
 
     @Test
     void updateWithDuplicateDiskFails() {
-        Unit actual = unidadEjemplo();
+        Unit actual = sampleUnit();
         actual.setNumeroDisco("009");
         when(unidadRepository.findById(1)).thenReturn(Optional.of(actual));
         when(unidadRepository.existsByDiskNumberIgnoreCase("001")).thenReturn(true);
 
-        assertThrows(IllegalArgumentException.class, () -> service.update(1, requestEjemplo("Activo")));
+        assertThrows(IllegalArgumentException.class, () -> service.update(1, sampleRequest("Activo")));
     }
 
     @Test
     void updateNonexistentFails() {
         when(unidadRepository.findById(99)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalArgumentException.class, () -> service.update(99, requestEjemplo("Activo")));
+        assertThrows(IllegalArgumentException.class, () -> service.update(99, sampleRequest("Activo")));
     }
 
     @Test

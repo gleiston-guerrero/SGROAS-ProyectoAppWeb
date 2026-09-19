@@ -36,7 +36,7 @@ class DriverServiceExtraTest {
     @InjectMocks
     private DriverService driverService;
 
-    private Driver conductorEjemplo() {
+    private Driver sampleDriver() {
         return Driver.builder()
                 .id(1L)
                 .firstNames("Carlos Alberto")
@@ -54,7 +54,7 @@ class DriverServiceExtraTest {
                 .build();
     }
 
-    private DriverRequest requestEjemplo() {
+    private DriverRequest sampleRequest() {
         return new DriverRequest(
                 "Carlos Alberto", "Mendoza Vera", "1200000001", "LIC-001-2026",
                 "E", LocalDate.of(2026, 7, 15), "0988888888",
@@ -67,7 +67,7 @@ class DriverServiceExtraTest {
         PageRequest pageable = PageRequest.of(0, 10);
         when(self.getObject()).thenReturn(driverService);
         when(driverRepository.findByActiveTrue(pageable))
-                .thenReturn(new PageImpl<>(List.of(conductorEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleDriver())));
 
         Page<DriverResponse> pagina = driverService.list(null, pageable);
 
@@ -85,7 +85,7 @@ class DriverServiceExtraTest {
 
     @Test
     void findInactiveDriverThrowsException() {
-        Driver inactivo = conductorEjemplo();
+        Driver inactivo = sampleDriver();
         inactivo.setActive(false);
         when(driverRepository.findById(1L)).thenReturn(Optional.of(inactivo));
 
@@ -99,7 +99,7 @@ class DriverServiceExtraTest {
         when(driverRepository.existsByLicenseNumber("LIC-001-2026")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> driverService.create(requestEjemplo()));
+                () -> driverService.create(sampleRequest()));
     }
 
     @Test
@@ -119,10 +119,10 @@ class DriverServiceExtraTest {
 
     @Test
     void updateModifiesAndReturns() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
-        when(driverRepository.save(any(Driver.class))).thenReturn(conductorEjemplo());
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
+        when(driverRepository.save(any(Driver.class))).thenReturn(sampleDriver());
 
-        DriverResponse response = driverService.update(1L, requestEjemplo());
+        DriverResponse response = driverService.update(1L, sampleRequest());
 
         assertEquals(1L, response.id());
         verify(driverRepository).save(any(Driver.class));
@@ -130,7 +130,7 @@ class DriverServiceExtraTest {
 
     @Test
     void updateWithOtherNationalIdThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
         when(driverRepository.existsByNationalId("1299999999")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
@@ -145,7 +145,7 @@ class DriverServiceExtraTest {
 
     @Test
     void updateWithOtherLicenseThrowsException() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
         when(driverRepository.existsByLicenseNumber("LIC-999-2026")).thenReturn(true);
 
         DriverRequest request = new DriverRequest(
@@ -160,7 +160,7 @@ class DriverServiceExtraTest {
 
     @Test
     void deactivateChangesStatus() {
-        when(driverRepository.findById(1L)).thenReturn(Optional.of(conductorEjemplo()));
+        when(driverRepository.findById(1L)).thenReturn(Optional.of(sampleDriver()));
 
         driverService.deactivate(1L);
 
@@ -170,7 +170,7 @@ class DriverServiceExtraTest {
 
     @Test
     void expiredLicenseShouldNotBeMarkedAsExpiring() {
-        Driver conductor = conductorEjemplo();
+        Driver conductor = sampleDriver();
         conductor.setLicenseExpiry(LocalDate.now().minusDays(5));
         when(driverRepository.findById(1L)).thenReturn(Optional.of(conductor));
 

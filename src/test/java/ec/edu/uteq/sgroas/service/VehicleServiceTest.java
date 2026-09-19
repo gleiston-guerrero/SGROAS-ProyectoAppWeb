@@ -35,7 +35,7 @@ class VehicleServiceTest {
     @InjectMocks
     private VehicleService vehicleService;
 
-    private Vehicle vehiculoEjemplo() {
+    private Vehicle sampleVehicle() {
         return Vehicle.builder()
                 .id(1L)
                 .plate("GTU-001")
@@ -53,7 +53,7 @@ class VehicleServiceTest {
                 .build();
     }
 
-    private VehicleRequest requestEjemplo() {
+    private VehicleRequest sampleRequest() {
         return new VehicleRequest(
                 "GTU-001", "Toyota", "Hiace", 2020, 14,
                 "MOT-123", "CHAS-123", "Blanco", "ACTIVO"
@@ -63,7 +63,7 @@ class VehicleServiceTest {
     @Test
     void listReturnsPage() {
         PageRequest pageable = PageRequest.of(0, 10);
-        Vehicle vehiculo = vehiculoEjemplo();
+        Vehicle vehiculo = sampleVehicle();
         when(self.getObject()).thenReturn(vehicleService);
         when(vehicleRepository.findByActiveTrue(pageable))
                 .thenReturn(new PageImpl<>(List.of(vehiculo)));
@@ -78,7 +78,7 @@ class VehicleServiceTest {
     @Test
     void findByIdReturnsVehicle() {
         when(vehicleRepository.findById(1L))
-                .thenReturn(Optional.of(vehiculoEjemplo()));
+                .thenReturn(Optional.of(sampleVehicle()));
 
         VehicleResponse response = vehicleService.findById(1L);
 
@@ -99,9 +99,9 @@ class VehicleServiceTest {
     void createSavesAndReturns() {
         when(vehicleRepository.existsByPlate("GTU-001")).thenReturn(false);
         when(vehicleRepository.save(any(Vehicle.class)))
-                .thenReturn(vehiculoEjemplo());
+                .thenReturn(sampleVehicle());
 
-        VehicleResponse response = vehicleService.create(requestEjemplo());
+        VehicleResponse response = vehicleService.create(sampleRequest());
 
         assertNotNull(response);
         assertEquals("GTU-001", response.plate());
@@ -113,7 +113,7 @@ class VehicleServiceTest {
         when(vehicleRepository.existsByPlate("GTU-001")).thenReturn(true);
 
         assertThrows(IllegalArgumentException.class,
-                () -> vehicleService.create(requestEjemplo()));
+                () -> vehicleService.create(sampleRequest()));
         verify(vehicleRepository, never()).save(any(Vehicle.class));
     }
 
@@ -132,11 +132,11 @@ class VehicleServiceTest {
     @Test
     void updateModifiesAndReturns() {
         when(vehicleRepository.findById(1L))
-                .thenReturn(Optional.of(vehiculoEjemplo()));
+                .thenReturn(Optional.of(sampleVehicle()));
         when(vehicleRepository.save(any(Vehicle.class)))
-                .thenReturn(vehiculoEjemplo());
+                .thenReturn(sampleVehicle());
 
-        VehicleResponse response = vehicleService.update(1L, requestEjemplo());
+        VehicleResponse response = vehicleService.update(1L, sampleRequest());
 
         assertNotNull(response);
         assertEquals(1L, response.id());
@@ -145,7 +145,7 @@ class VehicleServiceTest {
 
     @Test
     void updateWithDuplicatePlateThrowsException() {
-        Vehicle vehiculo = vehiculoEjemplo();
+        Vehicle vehiculo = sampleVehicle();
         when(vehicleRepository.findById(1L)).thenReturn(Optional.of(vehiculo));
         when(vehicleRepository.existsByPlate("GTU-999")).thenReturn(true);
 
@@ -161,7 +161,7 @@ class VehicleServiceTest {
     @Test
     void deactivateChangesStatus() {
         when(vehicleRepository.findById(1L))
-                .thenReturn(Optional.of(vehiculoEjemplo()));
+                .thenReturn(Optional.of(sampleVehicle()));
 
         vehicleService.deactivate(1L);
 

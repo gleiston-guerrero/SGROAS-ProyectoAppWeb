@@ -43,7 +43,7 @@ class IncidentControllerTest {
                 .build();
     }
 
-    private IncidentResponse responseEjemplo() {
+    private IncidentResponse sampleResponse() {
         return new IncidentResponse(
                 1L, 1L, "Carlos Mendoza", "AVERIA_MECANICA",
                 "Falla en el motor", LocalDateTime.now(), "Km 12 Via Quito",
@@ -54,7 +54,7 @@ class IncidentControllerTest {
     @Test
     void listReturns200() throws Exception {
         when(incidentService.list(any()))
-                .thenReturn(new PageImpl<>(List.of(responseEjemplo())));
+                .thenReturn(new PageImpl<>(List.of(sampleResponse())));
 
         mockMvc().perform(get("/api/incidentes"))
                 .andExpect(status().isOk());
@@ -62,7 +62,7 @@ class IncidentControllerTest {
 
     @Test
     void findByIdReturns200() throws Exception {
-        when(incidentService.findById(1L)).thenReturn(responseEjemplo());
+        when(incidentService.findById(1L)).thenReturn(sampleResponse());
 
         mockMvc().perform(get("/api/incidentes/1"))
                 .andExpect(status().isOk())
@@ -71,7 +71,7 @@ class IncidentControllerTest {
 
     @Test
     void createReturns201() throws Exception {
-        when(incidentService.create(any())).thenReturn(responseEjemplo());
+        when(incidentService.create(any())).thenReturn(sampleResponse());
 
         mockMvc().perform(post("/api/incidentes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -93,7 +93,7 @@ class IncidentControllerTest {
 
     @Test
     void updateReturns200() throws Exception {
-        when(incidentService.update(any(), any())).thenReturn(responseEjemplo());
+        when(incidentService.update(any(), any())).thenReturn(sampleResponse());
 
         mockMvc().perform(put("/api/incidentes/1")
                         .contentType(MediaType.APPLICATION_JSON)

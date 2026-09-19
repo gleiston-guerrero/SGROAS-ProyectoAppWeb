@@ -37,7 +37,7 @@ class AbdRouteServiceTest {
                 .ciudad(City.builder().idCiudad(1).nombre("Quevedo").build()).build();
     }
 
-    private AbdRoute ruta() {
+    private AbdRoute sampleRoute() {
         return AbdRoute.builder().idRuta(1)
                 .terminalOrigen(terminal(1, "T1")).terminalDestino(terminal(2, "T2"))
                 .precioPasaje(new BigDecimal("2.50")).build();
@@ -50,7 +50,7 @@ class AbdRouteServiceTest {
     @Test
     void listWithoutSearchUsesFindAllAndBlankToo() {
         PageRequest pageable = PageRequest.of(0, 10);
-        when(rutaAbdRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(ruta())));
+        when(rutaAbdRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(sampleRoute())));
         when(rutaAbdRepository.countSchedules(1)).thenReturn(0L);
 
         assertEquals(1, service.list(null, pageable).getTotalElements());
@@ -62,7 +62,7 @@ class AbdRouteServiceTest {
     void listWithSearchUsesSearch() {
         PageRequest pageable = PageRequest.of(0, 10);
         when(rutaAbdRepository.search(eq("quevedo"), eq(pageable)))
-                .thenReturn(new PageImpl<>(List.of(ruta())));
+                .thenReturn(new PageImpl<>(List.of(sampleRoute())));
         when(rutaAbdRepository.countSchedules(1)).thenReturn(3L);
 
         assertEquals(3L, service.list(" Quevedo ", pageable).getContent().get(0).totalProgramaciones());
@@ -70,7 +70,7 @@ class AbdRouteServiceTest {
 
     @Test
     void findByIdOkAndNotFound() {
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
         when(rutaAbdRepository.countSchedules(1)).thenReturn(0L);
         assertEquals(1, service.findById(1).idRuta());
 
@@ -82,7 +82,7 @@ class AbdRouteServiceTest {
     void createOkAndSameTerminalFails() {
         when(catalogoAbdService.findTerminal(1)).thenReturn(terminal(1, "T1"));
         when(catalogoAbdService.findTerminal(2)).thenReturn(terminal(2, "T2"));
-        when(rutaAbdRepository.save(any(AbdRoute.class))).thenReturn(ruta());
+        when(rutaAbdRepository.save(any(AbdRoute.class))).thenReturn(sampleRoute());
         when(rutaAbdRepository.countSchedules(1)).thenReturn(0L);
 
         assertNotNull(service.create(request(1, 2)));
@@ -91,7 +91,7 @@ class AbdRouteServiceTest {
 
     @Test
     void updateOkSameTerminalAndNotFoundFail() {
-        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(ruta()));
+        when(rutaAbdRepository.findById(1)).thenReturn(Optional.of(sampleRoute()));
         when(catalogoAbdService.findTerminal(1)).thenReturn(terminal(1, "T1"));
         when(catalogoAbdService.findTerminal(2)).thenReturn(terminal(2, "T2"));
         when(rutaAbdRepository.save(any(AbdRoute.class))).thenAnswer(i -> i.getArgument(0));

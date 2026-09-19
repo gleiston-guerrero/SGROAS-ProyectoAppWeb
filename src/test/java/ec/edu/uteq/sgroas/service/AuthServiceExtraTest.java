@@ -51,11 +51,11 @@ class AuthServiceExtraTest {
     private AuthService authService;
 
     @BeforeEach
-    void configurarRefreshExpiration() {
+    void setsRefreshExpiration() {
         ReflectionTestUtils.setField(authService, "refreshExpirationMs", 604800000L);
     }
 
-    private User usuarioEjemplo() {
+    private User sampleUser() {
         return User.builder()
                 .id(1L)
                 .name("Administrador SGROAS")
@@ -68,7 +68,7 @@ class AuthServiceExtraTest {
                 .build();
     }
 
-    private void simularGeneracionTokens(User usuario) {
+    private void simulateTokenGeneration(User usuario) {
         when(jwtService.generateToken(usuario)).thenReturn("access-token-prueba");
         when(tokenService.createRefreshToken(eq("admin@sgroas.com"), eq(604800000L)))
                 .thenReturn("refresh-token-prueba");
@@ -77,12 +77,12 @@ class AuthServiceExtraTest {
 
     @Test
     void verifyCorrectEmailActivatesAccountAndReturnsTokens() {
-        User usuario = usuarioEjemplo();
+        User usuario = sampleUser();
         usuario.setActive(false);
         usuario.setVerified(false);
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
-        simularGeneracionTokens(usuario);
+        simulateTokenGeneration(usuario);
 
         AuthResponse response = authService.verifyEmail("admin@sgroas.com", "654321");
 
@@ -95,7 +95,7 @@ class AuthServiceExtraTest {
 
     @Test
     void loginWithUnverifiedEmailShouldThrowException() {
-        User sinVerificar = usuarioEjemplo();
+        User sinVerificar = sampleUser();
         sinVerificar.setActive(false);
         sinVerificar.setVerified(false);
         when(userRepository.findByEmail("admin@sgroas.com"))
@@ -108,7 +108,7 @@ class AuthServiceExtraTest {
 
     @Test
     void resetPasswordShouldUpdatePassword() {
-        User usuario = usuarioEjemplo();
+        User usuario = sampleUser();
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         when(passwordEncoder.encode("nueva-clave-1")).thenReturn("hash-nuevo");
@@ -122,7 +122,7 @@ class AuthServiceExtraTest {
 
     @Test
     void resendCodeShouldGenerateAndSendNewCode() {
-        User sinVerificar = usuarioEjemplo();
+        User sinVerificar = sampleUser();
         sinVerificar.setVerified(false);
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(sinVerificar));
@@ -139,7 +139,7 @@ class AuthServiceExtraTest {
 
     @Test
     void resendCodeWithVerifiedAccountShouldNotSendAnything() {
-        User verificado = usuarioEjemplo();
+        User verificado = sampleUser();
         verificado.setVerified(true);
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(verificado));
@@ -151,7 +151,7 @@ class AuthServiceExtraTest {
 
     @Test
     void requestPasswordResetShouldSendCode() {
-        User usuario = usuarioEjemplo();
+        User usuario = sampleUser();
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
         when(verificationCodeService.canResend("admin@sgroas.com",
@@ -166,12 +166,12 @@ class AuthServiceExtraTest {
 
     @Test
     void refreshShouldRotateToken() {
-        User usuario = usuarioEjemplo();
+        User usuario = sampleUser();
         when(tokenService.getEmailFromRefreshToken("refresh-token-prueba"))
                 .thenReturn("admin@sgroas.com");
         when(userRepository.findByEmail("admin@sgroas.com"))
                 .thenReturn(Optional.of(usuario));
-        simularGeneracionTokens(usuario);
+        simulateTokenGeneration(usuario);
 
         AuthResponse response = authService.refresh(
                 new RefreshTokenRequest("refresh-token-prueba")
@@ -184,7 +184,7 @@ class AuthServiceExtraTest {
 
     @Test
     void refreshWithInactiveUserShouldThrowException() {
-        User inactivo = usuarioEjemplo();
+        User inactivo = sampleUser();
         inactivo.setActive(false);
         when(tokenService.getEmailFromRefreshToken("refresh-token-prueba"))
                 .thenReturn("admin@sgroas.com");
