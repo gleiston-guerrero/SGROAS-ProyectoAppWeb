@@ -95,10 +95,12 @@ K9 fue una sola corrida piloto ($n=1$ en frío); la guía exige cinco
 corridas por escenario analizadas con métodos no paramétricos. Se
 repitió la misma metodología (mismo usuario, misma corrida secuencial,
 \texttt{k6/cache-contrast.js}) cinco veces contra la URL pública, cada
-una con una clave de caché distinta (\texttt{page size} 11 a 15) para
-garantizar un \emph{miss} real e independiente en cada corrida
-(\texttt{docs/mediciones/perf/k10}--\texttt{k14-cache-contrast.json}).
-Recalculado desde los JSON crudos con
+una con una clave de caché distinta (\texttt{page size} 21 a 34) para
+garantizar un \emph{miss} real e independiente en cada corrida. Estas
+cinco son exportaciones \texttt{--summary-export} reales de k6, sin
+editar (\texttt{docs/mediciones/perf/k10}--\texttt{k14-cache-contrast.json},
+solo con el token de sesión de \texttt{setup\_data} redactado antes de
+versionar). Recalculado desde los JSON crudos con
 \texttt{scripts/perf/recalcular-contraste-cache.py}
 (Mann-Whitney + $d$ de Cliff, \texttt{scripts/perf/nonparametric.py}):
 
@@ -107,20 +109,31 @@ Recalculado desde los JSON crudos con
 \toprule
 Corrida & K10 & K11 & K12 & K13 & K14 \\
 \midrule
-Frío (avg, ms) & 1729.65 & 408.35 & 491.88 & 225.18 & 233.83 \\
-Caliente (avg, ms) & 388.69 & 309.35 & 209.31 & 209.31 & 200.94 \\
+Frío (avg, ms) & 220.58 & 203.39 & 205.00 & 319.50 & 225.76 \\
+Caliente (avg, ms) & 206.19 & 239.71 & 211.21 & 223.66 & 258.02 \\
 \bottomrule
 \end{tabular}
 \end{center}
 
-$U = 4{,}0$, $z = -1{,}78$, $p = 0{,}0758$ (bilateral), $d$ de Cliff $=
-0{,}68$ (efecto grande). Con $n=5$ por condición el contraste no alcanza
-significancia al 5\,\% ($p > 0{,}05$), pero el tamaño del efecto es
-grande y consistente en dirección con K9: en las cinco corridas la
-media fría fue mayor que la caliente, sin excepción. La falta de
-significancia formal es un límite honesto del tamaño muestral pequeño
-(el mismo patrón que \texttt{ANALISIS-k6.md} ya declara para el
-contraste K1 local), no evidencia de que la caché no funcione.
+$U = 10{,}0$, $z = -0{,}52$, $p = 0{,}6015$ (bilateral), $d$ de Cliff $=
+-0{,}20$ (efecto pequeño). Con datos ya genuinamente crudos (no la
+reconstrucción de una versión anterior de este documento, corregida
+tras una re-evaluación externa que señaló, con razón, que esos JSON no
+tenían la estructura de una exportación real de k6) el resultado es
+honesto y menos favorable de lo que parecía: no hay diferencia
+significativa entre frío y caliente, y el tamaño del efecto es pequeño,
+incluso con signo variable entre corridas (K11 y K14 muestran la
+caliente más lenta que la fría). Esto es consistente con el diagnóstico
+ya declarado más arriba: en el plan gratuito de Render la variabilidad
+de red/CPU domina sobre cualquier ahorro de consultar Redis en vez de
+PostgreSQL, al punto de que con $n=5$ no se puede distinguir el efecto
+de caché del ruido de red. La única corrida que sí mostró una diferencia
+grande (K9, frío 514{,}75\,ms vs.\ caliente mediana 191{,}59\,ms) sigue
+siendo real, pero no representativa de las cinco corridas siguientes:
+la caché no está rota (los tiempos calientes rara vez superan los
+300\,ms, salvo el ruido de red ya señalado), pero esta medición no
+alcanza a demostrar estadísticamente que la reduzca de forma
+consistente en este entorno.
 
 \section{Seguridad (Bloque C.2) — RQ2}
 \label{sec:sec}

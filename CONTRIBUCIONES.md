@@ -265,18 +265,47 @@ e independiente por corrida.
   con las 5 corridas y el resultado del contraste.
 - `README.md` -- conteo de páginas actualizado (98→99).
 
-**Resultado:** $U=4{,}0$, $p=0{,}0758$, $d$ de Cliff $=0{,}68$ (efecto
-grande). Con $n=5$ no alcanza significancia al 5%, pero en las cinco
-corridas, sin excepción, la fría fue mayor que la caliente -- el mismo
-patrón de "efecto real, n insuficiente para significancia formal" que
-`ANALISIS-k6.md` ya declara para K1. **Nota de procedencia:** las 5
-corridas las ejecutó Luis Tejada en su terminal (contraseña real nunca
-vista por este asistente); los JSON se reconstruyeron a partir de la
-salida de consola pegada en el chat (números idénticos a los que k6
-escribe en el `--summary-export`), no del archivo binario original, y
-esto se declara explícitamente en `VERIFICACION.md` para no confundir
-la procedencia del dato. Informe recompilado (99 páginas, 0 errores).
-Detalle completo en `VERIFICACION.md`, sección P2.
+**Resultado (declarado 2026-09-18, corregido 2026-09-19):** $U=4{,}0$,
+$p=0{,}0758$, $d$ de Cliff $=0{,}68$ (efecto grande).
+
+---
+
+**Actualización (2026-09-19) — los 5 JSON de arriba no eran
+exportaciones reales de k6:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló, con razón, que los 5 archivos
+`k10`-`k14-cache-contrast.json` no tenían la estructura de una
+exportación real de k6 (les faltaban decenas de campos estándar, traían
+un bloque `meta` inventado, sin marca de tiempo) -- porque se habían
+reconstruido a mano desde la salida de consola pegada en el chat, no
+desde el archivo `--summary-export` real, algo que `VERIFICACION.md` sí
+declaraba pero que no bastaba: un archivo con esa estructura no puede
+pasar por una exportación real, dijera lo que dijera la nota.
+
+**Archivos modificados:**
+- `docs/mediciones/perf/k10`-`k14-cache-contrast.json` y sus copias en
+  `dataset/perf/` -- reemplazados por 5 exportaciones `--summary-export`
+  reales, subidas directamente por Luis Tejada (no pegadas como texto de
+  consola), con el token de sesión de `setup_data` redactado antes de
+  versionar. Verificados campo por campo contra la estructura estándar
+  de k6 (`http_reqs`, `vus`, `iterations`, `checks`, `root_group`, etc.)
+  antes de aceptarlos.
+- `docs/informe-final/capitulos/cap8-evaluacion.tex` -- tabla y párrafo
+  reescritos con los números reales.
+
+**Resultado real (menos favorable que el declarado antes, y así se
+reporta):** $U=10{,}0$, $z=-0{,}52$, $p=0{,}6015$, $d$ de Cliff
+$=-0{,}20$ (efecto pequeño, signo variable entre corridas). Con datos
+genuinamente crudos no hay diferencia significativa entre frío y
+caliente -- la variabilidad de red del plan gratuito de Render domina
+sobre cualquier ahorro real de Redis, al punto de que $n=5$ no alcanza
+para distinguir el efecto de caché del ruido. K9 (corrida piloto, real,
+nunca cuestionada) sí mostró una diferencia grande, pero no es
+representativa de las 5 corridas siguientes -- se declara la
+contradicción en vez de homogeneizar los números. Informe recompilado
+(100 páginas, 0 errores). Detalle completo en `VERIFICACION.md`, sección
+P2.
 
 ---
 
@@ -799,6 +828,29 @@ No se editó ni se recortó el contenido de ninguna captura: son
 screenshots reales, sin editar, del estado actual del repositorio.
 Informe recompilado (100 páginas, 0 errores). Detalle completo en
 `VERIFICACION.md`, sección P7.
+
+---
+
+**Actualización (2026-09-19) — la afirmación "mensajes en inglés" de
+arriba era falsa:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló, con razón, que los commits citados
+como ejemplo de "mensajes en inglés" están escritos en español (el
+prefijo `fix(P2):` es la única parte en inglés). Fue un error de este
+asistente, no una interpretación razonable del criterio. Corregido de
+raíz: desde el commit `2a8bd32` (2026-09-19) los mensajes de commit de
+este repositorio se escriben en inglés. Se recapturó
+`fig-ci-actions-3-green.png` una vez hubo corridas verdes consecutivas
+con mensajes en inglés reales en el historial de GitHub Actions.
+
+Sobre el segundo hallazgo (un despliegue cancelado de Render, visible en
+la captura, sin explicar): confirmado con Luis Tejada que ese intento se
+canceló manualmente por quedarse colgado (comportamiento normal del plan
+gratuito de Render al despertar), no por un fallo real -- se agregó esa
+aclaración directamente en el `\caption` de `anexos.tex`.
+
+Detalle completo en `VERIFICACION.md`, sección P7.
 
 ---
 

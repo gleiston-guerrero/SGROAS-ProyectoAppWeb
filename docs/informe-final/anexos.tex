@@ -39,7 +39,7 @@ El pipeline de GitHub Actions (\texttt{.github/workflows/ci.yml}) ejecuta:
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]{figuras/fig-render-deploy-succeeded-live.png}
-  \caption{Deployment on Render with status \texttt{Live} for commit \texttt{4722c1f} (3m47s), 2026-09-18.}
+  \caption{Deployment on Render with status \texttt{Live} for commit \texttt{4722c1f} (3m47s), 2026-09-18. The greyed-out entry above it, for the same commit, was manually cancelled by the developer after it hung (10m34s with no progress); it is not a failed build, and the retry immediately below succeeded.}
   \label{fig:render-deploy}
 \end{figure}
 
