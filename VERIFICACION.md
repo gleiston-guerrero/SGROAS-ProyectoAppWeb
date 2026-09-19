@@ -1682,12 +1682,18 @@ historial real de GitHub Actions (captura tomada de forma directa con
 un script Playwright headless, no por captura manual, para eliminar
 cualquier duda sobre su autenticidad):
 
+Compruébese en cualquier momento con `git log --oneline -3`; a modo de
+referencia, dos de los commits que ya están verdes en GitHub Actions en
+el momento de escribir esto son:
 ```
-$ git log --oneline -3
-<hash real, mensaje en ingles>
-<hash real, mensaje en ingles>
-<hash real, mensaje en ingles>
+d81a0ab fix(P2): replace reconstructed k6 JSON with genuine raw exports
+2a8bd32 fix(P1,P4,P7): fix remaining unfailable Makefile checks and Figure/Table label
 ```
+(deliberadamente no se cita aquí el hash de este mismo commit como
+"el tercero" — citar el propio hash de un commit dentro de su mensaje es
+el mismo problema de auto-referencia ya discutido para el tag `v1.1.0`:
+cualquier commit posterior lo vuelve obsoleto. La comprobación válida es
+siempre `git log`, no una lista fija.)
 
 **Sobre el deploy "fallido" de Render, también señalado:** la captura
 de Render sí mostraba, sin explicarlo, una segunda entrada para el
