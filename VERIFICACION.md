@@ -1713,6 +1713,123 @@ commits reales visibles en cada imagen y explicando la entrada
 cancelada. Informe recompilado (100 páginas, 0 errores, 0 referencias
 sin resolver).
 
+**Cierre real (2026-09-19, ronda final) — texto en espanol dentro de los
+pixeles, y un check que por fin lo ve:**
+
+La ronda anterior dejo P7 en 70 %: la captura de CI mostraba en ingles
+solo las tres filas citadas en el pie y otras cuatro en espanol en la
+misma imagen; la de Render no se recapturo y conservaba cinco titulos en
+espanol. Corregido en origen:
+
+- `fig-ci-actions-3-green.png`: recapturada tras empujar `bb5b87c`. Se
+  ven las corridas #252 a #246, las siete verdes y las siete con mensaje
+  en ingles. La primera corrida con mensaje en espanol es la #243, fuera
+  de cuadro (comprobable en la API publica de GitHub Actions).
+- `fig-render-deploy-succeeded-live.png`: recapturada desde la **pagina
+  de detalle** del deploy, no desde la lista. Se declara por escrito
+  porque es una decision de encuadre: la lista muestra los cinco ultimos
+  deploys y cuatro corresponden a commits anteriores al cambio de
+  idioma. La pagina de detalle muestra el deploy que el pie cita y nada
+  mas: `bb5b87c`, `Deploy succeeded | Live`, 3m54s, 2026-09-19 22:05:54
+  GMT-5.
+
+Ambas son capturas de pantalla completa, sin recorte ni edicion de
+pixeles. El archivo se recomprimio sin perdida al transferirlo, de modo
+que el sha256 del **archivo** no coincide con el de la captura original;
+el del **raster decodificado** si, y es el que prueba que no se toco
+ningun pixel:
+
+```
+$ sha256sum docs/informe-final/figuras/*.png
+5418d04e34243a7a0d410371e96c44768830f10a9a4c447657d0cb8b289e47ee  fig-ci-actions-3-green.png
+2d8d86a27a888b3a90b349baef9ac7f02849992dbe187431258ff9f42fccab0c  fig-render-deploy-succeeded-live.png
+
+$ python3 -c "from PIL import Image; import hashlib; ..."   # sha256 del raster RGBA
+dce9914ae9acaa6046a024e2d7835e144c9a8595ead8d2c341432c1065d99443  fig-ci-actions-3-green.png
+92c9cb641f66bc2446a251d3cf3ddb2b6fd5b084aebd17cece753fa21b9d3e15  fig-render-deploy-succeeded-live.png
+```
+
+**El check nuevo.** `scripts/check-figure-text.py` descubre las figuras
+leyendo los `\includegraphics` del informe (no una lista fija), hace OCR
+con `tesseract` sobre cada una (escala de grises x2, pasada normal e
+invertida, porque a tamano original tesseract pierde las lineas
+pequenas y el check pasaria en vacio) y falla si aparece una palabra de
+un lexico espanol. Cada figura tiene una instantanea OCR versionada en
+`docs/informe-final/figuras/ocr/` que declara el sha256 de su imagen.
+
+**Orden de verificacion:**
+```bash
+python3 scripts/check-figure-text.py
+echo "exit=$?"
+```
+
+**Salida (2026-09-19):**
+```
+  Figuras incluidas en el informe: 6
+  Modo: OCR en vivo (tesseract)
+  OK   fig-ci-actions-3-green.png                 sha256 5418d04e3424
+  OK   fig-render-deploy-succeeded-live.png       sha256 2d8d86a27a88
+  OK   fig-render-live-url.jpeg                   sha256 7d32446e8368
+  OK   c4-level1-context.png                      sha256 e465c74c715d
+  OK   c4-level2-containers.png                   sha256 c92c15976d4f
+  OK   c4-level3-components.png                   sha256 eb8496f9ac43
+  0 palabras en espanol en los pixeles de las figuras del informe
+exit=0
+```
+
+**Pruebas de mutacion (todas revertidas, ninguna queda en el
+repositorio):**
+
+1. Se reintroduce `La Tabla~\ref{tab:trabajos-relacionados}` en `cap3`:
+   ```
+   docs/informe-final/cap3-trabajos-relacionados.tex:47:La Tabla~\ref{...} resume los 10 trabajos incluidos...
+   exit=0 (detectado)
+   ```
+2. Se reemplaza `fig-render-live-url.jpeg` por otra imagen sin tocar su
+   instantanea:
+   ```
+   FAIL: docs/informe-final/figuras/fig-render-live-url.jpeg cambio y su instantanea OCR no (sha256 imagen e465c74c715d != instantanea 7d32446e8368)
+   ```
+3. Se inyecta texto en espanol en una instantanea:
+   ```
+   FAIL: texto en espanol dentro de docs/informe-final/figuras/fig-render-live-url.jpeg: con, corridas, reales
+   ```
+4. **La que importa:** se repone la captura antigua (con espanol) *y* se
+   escribe a mano una instantanea "limpia" con el sha256 correcto, que
+   es exactamente como se falsificaria este check:
+   ```
+   FAIL: el OCR en vivo de docs/informe-final/figuras/fig-ci-actions-3-green.png encuentra espanol que la instantanea no declara: con, del, corrige, corridas, recaptura, espanol, horneado, fallar, reales
+   ```
+   La instantanea versionada no sirve para maquillar el resultado
+   mientras haya `tesseract` en el entorno.
+
+**`scripts/verify.sh` tambien corregido.** Su check de P7 era
+`grep -rE "..." docs/informe-final/*.md`: no hay ningun `.md` en ese
+directorio, el glob no expandia, `grep` no encontraba nada y el check
+**no podia fallar nunca**. Ahora mira los `.tex` reales, la prosa y las
+imagenes.
+
+**Prosa vs. rotulo.** Seis referencias cruzadas decian "la Tabla N"
+mientras el flotante se rotulaba "Table N". Corregidas a
+`Table~\ref{...}`. Medido sobre el PDF recompilado:
+```
+$ pdfinfo docs/informe-final/main.pdf | grep Pages
+Pages:           101
+$ pdftotext docs/informe-final/main.pdf - | grep -c Figura
+0
+$ pdftotext docs/informe-final/main.pdf - | grep -c Tabla
+0
+$ pdftotext docs/informe-final/main.pdf - | grep -c Figure
+6
+$ pdftotext docs/informe-final/main.pdf - | grep -c Table
+14
+```
+
+Informe recompilado con el procedimiento del README (`pdflatex`,
+`biber`, `pdflatex`, `pdflatex`): 101 paginas, 0 errores, 0 referencias
+sin resolver, 0 citas sin resolver. `make verify` completo: `ALL CHECKS
+PASSED`, exit 0.
+
 ---
 
 ## P8 — Demografía SUS con trazabilidad CSV (0.7)

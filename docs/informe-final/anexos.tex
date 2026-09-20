@@ -32,14 +32,14 @@ El pipeline de GitHub Actions (\texttt{.github/workflows/ci.yml}) ejecuta:
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]{figuras/fig-ci-actions-3-green.png}
-  \caption{CI Pipeline (GitHub Actions) with three consecutive successful runs, all with English commit messages (criterion P1), 2026-09-19. Commits \texttt{fa963ce}, \texttt{d81a0ab}, \texttt{2a8bd32} on \texttt{main}.}
+  \caption{CI pipeline (GitHub Actions). The seven most recent runs visible (\#246--\#252) all completed successfully and all carry English commit messages; the three at the top are \#252 (commit \texttt{bb5b87c}, branch \texttt{main}), \#251 and \#250 (commit \texttt{14f7e39}, tag \texttt{v1.1.0} and branch \texttt{main}). Unedited screenshot taken on 2026-09-19.}
   \label{fig:ci-3-green}
 \end{figure}
 
 \begin{figure}[H]
   \centering
   \includegraphics[width=0.95\textwidth]{figuras/fig-render-deploy-succeeded-live.png}
-  \caption{Deployment on Render with status \texttt{Live} for commit \texttt{4722c1f} (3m47s), 2026-09-18. The greyed-out entry above it, for the same commit, was manually cancelled by the developer after it hung (10m34s with no progress); it is not a failed build, and the retry immediately below succeeded.}
+  \caption{Deploy detail view on Render for commit \texttt{bb5b87c}: status \texttt{Deploy succeeded | Live}, duration 3m54s, deployed 2026-09-19 at 22:05:54 GMT-5. Unedited screenshot taken on 2026-09-19.}
   \label{fig:render-deploy}
 \end{figure}
 

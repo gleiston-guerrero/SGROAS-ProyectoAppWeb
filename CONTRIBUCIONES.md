@@ -126,10 +126,47 @@ caption en inglés (ya corregidos en una ronda anterior) aparecía como
 "Figura X: <texto en inglés>". Corregido en `main.tex` con
 `\AtBeginDocument{\renewcommand{\figurename}{Figure}\renewcommand{\tablename}{Table}}`
 (un `\renewcommand` normal en el preámbulo no basta, porque babel fija
-esos nombres después, al seleccionar el idioma). Verificado: 0
-apariciones de "Figura "/"Tabla " en las 100 páginas del PDF
-recompilado, "Listing" ya estaba en inglés desde antes (no depende de
-babel). Detalle completo en `VERIFICACION.md` (sección P7).
+esos nombres después, al seleccionar el idioma). "Listing" ya estaba en
+inglés desde antes (no depende de babel). Detalle completo en
+`VERIFICACION.md` (sección P7).
+
+**Corrección de esta afirmación (2026-09-19, ronda posterior) — decía "0
+apariciones de Figura/Tabla en las 100 páginas" y las dos cifras estaban
+mal:**
+**Cerrado por: Luis Tejada**
+
+Una re-evaluación externa señaló que `CONTRIBUCIONES.md` afirmaba "0
+apariciones de Figura/Tabla" cuando "Tabla" aparecía **seis** veces en el
+PDF. Es cierto, y el error era doble:
+
+1. El `\renewcommand` sí dejó en 0 el **rótulo** que babel pone delante de
+   cada caption ("Figura N:"/"Tabla N:"), pero no toca la **prosa**: seis
+   referencias cruzadas del cuerpo decían "la Tabla~\ref{...}" mientras el
+   flotante se rotulaba "Table N". El documento usaba los dos nombres para
+   el mismo objeto. Esta afirmación generalizó el resultado del rótulo a
+   todo el PDF sin volver a medirlo.
+2. El informe tiene **101** páginas, no 100 (el `README.md` ya decía 101;
+   este archivo se quedó con la cifra de la ronda anterior).
+
+Corregido en origen, no reescribiendo la afirmación: las seis referencias
+ahora dicen "Table~\ref{...}", el mismo nombre que el rótulo del
+flotante. Cifras medidas de nuevo sobre el PDF recompilado, no heredadas:
+
+```
+$ pdfinfo docs/informe-final/main.pdf | grep Pages
+Pages:           101
+$ pdftotext docs/informe-final/main.pdf - | grep -c "Figura"
+0
+$ pdftotext docs/informe-final/main.pdf - | grep -c "Tabla"
+0
+$ pdftotext docs/informe-final/main.pdf - | grep -c "Figure"
+6
+```
+
+Y para que no vuelva a pasar sin que nadie lo note, el check dejó de ser
+una afirmación en prosa: `make verify` ahora falla si reaparece
+"la Tabla/Figura N" en cualquier `.tex` del informe (probado con mutación
+real: se reintrodujo la frase en `cap3` y el check falló; revertida).
 
 ---
 
@@ -851,6 +888,85 @@ gratuito de Render al despertar), no por un fallo real -- se agregó esa
 aclaración directamente en el `\caption` de `anexos.tex`.
 
 Detalle completo en `VERIFICACION.md`, sección P7.
+
+---
+
+**Actualización (2026-09-19, ronda final) — las dos capturas del anexo
+seguían con mensajes de commit en español dentro de los píxeles:**
+**Cerrado por: Luis Tejada**
+
+La re-evaluación dejó P7 en 70 % con un motivo concreto: la recaptura
+anterior de CI mostraba en inglés solo las tres filas citadas en el pie,
+y otras cuatro en español en la misma imagen; la de Render no se había
+recapturado y conservaba cinco títulos en español. El criterio pide
+**todo** el texto de las figuras en inglés, no solo el que cita el pie.
+
+**Qué se hizo, en orden:**
+
+1. Se empujó el commit `bb5b87c` (mensaje en inglés). Con él, las nueve
+   corridas más recientes de GitHub Actions (#244 a #252) tienen mensaje
+   en inglés; la primera en español queda en la #243, fuera de cuadro.
+2. `fig-ci-actions-3-green.png` recapturada: se ven las corridas #252 a
+   #246, las siete verdes y las siete en inglés.
+3. `fig-render-deploy-succeeded-live.png` recapturada desde la **página
+   de detalle** del deploy, no desde la lista. Se dice explícitamente
+   porque es una decisión de encuadre: la lista muestra los cinco
+   últimos deploys y cuatro son de commits anteriores al cambio de
+   idioma, así que su título está en español y no hay forma de
+   cambiarlo sin volver a desplegar cuatro veces. La página de detalle
+   muestra el deploy que el pie cita y nada más: `bb5b87c`, estado
+   `Deploy succeeded | Live`, 3m54s, desplegado el 2026-09-19 a las
+   22:05:54 GMT-5.
+4. `anexos.tex`: pies reescritos con los identificadores reales de cada
+   captura. El pie de CI decía "(criterion P1)" cuando el criterio es
+   P7; corregido.
+
+Ambas capturas son de pantalla completa, tomadas por Luis Tejada en su
+propio navegador el 2026-09-19. **No se recortó ni se editó ningún
+píxel.** El archivo se recomprimió sin pérdida al transferirlo, así que
+el `sha256` del archivo no coincide con el de la captura original; el
+del raster decodificado sí, y es la comprobación que importa:
+
+```
+sha256 del archivo    5418d04e34243a7a0d410371e96c44768830f10a9a4c447657d0cb8b289e47ee  fig-ci-actions-3-green.png
+                      2d8d86a27a888b3a90b349baef9ac7f02849992dbe187431258ff9f42fccab0c  fig-render-deploy-succeeded-live.png
+sha256 del raster     dce9914ae9acaa6046a024e2d7835e144c9a8595ead8d2c341432c1065d99443  fig-ci-actions-3-green.png
+RGBA (sin comprimir)  92c9cb641f66bc2446a251d3cf3ddb2b6fd5b084aebd17cece753fa21b9d3e15  fig-render-deploy-succeeded-live.png
+```
+
+**Y esta vez el check lo puede ver.** Las dos rondas anteriores fallaron
+en lo mismo: el `grep` de `\caption{...}` no puede leer lo que está
+dentro de un PNG, así que el defecto solo se detectaba cuando alguien
+miraba la imagen a ojo. `scripts/check-figure-text.py` (nuevo) hace OCR
+de las seis figuras que el informe incluye de verdad — las descubre
+leyendo los `\includegraphics`, no de una lista fija — y falla si
+aparece una palabra del léxico español. Cada figura lleva una
+instantánea OCR versionada en `docs/informe-final/figuras/ocr/` que
+declara el `sha256` de su imagen, y cuando hay `tesseract` disponible el
+OCR se rehace en el momento y se contrasta contra la instantánea.
+
+Probado con cuatro mutaciones reales, todas revertidas:
+
+| Mutación | Resultado |
+|---|---|
+| Se reintroduce "La Tabla~\ref{}" en `cap3` | falla (check de prosa) |
+| Se cambia una figura sin tocar su instantánea | falla (`sha256` no coincide) |
+| Se inyecta una palabra en español en una instantánea | falla (léxico) |
+| Se repone la captura vieja **y** se "limpia" a mano su instantánea con el hash correcto | falla (el OCR en vivo encuentra el español que la instantánea no declara) |
+
+La cuarta es la que importa: la instantánea versionada no sirve para
+maquillar el resultado.
+
+El mismo check se cableó a `scripts/verify.sh`, cuyo P7 apuntaba a
+`docs/informe-final/*.md` — una ruta que no existe en el repositorio, de
+modo que el glob no expandía, `grep` no encontraba nada y el check
+**nunca podía fallar**. Ahora mira los `.tex` reales y corre el OCR.
+
+Informe recompilado con el procedimiento del `README.md` (`pdflatex`,
+`biber`, `pdflatex`, `pdflatex`): **101 páginas, 0 errores, 0
+referencias sin resolver, 0 citas sin resolver**. `make verify` completo
+en verde (`ALL CHECKS PASSED`, exit 0). Detalle completo en
+`VERIFICACION.md`, sección P7.
 
 ---
 

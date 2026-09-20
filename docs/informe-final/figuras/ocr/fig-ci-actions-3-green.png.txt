@@ -1,0 +1,248 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/figuras/fig-ci-actions-3-green.png
+# sha256: 5418d04e34243a7a0d410371e96c44768830f10a9a4c447657d0cb8b289e47ee
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+= re) gleiston-guerrero / SGROAS-ProyectoAppWeb ~
+
+© Issues
+
+<> Code
+
+Actions
+
+All workflows
+
+| a
+Deemer test
+
+Keep Render alive
+
+Management
+Seta
+
+G Die) Counc
+(3) Attestations
+Bey
+
+(Gj Usage metrics
+
+(Gj age Stir e Mts oy
+
+3 Pull requests
+
+ 
+
+fe
+
+eee enc
+
+© Actions [A Projects () Wiki 0) Security and quality |“ Insights
+
+Cl
+
+ci.yml
+
+252 workflow runs
+
+@ fix(P7): use the English float name in prose cross-references
+Cl #252: Commit bb5b87c pushed by Alxjandr07
+
+@ docs(P2): explain in the report why the 5-run cache contrast isn't fa...
+Cl #251: Commit 14f7e39 pushed by Alxjandr07
+
+@ docs(P2): explain in the report why the 5-run cache contrast isn't fa...
+Cl #250: Commit 14f7e39 pushed by Alxjandr07
+
+@ fix(P10): regenerate MANIFEST hash for k10-cache-contrast.json from a...
+a Ee SoA Ua week mare Urs
+
+ 
+
+@ fix(P10): regenerate MANIFEST hash for k10-cache-contrast.json from a...
+a Ee ee Anew eu emma Urd
+
+ 
+
+@ fix(P7): recapture Cl screenshot with real English-message green runs
+Cl #247: Commit aeObbb9 pushed by Alxjandr07
+
+© docs(P7): fill in verification hashes for the English commit message ...
+Cl #246: Commit fa963ce pushed by Alxjandr07
+
+ 
+
+https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml
+
+ry Settings
+
+main
+
+Ve tea Ie
+
+main
+
+Ve tea Ie
+
+main
+
+main
+
+main
+
+—
+
+tf]
+OR 1-3 PAL okra) 8) ~ ++i O}/9))/8)\ a
+Q Filter workflow runs mec)
+Event » Se) a Branch Actor ¥
+
+6 13 minutes ago
+owe ws
+
+a Bete)
+
+© 6m 53s
+
+a Leto Nae)
+© 2m 49s
+
+am Leto NE
+
+© 5m 31s
+
+a eke NE)
+
+Owes
+
+a Beto EE)
+
+© 2m 58s
+
+im Leto EVEL
+
+© 2m 57s
+
+### inverted
+— re) gleiston-guerrero / SGROAS-ProyectoAppWeb ~
+
+© Issues
+
+<> Code
+
+Actions
+
+All workflows
+
+| a
+Docker GHCR
+
+Keep Render alive
+
+Management
+
+& Caches
+
+G Deployments
+© Attestations
+Runners
+
+@ Usage metrics
+
+@ Performance metrics
+
+3 Pull requests
+
+ 
+
+cl
+
+& Agents
+
+© Actions $f Projects 1) Wiki QO Security and quality | Insights
+
+Cl
+
+ci.yml
+
+252 workflow runs
+
+@ fix(P7): use the English float name in prose cross-references
+Cl #252: Commit bb5b87c pushed by Alxjandr07
+
+@ docs(P2): explain in the report why the 5-run cache contrast isn't fa...
+Cl #251: Commit 14f7e39 pushed by Alxjandr07
+
+@ docs(P2): explain in the report why the 5-run cache contrast isn't fa...
+Cl #250: Commit 14f7e39 pushed by Alxjandr07
+
+@ fix(P10): regenerate MANIFEST hash for k10-cache-contrast.json from a...
+Cl #249: Commit 7600cla pushed by Alxjandr07
+
+ 
+
+@ fix(P10): regenerate MANIFEST hash for k10-cache-contrast.json from a...
+Cl #248: Commit 7600cla pushed by Alxjandr07
+
+ 
+
+© fix(P7): recapture Cl screenshot with real English-message green runs
+Cl #247: Commit aeObbb9 pushed by Alxjandr07
+
+© docs(P7): fill in verification hashes for the English commit message ...
+Cl #246: Commit fa963ce pushed by Alxjandr07
+
+ 
+
+https://github.com/gleiston-guerrero/SGROAS-ProyectoAppWeb/actions/workflows/ci.yml
+
+rr} Settings
+
+main
+
+Viole
+
+main
+
+Viole
+
+main
+
+main
+
+main
+
+—
+
+e
+Q Type (7) to search 8) ~ ++//O}/9))/8)| ay
+Q Filter workflow runs mec)
+Event » Status v Branch Actor ¥
+
+6 13 minutes ago
+© 2m 40s
+
+A Today at 14:49
+
+© 6m 53s
+
+A Today at 14:45
+© 2m 49s
+
+A Today at 14:29
+
+© 5m 31s
+
+A Today at 14:25
+
+© 2m 36s
+
+A Today at 14:13
+
+© 2m 58s
+
+A Today at 13:56
+
+© 2m 57s

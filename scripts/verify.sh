@@ -38,11 +38,32 @@ else
 fi
 
 echo "[P7] Checking Spanish captions in informe..."
-if grep -rE "\b(Tabla|Figura|Listado|cuadro|figura|listado)\b" docs/informe-final/*.md >/dev/null 2>&1; then
+# Antes este check apuntaba a docs/informe-final/*.md, que no existe: el glob
+# no expandia, grep no encontraba nada y el check no podia fallar nunca.
+# Ahora mira las fuentes reales (.tex) y ademas el texto horneado en las
+# imagenes, que es donde estaba el defecto que senalo la evaluacion.
+if grep -rn --include=*.tex "caption{" docs/informe-final/ 2>/dev/null \
+     | grep -E "Tabla|Figura|Listado|Resumen|Resultados|Distribución|Síntesis|Desglose|trazados|comparación|puntaje|prioridad" >/dev/null 2>&1; then
   echo "  FAIL: Spanish captions found"
   failed=$((failed+1))
 else
+  echo "  OK - all figure/table captions in English"
+fi
+
+echo "[P7] Checking Spanish float names in prose cross-references..."
+if grep -rn --include=*.tex -E "\b(la|La|las|Las) (Tabla|Figura)\b" docs/informe-final/ >/dev/null 2>&1; then
+  echo "  FAIL: prose still says 'la Tabla/Figura N' while the float is labelled Table/Figure N"
+  failed=$((failed+1))
+else
+  echo "  OK - prose refers to Table/Figure"
+fi
+
+echo "[P7] Checking Spanish text baked into the figure pixels..."
+if "${PYTHON:-python3}" scripts/check-figure-text.py; then
   echo "  OK"
+else
+  echo "  FAIL: Spanish text inside a figure of the report"
+  failed=$((failed+1))
 fi
 
 echo "[P10] Verifying MANIFEST.sha256..."

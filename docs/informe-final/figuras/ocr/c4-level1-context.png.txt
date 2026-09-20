@@ -1,0 +1,65 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/c4-level1-context.png
+# sha256: e465c74c715d903ff40fbd6bf62146055d52683943beb94610600181ed40e909
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+System Context View: SGROAS API
+Level 1 - System Context Diagram
+
+User
+[Person]
+
+System operator (admin,
+coordinator, security)
+
+ 
+
+Uses the platform via
+
+|
+|
+|
+|
+|
+|
+[REST API / Angular frontend]
+y
+SGROAS API
+
+[Software System]
+
+Management platform for routes,
+drivers, vehicles and incidents
+
+ 
+
+### inverted
+System Context View: SGROAS API
+Level 1 - System Context Diagram
+
+User
+[Person]
+
+System operator (admin,
+coordinator, security)
+
+ 
+
+Uses the platform via
+
+]
+i]
+i]
+]
+]
+i]
+[REST API / Angular frontend]
+7
+SGROAS API
+
+[Software System]
+
+Management platform for routes,
+drivers, vehicles and incidents

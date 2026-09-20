@@ -1,0 +1,91 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/c4-level3-components.png
+# sha256: eb8496f9ac43806ee259b2713cf304f56512a3f0cfe2ed35696c0c28acf5a2b4
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+Authentication Module
+[Component: Spring Security + JWT]
+
+Login, signup, refresh token
+
+Drivers Module
+[Component: Spring MVC + JPA]
+
+Driver CRUD
+
+Component View: SGROAS - Spring Boot REST API
+Level 3 - Component Diagram
+
+SGROAS
+
+[Software System]
+
+Spring Boot REST API
+
+[Container: Spring Boot 3.5 + Java 21]
+
+. Assignments Module .
+Vehicles Module Routes Module iGengonent: Spring MVC +)PAI Incidents Module
+
+[Component: Spring MVC + JPA] [Component: Spring MVC + JPA] [Component: Spring MVC + JPA]
+
+Route-driver-vehicle assignment
+
+CRUD Incident CRUD
+
+Vehicle CRUD Route CRUD
+
+‘CRUD ,’CRUD
+
+/
+
+Stored Procedures
+[Component: PostgreSQL PL/pgSQL]
+
+Reports and aggregations in DB
+
+ 
+
+### inverted
+Authentication Module
+[Component: Spring Security + JWT]
+
+Login, signup, refresh token
+
+Drivers Module
+[Component: Spring MVC + JPA]
+
+Driver CRUD
+
+Component View: SGROAS - Spring Boot REST API
+Level 3 - Component Diagram
+
+SGROAS
+
+[Software System]
+
+Spring Boot REST API
+
+[Container: Spring Boot 3.5 + Java 21]
+
+; Assignments Module ;
+Vehicles Module Routes Module sain eae Tra NN Incidents Module
+
+[Component: Spring MVC + JPA] [Component: Spring MVC + JPA] [Component: Spring MVC + JPA]
+
+Route-driver-vehicle assignment
+
+CRUD Incident CRUD
+
+Vehicle CRUD Route CRUD
+
+BNO! }\0] DO); 10) D
+
+/
+
+Stored Procedures
+[Component: PostgreSQL PL/pgSQL]
+
+Reports and aggregations in DB

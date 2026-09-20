@@ -118,7 +118,13 @@ verify:
 	@echo ""
 	@echo "[P7] Checking Spanish captions in informe..."
 	@! grep -rn "caption{" docs/informe-final/ 2>/dev/null | grep -E "Tabla|Figura|Listado|Resumen|Resultados|Distribución|Síntesis|Desglose|trazados|comparación|puntaje|prioridad"
-	@echo "[P7] OK - all figure/table captions in English"
+	@echo "  OK - all figure/table captions in English"
+	@echo "[P7] Checking Spanish float names in prose cross-references..."
+	@! grep -rn --include=*.tex -E "\\b(la|La|las|Las) Tabla\\b|\\b(la|La|las|Las) Figura\\b" docs/informe-final/ 2>/dev/null
+	@echo "  OK - prose refers to Table/Figure, same name as the float label"
+	@echo "[P7] Checking Spanish text baked into the figure pixels..."
+	@$(PYTHON) scripts/check-figure-text.py
+	@echo "[P7] OK"
 	@echo ""
 	@echo "[P10] Verifying MANIFEST.sha256..."
 	@tr -d '\r' < dataset/MANIFEST.sha256 | sha256sum -c -

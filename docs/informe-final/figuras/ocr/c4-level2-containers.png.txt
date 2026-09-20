@@ -1,0 +1,111 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/c4-level2-containers.png
+# sha256: c92c15976d4ff4de92a0964b5555d9e233c88e81d275c7b1703d4975b0b27476
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+Container View: SGROAS
+
+Level 2 - Container Diagram
+User
+
+[Person]
+
+System operator
+
+I
+SGROAS
+
+[Software System]
+v
+
+Angular Frontend
+[Container: Angular 20]
+
+SPA application
+
+| HTTP requests
+
+¥ ncn
+Spring Boot REST API
+
+[Container: Spring Boot 3.5 + Java 21]
+
+Java backend
+
+7
+
+7
+
+1
+.
+Réad/Write | Query cache . Token validation
+7 I
+|
+|
+|
+
+[SQL] [Redis Protocol]
+
+4
+ostgreSQL Database Redis JWT Service
+
+[Container: PostgreSQL 16] [Container: Redis 7] [Container: jjwt 0.12.6]
+
+Primary Distributed Authentication
+storage cache and authorization
+
+ 
+
+### inverted
+Container View: SGROAS
+
+Level 2 - Container Diagram
+User
+
+[Person]
+
+System operator
+
+I
+SGROAS
+
+[Software System]
+sf
+
+Angular Frontend
+[Container: Angular 20]
+
+SPA application
+
+Meo
+
+ae
+Spring Boot REST API
+
+[Container: Spring Boot 3.5 + Java 21]
+
+Java backend
+
+ra
+
+A
+
+]
+“ .
+Réad/Write melel-aVaer-leal— . Token validation
+7 I
+|
+\
+1
+
+[SQL] [Redis Protocol]
+
+Y
+ostgreSQL Database Redis JWT Service
+
+[Container: PostgreSQL 16] [Container: Redis 7] [Container: jjwt 0.12.6]
+
+Primary Distributed Authentication
+storage cache and authorization

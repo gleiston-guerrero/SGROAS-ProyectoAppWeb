@@ -1,0 +1,23 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/figuras/fig-render-live-url.jpeg
+# sha256: 7d32446e8368991e65a4e51bb115969d2cfd0ca887f00b7a50612b69e5f74c67
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+@ WEB SERVICE
+sg roas- backe nd Docker Free Upgradeyourinstance > = Blueprint managed
+
+Service ID: srv-dala9plbedke73cep1l0 '5
+©) Alxjandr07 / SGROAS-ProyectoAppWeb “main -o 216f73a v Live
+
+https://sgroas-backend.onrender.com ‘Fj
+
+### inverted
+@ WEB SERVICE
+sg roas- backe nd Docker Free Upgradeyourinstance > = Blueprint managed
+
+Service ID: srv-dala9plbedke73cep1l0 '5
+©) Alxjandr07 / SGROAS-ProyectoAppWeb °c main -o 216f73a v Live
+
+https://sgroas-backend.onrender.com ‘Fj

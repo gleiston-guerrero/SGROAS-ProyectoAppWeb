@@ -190,8 +190,12 @@ def read_snapshot(rel_image):
     if not os.path.isfile(path):
         return None, None
     with open(path, encoding="utf-8", errors="replace") as fh:
-        body = fh.read()
-    m = re.search(r"^# sha256: ([0-9a-f]{64})$", body, re.M)
+        raw = fh.read()
+    m = re.search(r"^# sha256: ([0-9a-f]{64})$", raw, re.M)
+    # La cabecera lleva la ruta de la imagen (".../informe-final/figuras/...")
+    # y comentarios en espanol: se descarta antes de buscar el lexico, o el
+    # check se acusaria a si mismo.
+    body = "\n".join(l for l in raw.splitlines() if not l.startswith("#"))
     return (m.group(1) if m else None), body
 
 
@@ -207,6 +211,21 @@ def main():
     print("  Figuras incluidas en el informe: %d" % len(figures))
     print("  Modo: %s" % mode)
 
+    # El OCR es lo caro (~13 s por figura); se lanzan en paralelo para que
+    # "make verify" no tarde minutos. El orden del informe se conserva.
+    jobs = [r for r in figures if not r.startswith("__MISSING__")]
+    live_by_rel = {}
+    if has_tesseract:
+        try:
+            from concurrent.futures import ThreadPoolExecutor
+            workers = min(len(jobs), max(1, (os.cpu_count() or 2)))
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                paths = [os.path.join(ROOT, r.replace("/", os.sep)) for r in jobs]
+                for rel, text in zip(jobs, pool.map(run_tesseract, paths)):
+                    live_by_rel[rel] = text
+        except ImportError:
+            pass
+
     failed = 0
     for rel in figures:
         if rel.startswith("__MISSING__"):
@@ -214,7 +233,7 @@ def main():
             continue
         abs_path = os.path.join(ROOT, rel.replace("/", os.sep))
         digest = sha256_of(abs_path)
-        live = run_tesseract(abs_path)
+        live = live_by_rel.get(rel) if rel in live_by_rel else run_tesseract(abs_path)
 
         if update:
             if live is None:

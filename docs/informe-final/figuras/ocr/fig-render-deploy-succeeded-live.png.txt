@@ -1,0 +1,151 @@
+# OCR snapshot (tesseract -l eng, grayscale x2, plain + inverted)
+# P7 figure text check - scripts/check-figure-text.py
+# image: docs/informe-final/figuras/fig-render-deploy-succeeded-live.png
+# sha256: 2d8d86a27a888b3a90b349baef9ac7f02849992dbe187431258ff9f42fccab0c
+# regenerate: python3 scripts/check-figure-text.py --update
+
+### plain
+” ad rs} sgroas ¢
+
+< Dashboard
+
+@ sgroas-backend
+
+is} Deploys
+
+ott ~1 41191013)
+
+Introducing Workflows
+
+An orchestration and execution
+engine for long-running,
+distributed tasks.
+
+Learn more >
+
+V Task A |
+V Task 1 a
+V Task 2 —
+{=] Changelog
+
+Sag 2-110 (=) 6S) CLUS
+
+J ® sgr...
+
+io} Deploys jo} dep-dankr4n40ujc73c9di40 Q Search «K + New am) exe] ¢-(0 (=)
+
+fix(P7): use the English float name in prose cross-references v
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+STATUS : DURATION
+°o (0)
+Deploy succeeded | Live 3m54s
+= DEPLOYED ey OU eMclcl aa)
+Sep 19, 2026 at 10:05:54 PM GMT-5 Manually deployed by you via Dashboard
+SOURCE
+oOo
+bb5b87c
+Alllogs v | Q Search logs | % Live tail v | of |
+Sep 19
+10:09:15 PM ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+10:09:07 PM [txh89] 2026-09-20 03:09:07.168 [main] INFO
+0.S.S.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigur
+er - Global AuthenticationManager configured with UserDetailsService bean with name
+customUserDetailsService
+10:09:10 PM [txh89] 2026-09-20 03:09:10.171 [main] INFO o0.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome
+page: class path resource [static/index.html]
+10:09:16 PM [txh89] 2026-09-20 03:09:16.773 [main] INFO o0.s.b.a.e.web.EndpointLinksResolver - Exposing 2
+
+4n.nn.nan
+
+Patti
+
+lo ee Oo To te |
+
+endpoints beneath base path ‘/actuator'
+
+r.’.Y,’-W.”. a. Me) ee oe, ee) ee ee ee, lo ee a es) eS =. ee Se ee ee
+
+### inverted
+” od 6 sgroas ¢
+
+< Dashboard
+
+@ sgroas-backend
+
+is} Deploys
+
+Settings
+
+Introducing Workflows
+
+An orchestration and execution
+engine for long-running,
+distributed tasks.
+
+Learn more >
+
+V Task A SS
+JV Task 1 a
+V Task 2 —
+{=] Changelog
+
+« Render Status
+
+JO ® sgr...
+
+ico} Deploys jo) dep-dankr4n40ujc73c9di40 Q Search «K + New % Upgrade
+
+fix(P7): use the English float name in prose cross-references v
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+ 
+
+STATUS . DURATION
+eo o
+Deploy succeeded | Live 3m54s
+= DEPLOYED i TRIGGER
+Sep 19, 2026 at 10:05:54 PM GMT-5 Manually deployed by you via Dashboard
+SOURCE
+oOo
+bb5b87c
+Alllogs v | Q Search logs | % Live tail v | ea |
+Sep 19
+10:09:15 PM ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+10:09:07 PM [txh89] 2026-09-20 03:09:07.168 [main] INFO
+0.S.S.c.a.a.c.InitializeUserDetailsBeanManagerConfigurer$InitializeUserDetailsManagerConfigur
+er - Global AuthenticationManager configured with UserDetailsService bean with name
+customUserDetailsService
+10:09:10 PM [txh89] 2026-09-20 03:09:10.171 [main] INFO o0.s.b.a.w.s.WelcomePageHandlerMapping - Adding welcome
+page: class path resource [static/index.html]
+10:09:16 PM [txh89] 2026-09-20 03:09:16.773 [main] INFO o0.s.b.a.e.web.EndpointLinksResolver - Exposing 2
+
+4n.nn.nan
+
+mu
+
+r+..khan1
+
+endpoints beneath base path ‘/actuator’
+
+ANAS 1h an Bo... B20 Pe-te% TRCAR « «kh mo kame Taemeantiiahk@amansace re
