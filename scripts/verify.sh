@@ -25,7 +25,7 @@ if grep -E "\.secure\(cookieSecure\)" src/main/java/ec/edu/uteq/sgroas/controlle
   echo "  FAIL: .secure(cookieSecure) found"
   failed=$((failed+1))
 else
-  count=$(grep -c '\.secure(true)' src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java)
+  count=$(grep -v '//' src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java | grep -c '\.secure(true)')
   echo "  OK ($count .secure(true) calls)"
 fi
 
