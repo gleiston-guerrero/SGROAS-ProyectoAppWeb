@@ -344,6 +344,10 @@ contradicción en vez de homogeneizar los números. Informe recompilado
 (100 páginas, 0 errores). Detalle completo en `VERIFICACION.md`, sección
 P2.
 
+(Cifra de esta ronda, no la vigente: correcciones posteriores subieron el
+conteo a 101 páginas, la cifra final. Ver más abajo, sección "P7", y
+`README.md`.)
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
@@ -865,6 +869,10 @@ No se editó ni se recortó el contenido de ninguna captura: son
 screenshots reales, sin editar, del estado actual del repositorio.
 Informe recompilado (100 páginas, 0 errores). Detalle completo en
 `VERIFICACION.md`, sección P7.
+
+(Cifra de esta ronda, no la vigente: la corrección posterior de P7 -- ver
+más abajo -- sube el conteo a 101 páginas, la cifra final, ya reflejada
+en `README.md`.)
 
 ---
 

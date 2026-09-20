@@ -587,6 +587,9 @@ Output written on main.pdf (100 pages, 1182198 bytes).
 ```
 (0 errores, 0 referencias sin resolver.)
 
+(Cifra de esta ronda, no la vigente: contenido posterior del informe subió
+el conteo a 101 páginas. Ver la salida final, sección "P7", y `README.md`.)
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)
@@ -1712,6 +1715,10 @@ anteriores en `anexos.tex`, con los captions actualizados citando los
 commits reales visibles en cada imagen y explicando la entrada
 cancelada. Informe recompilado (100 páginas, 0 errores, 0 referencias
 sin resolver).
+
+(Cifra de esta ronda, no la vigente: la corrección de P7 que sigue a
+continuación sube el conteo a 101 páginas, cifra final reproducible en
+`README.md` y en la sección "Cierre real" de más abajo.)
 
 **Cierre real (2026-09-19, ronda final) — texto en espanol dentro de los
 pixeles, y un check que por fin lo ve:**
