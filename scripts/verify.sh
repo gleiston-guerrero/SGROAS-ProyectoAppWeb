@@ -20,13 +20,26 @@ else
   echo "  OK"
 fi
 
+echo "[P1] Checking JWT tokens versioned in dataset/ and docs/ are expired..."
+if "${PYTHON:-python3}" scripts/check-jwt-expiry.py; then
+  :
+else
+  echo "  FAIL: a live (non-expired) JWT is versioned in the repository"
+  failed=$((failed+1))
+fi
+
 echo "[P4] Checking cookie Secure(true)..."
 if grep -E "\.secure\(cookieSecure\)" src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java >/dev/null 2>&1; then
   echo "  FAIL: .secure(cookieSecure) found"
   failed=$((failed+1))
 else
   count=$(grep -v '//' src/main/java/ec/edu/uteq/sgroas/controller/AuthController.java | grep -c '\.secure(true)')
-  echo "  OK ($count .secure(true) calls)"
+  if [ "$count" -lt 4 ]; then
+    echo "  FAIL: only $count .secure(true) calls found (expected >= 4)"
+    failed=$((failed+1))
+  else
+    echo "  OK ($count .secure(true) calls)"
+  fi
 fi
 
 echo "[P5] Checking Spanish field names in entities..."

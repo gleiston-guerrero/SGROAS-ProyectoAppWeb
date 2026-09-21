@@ -237,6 +237,61 @@ make: *** [Makefile:95: verify] Error 1
 ```
 Ahora sí falla. Árbol restaurado (`git status` limpio) tras la prueba.
 
+**Hallazgo (2026-09-20) — el alcance de P1 nunca miró `dataset/` ni
+`docs/`, y ahí sí hay JWT reales versionados:** una re-evaluación externa
+señaló, con razón, que 13 exportaciones crudas de k6 en `dataset/perf/`
+(y sus copias en `docs/mediciones/perf/`) llevan un JWT real de
+`admin@sgroas.com` como `Authorization: Bearer` de las peticiones
+autenticadas, y que `docs/mediciones/sec/A02-criptografia.txt` y
+`A05-headers.txt` (evidencia de la auditoría OWASP) también citan el
+token completo. `CONTRIBUCIONES.md` tenía una nota que, leída en
+general, afirmaba que ningún token se había guardado en el repositorio
+-- cierto para el token puntual del que hablaba, falso como afirmación
+general. Ver la corrección en `CONTRIBUCIONES.md`, sección "Nota de
+seguridad".
+
+**Por qué no se redactaron los tokens:** estos JSON son evidencia cruda
+de P2 -- `VERIFICACION.md` sección P2 los verifica byte a byte contra la
+estructura real de `--summary-export` de k6, y `MANIFEST.sha256` fija su
+hash. Editarlos ahora, después de esa verificación, sería el mismo tipo
+de manipulación de evidencia que ya se señaló en otros puntos de este
+documento. En vez de eso se decodificó el claim `exp` de los 28 JWT
+completos versionados en `dataset/` y `docs/` (con
+`scripts/check-jwt-expiry.py`, nuevo) y los 28 están expirados; el más
+reciente vence el 2026-09-06 a las 10:48 UTC, dos semanas antes de esta
+verificación:
+
+```bash
+python3 scripts/check-jwt-expiry.py
+echo "exit=$?"
+```
+
+**Salida (2026-09-20):**
+```
+  Archivos con JWT versionados: 28
+  Tokens verificados: 28
+  OK - todos los JWT versionados en dataset/ y docs/ estan expirados
+exit=0
+```
+
+Cableado a `make verify` y `scripts/verify.sh`, sección P1. Prueba de
+mutación (revertida): se agregó un archivo con un JWT de `exp` futuro
+bajo `docs/mediciones/`:
+```
+  FAIL: hay JWT vigentes (no expirados) versionados en el repositorio:
+    docs/mediciones/mutation_test.txt -- exp=1789955349 (vigente, vence 2026-09-21)
+exit=1
+```
+Detectado. Árbol restaurado tras la prueba.
+
+**Sobre el riesgo real:** los 28 tokens están expirados desde antes de
+esta ronda de verificación, así que no hay fuga viva ni utilizable hoy.
+El defecto real que esta ronda corrige no es el riesgo de seguridad --
+que nunca existió, dado que expiraron antes de que alguien pudiera
+explotarlos -- sino la afirmación imprecisa sobre su alcance en
+`CONTRIBUCIONES.md` y el chequeo de secretos que nunca miraba estas
+carpetas.
+
 ---
 
 ## P2 — k6 corridas crudas versionadas (1.2)
@@ -589,6 +644,56 @@ Output written on main.pdf (100 pages, 1182198 bytes).
 
 (Cifra de esta ronda, no la vigente: contenido posterior del informe subió
 el conteo a 101 páginas. Ver la salida final, sección "P7", y `README.md`.)
+
+**Corrección (2026-09-20) — el informe seguía llamando "caché caliente"
+a corridas que su propio capítulo 8 declaraba anteriores al arreglo de
+\texttt{@Cacheable}, y un `**tres de cinco**` en Markdown salía como
+asteriscos literales en el PDF (LaTeX no interpreta `**negrita**`),
+ambos señalados por tercera y primera vez respectivamente en una
+re-evaluación externa:**
+
+1. La serie local K1--K3 (23.01\,ms, p95 173.13\,ms, citada como cabecera
+   de RQ1 en las conclusiones y la discusión) se ejecutó el 2026-07-29
+   (commit `62bf8fa`), **antes** de que `@Cacheable` se implementara de
+   verdad en `GET /api/conductores` (commit `3f78036`, 2026-09-17,
+   corrige un bug de auto-invocación de Spring AOP). Esa serie no medía
+   ningún efecto de caché -- solo el arranque en frío del proceso -- y
+   sin embargo el capítulo de evaluación, discusión y conclusiones la
+   describían como "condición de cache caliente". Corregido en
+   `cap8-evaluacion.tex`, `cap9-discusion.tex` y `cap12-conclusiones.tex`:
+   ahora se describe como "entorno local sin throttling" y se aclara que
+   no mide caché, remitiendo a la evidencia real de caché (K9 piloto +
+   K10--K14, ya documentada arriba, con su resultado no significativo).
+2. La serie Render K4--K8 (línea 51 en adelante de `cap8-evaluacion.tex`)
+   ya declaraba por escrito "no miden caché real" pero seguía llamando
+   "caliente"/"fría" a sus dos condiciones en el resto del párrafo.
+   Renombradas a "con Redis activo"/"con Redis reiniciado" para no usar
+   el vocabulario de caché en una serie que el propio texto dice que no
+   la mide.
+3. `cap11-futuro.tex` listaba el contraste caché caliente/fría como
+   trabajo *futuro* cuando K9--K14 ya lo habían ejecutado; corregido para
+   describir lo que de verdad falta: ampliar $n=5$ hasta tener poder
+   estadístico suficiente, dado que $p=0.6015$ no fue significativo.
+4. `**tres de cinco**` (línea 125 de `cap8-evaluacion.tex` en la ronda
+   anterior) → `\textbf{tres de cinco}`.
+
+Informe recompilado (`pdflatex`, `biber`, `pdflatex`, `pdflatex`, dos
+veces -- una vez se encontró y corrigió de paso un error real de
+compilación introducido en esta misma edición, `! Incompatible glue
+units` por un `\%` dentro de modo matemático en `cap9-discusion.tex`,
+detectado porque el log de la primera recompilación no estaba en cero
+errores):
+
+```
+$ pdfinfo docs/informe-final/main.pdf | grep Pages
+Pages:           101
+$ pdftotext docs/informe-final/main.pdf - | grep -c '\*\*'
+0
+```
+
+101 páginas, 0 errores, 0 referencias sin resolver, sin asteriscos de
+Markdown sueltos. `docs/informe-final.pdf` (la copia que enlaza el
+`README.md`) recompilado igual, con el mismo resultado.
 
 ---
 
@@ -1932,6 +2037,9 @@ $ grep -n "adjetiva" docs/mediciones/sus/estadisticas-sus.json
   "adjetiva": "OK"
 ```
 Informe recompilado (98 páginas, 0 errores, 0 referencias sin resolver).
+
+(Cifra de esta ronda, no la vigente: correcciones posteriores subieron el
+conteo a 101 páginas, la cifra final. Ver `README.md` y la sección P7.)
 `scripts/update-sus.py` tiene la misma etiqueta duplicada a mano
 ("Bueno"/"Regular"/"Malo") pero está marcado explícitamente
 "DO NOT RUN" (es evidencia congelada del incidente de P11-P15 ya

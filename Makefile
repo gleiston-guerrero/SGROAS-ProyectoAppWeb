@@ -74,7 +74,7 @@ pdf:
 	cd docs/informe-final && biber main
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
-	@echo "PDF generado en docs/informe-final/main.pdf (98 paginas)."
+	@echo "PDF generado en docs/informe-final/main.pdf (101 paginas)."
 
 docs: versions
 	$(PYTHON) scripts/gen-figuras.py
@@ -93,6 +93,8 @@ verify:
 	@echo "[P1] Checking hardcoded secrets..."
 	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties docker-compose.yml 2>/dev/null | grep -v "CHANGE_ME"
 	@! grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml 2>/dev/null | grep -v '\$$'
+	@echo "[P1] Checking JWT tokens versioned in dataset/ and docs/ are expired..."
+	@$(PYTHON) scripts/check-jwt-expiry.py
 	@echo "[P1] OK"
 	@echo ""
 	@echo "[P2] Checking raw k6 runs (hot x5 + cold x5) reproducible contrast..."

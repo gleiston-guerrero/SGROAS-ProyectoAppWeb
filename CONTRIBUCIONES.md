@@ -348,6 +348,21 @@ P2.
 conteo a 101 páginas, la cifra final. Ver más abajo, sección "P7", y
 `README.md`.)
 
+**Corrección (2026-09-20) — la cifra de arriba ($p=0.6015$, tres de cinco
+corridas más lentas en caliente) era correcta, pero el resto del informe
+seguía sin ser consistente con ella:** las conclusiones y la discusión
+citaban 23.01\,ms de la serie local K1--K3 como si fuera evidencia de
+"caché caliente", cuando esa serie es de 2026-07-29 y `@Cacheable` recién
+se implementó de verdad el 2026-09-17 (commit `3f78036`) -- no medía
+ningún efecto de caché. Corregido en `cap8-evaluacion.tex`,
+`cap9-discusion.tex`, `cap12-conclusiones.tex` y `cap11-futuro.tex` (este
+último todavía listaba el contraste caché caliente/fría como trabajo
+futuro, cuando K9--K14 ya lo habían corrido). También se corrigió
+`**tres de cinco**` en `cap8-evaluacion.tex`, que al ser sintaxis
+Markdown dentro de LaTeX salía como asteriscos literales en el PDF en
+vez de negrita. Detalle completo, con el error de compilación real que
+se encontró y corrigió de paso, en `VERIFICACION.md`, sección P2.
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
@@ -1081,6 +1096,9 @@ P11-P15) y ningún pipeline lo invoca -- no se tocó a propósito.
 Verificado: informe recompilado (98 páginas, 0 errores). Detalle
 completo en `VERIFICACION.md`, sección P8.
 
+(Cifra de esta ronda, no la vigente: correcciones posteriores subieron el
+conteo a 101 páginas, la cifra final. Ver `README.md`.)
+
 ---
 
 ## P9 — Postman CRUD asignaciones (commit 20a487f)
@@ -1467,9 +1485,38 @@ Durante la verificación del despliegue se hizo un login real de prueba
 contra Render con la cuenta de desarrollo sembrada
 (`admin@sgroas.com`/`admin123`, ver `V2__seed.sql`) para confirmar el
 contrato corregido. El `access_token`/`refresh_token` de esa respuesta
-**no se guardó en ningún archivo de este repositorio** — solo se vio en la
-salida de un comando `curl` durante esta sesión de auditoría. Expira en 1
-hora (access) / 7 días (refresh) desde el momento de esa prueba.
+concreta **no se guardó en ningún archivo de este repositorio** — solo se
+vio en la salida de un comando `curl` durante esta sesión de auditoría.
+Expira en 1 hora (access) / 7 días (refresh) desde el momento de esa
+prueba.
+
+**Corrección (2026-09-20) — esa afirmación no cubría todos los tokens
+que sí hay en el repositorio, y una re-evaluación externa lo señaló con
+razón:** lo de arriba es cierto para *ese* token puntual, pero es falso
+leído como afirmación general. Sí hay JWT reales de `admin@sgroas.com`
+versionados en el repositorio: las 13 exportaciones crudas de k6 en
+`dataset/perf/` (y sus copias en `docs/mediciones/perf/`) los llevan
+como `Authorization: Bearer` de las peticiones autenticadas de la carga,
+y dos evidencias de la auditoría de seguridad
+(`docs/mediciones/sec/A02-criptografia.txt`,
+`docs/mediciones/sec/A05-headers.txt`) también los citan completos —
+`docs/mediciones/sec/A01-acceso.txt` sí los trunca
+(`eyJhbGciOi..`), así que el equipo ya sabía redactar cuando quiso, solo
+no lo hizo de forma consistente en todos los archivos.
+
+No se redactaron esos tokens: hacerlo rompería la cadena de verificación
+de autenticidad de P2, que compara estos mismos JSON byte a byte contra
+la estructura real de `--summary-export` de k6 (ver `VERIFICACION.md`,
+sección P2) — modificar el archivo después de esa comprobación sería
+exactamente el tipo de manipulación de evidencia que las rondas
+anteriores ya señalaron en otros puntos. En vez de eso se comprobó que
+los 28 tokens versionados (dataset/ + docs/) están **todos expirados**
+(el más reciente vence el 2026-09-06 a las 10:48 UTC) decodificando el
+claim `exp` de cada uno, y se agregó `scripts/check-jwt-expiry.py` —
+cableado a `make verify` y `scripts/verify.sh`, sección P1 — que falla
+si alguna vez aparece un JWT vigente en `dataset/` o `docs/`. Probado
+con una mutación real: se agregó un JWT con `exp` en el futuro en un
+archivo de prueba y el check falló; revertida.
 
 ## Firmas
 

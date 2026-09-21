@@ -7,13 +7,23 @@ prácticas.
 
 \section{Respuesta a las preguntas de investigación}
 
-\textbf{RQ1 (rendimiento).} El acceso híbrido CRUD/ORM + stored procedures presenta
-una latencia media de 23.01\,ms en condición de cache caliente (IC\,95\,\%
-[$-7.88$; $53.91$]\,ms, n = 3) con 0\,\% de errores y p95 máximo de 173.13\,ms.
-La media observada es consistente con los resultados de pruebas de carga de
-sistemas web reportados en la literatura \cite{jiang2015,jiang2009}: la mayor
-latencia se concentra en la primera corrida (inicialización) y decae en las
-siguientes.
+\textbf{RQ1 (rendimiento).} En el entorno local sin throttling, el acceso
+híbrido CRUD/ORM + stored procedures presenta una latencia media de
+23.01\,ms (IC\,95\,\% [$-7.88$; $53.91$]\,ms, n = 3) con 0\,\% de errores y
+p95 máximo de 173.13\,ms, cumpliendo el umbral de 200\,ms (serie K1--K3,
+2026-07-29, anterior a la implementación real de \texttt{@Cacheable} en
+este endpoint: no mide un efecto de caché, solo la estabilización tras el
+arranque en frío del proceso). La media observada es consistente con los
+resultados de pruebas de carga de sistemas web reportados en la
+literatura \cite{jiang2015,jiang2009}. El efecto de la caché de
+aplicación, medido después con metodología válida (K9, K10--K14, una vez
+implementado \texttt{@Cacheable}), es real en la corrida piloto (mediana
+514.75\,ms fría vs.\ 191.59\,ms caliente, 63\,\% menos) pero no alcanza
+significancia estadística en las cinco corridas de contraste
+($p=0.6015$, $d$ de Cliff $=-0.20$): la condición caliente resultó igual
+o más lenta que la fría en tres de cinco corridas, así que con $n=5$ no
+se puede distinguir el efecto de caché del ruido de red del plan
+gratuito de Render.
 
 \textbf{RQ2 (seguridad).} El sistema mitiga A01, A02, A03, A05, A07 y A09 del
 OWASP Top 10 \cite{owasp2021} mediante controles verificables: autenticación JWT

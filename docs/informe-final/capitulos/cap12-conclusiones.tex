@@ -9,8 +9,10 @@ Los resultados por bloque confirman el cumplimiento de los umbrales en la mayor�
 de los criterios:
 \begin{itemize}
   \item \textbf{Rendimiento:} p95 máximo de 173.13\,ms (umbral 200\,ms) y 0\,\% de
-        errores en la condición de cache caliente; media de medias de 23.01\,ms
-        con IC\,95\,\% [$-$7.88; 53.91]\,ms.
+        errores en el entorno local sin throttling (serie K1--K3); media de medias
+        de 23.01\,ms con IC\,95\,\% [$-$7.88; 53.91]\,ms. El efecto de la caché de
+        aplicación (K9, K10--K14) es real en la corrida piloto pero no alcanza
+        significancia estadística con $n=5$ (\S\ref{sec:perf}).
   \item \textbf{Seguridad:} seis controles OWASP con evidencia cruda (A01, A02,
         A03, A05, A07, A09) y cero SQL dinámico en el análisis estático.
   \item \textbf{Usabilidad:} SUS 63,0 (IC\,95\,\% [53,07; 72,93], n=10), clasificado como

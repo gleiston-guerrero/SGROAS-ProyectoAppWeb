@@ -32,14 +32,21 @@ pública en \texttt{k04-run1.json}--\texttt{k08-run1.json} y cinco muestras frí
 \textbf{[$-7.88$; $53.91$]\,ms} (t de Student, gl = 2, n = 3 corridas). El p95
 máximo es 173.13\,ms (corrida k01), por debajo del umbral de 200\,ms, y la tasa de
 error es 0\,\% con 8930 verificaciones correctas. La primera corrida (37.3\,ms de
-media; p95 173.13\,ms) refleja el arranque en frío de conexiones y del cache
-Redis; las corridas k02 y k03 estabilizan la media por debajo de 17\,ms
-(\texttt{docs/mediciones/perf/ANALISIS-k6.md}).
+media; p95 173.13\,ms) refleja el arranque en frío de conexiones (pool JDBC,
+JIT); las corridas k02 y k03 estabilizan la media por debajo de 17\,ms
+(\texttt{docs/mediciones/perf/ANALISIS-k6.md}). Esta serie (K1--K3, commit
+\texttt{62bf8fa}, 2026-07-29) es anterior a la implementación real de
+\texttt{@Cacheable} en este endpoint (commit \texttt{3f78036}, 2026-09-17):
+\texttt{GET /api/conductores} no tenía caché de aplicación activa en ese
+momento, así que la caída de latencia entre corridas no puede atribuirse a
+Redis, solo al arranque en frío del propio proceso.
 
-\textbf{Interpretación:} el sistema cumple los umbrales de rendimiento en la
-condición de cache caliente y en el entorno local. Dado que las tres corridas
-corresponden a la misma condición, el contraste formal cache caliente-frío se
-ejecutó con la URL pública disponible (K3).
+\textbf{Interpretación:} el sistema cumple el umbral de p95~<~200\,ms en el
+entorno local sin throttling (serie K1--K3), aunque esta serie no mide un
+efecto de caché real -- ver el párrafo anterior. El contraste formal de
+caché caliente/fría, con metodología válida, se ejecutó después contra la
+URL pública una vez implementado \texttt{@Cacheable} (K9 y K10--K14, más
+abajo).
 
 \textbf{Serie Render (K4--K8, URL pública):} con la URL pública activa se ejecutaron
 cinco corridas adicionales contra \texttt{https://sgroas-backend.onrender.com}
@@ -48,17 +55,21 @@ frías (\texttt{k04-cold.json}--\texttt{k08-cold.json}) y el contraste no param�
 (\texttt{RENDER-REPORT.md}). Estas cinco corridas (50 VUs) se ejecutaron el
 6 de septiembre, antes de corregirse un bug de auto-invocación de Spring AOP
 que impedía que \texttt{@Cacheable} se activara en ningún servicio (ver
-capítulo de implementación); no miden caché real. La media de avg por
-corrida caliente es \textbf{3967.32\,ms} (DT 1539.20, IC\,95\,\%
-[2056.46; 5878.19]) y la media fría es \textbf{257.50\,ms}. El p95 caliente
-va de 4.3\,s a 11.4\,s; el plan gratuito de Render (0.1\,vCPU) no cumple el
+capítulo de implementación): \emph{ninguna} de las dos condiciones mide
+caché real, así que aquí se llaman "con Redis reiniciado" y "con Redis
+activo" -- no "fría" y "caliente" -- para no sugerir un efecto que esta
+serie no puede medir. La media de avg con Redis activo es
+\textbf{3967.32\,ms} (DT 1539.20, IC\,95\,\% [2056.46; 5878.19]) y con
+Redis reiniciado, \textbf{257.50\,ms}. El p95 con Redis activo va de
+4.3\,s a 11.4\,s; el plan gratuito de Render (0.1\,vCPU) no cumple el
 umbral $p95 < 200$\,ms. La diferencia de orden de magnitud corresponde al
 throttling de CPU del plan gratuito y al almacenamiento local de Render
-\cite{jiang2015}. El contraste Mann-Whitney frío vs.\ caliente arroja
+\cite{jiang2015}. El contraste Mann-Whitney entre ambas condiciones arroja
 $U = 0.0$, $p = 0.009$ y $d$ de Cliff $= -1.00$ (efecto grande), pero mide
 sobre todo el arranque en frío de la instancia gratuita de Render, no el
-efecto de la caché de aplicación. La serie local K1 (p95 medio 81\,ms) sigue
-siendo la referencia de rendimiento sin throttling.
+efecto de la caché de aplicación -- que en este momento del proyecto ni
+siquiera estaba activa. La serie local K1 (p95 medio 81\,ms) sigue siendo
+la referencia de rendimiento sin throttling.
 
 \textbf{Contraste frío/caliente de caché, con metodología corregida
 (K9):} el contraste anterior comparaba perfiles de carga distintos (1
@@ -122,8 +133,8 @@ tras una re-evaluación externa que señaló, con razón, que esos JSON no
 tenían la estructura de una exportación real de k6) el resultado es
 honesto y menos favorable de lo que parecía: no hay diferencia
 significativa entre frío y caliente. De las cinco corridas, la
-condición caliente resultó igual o más lenta que la fría en **tres de
-cinco** (K11: 239{,}71 vs.\ 203{,}39; K12: 211{,}21 vs.\ 205{,}00; K14:
+condición caliente resultó igual o más lenta que la fría en
+\textbf{tres de cinco} (K11: 239{,}71 vs.\ 203{,}39; K12: 211{,}21 vs.\ 205{,}00; K14:
 258{,}02 vs.\ 225{,}76) y más rápida solo en dos (K10, K13). Si la caché
 redujera la latencia de forma consistente, la condición caliente
 debería ganar en casi todas las corridas, no en 2 de 5.

@@ -1,9 +1,11 @@
 \chapter{Trabajo futuro}
 \label{cap:futuro}
 
-El siguiente ciclo de desarrollo abordará: (1) la ejecución del contraste empírico
-cache caliente-cache frío contra la URL pública con los contrastes no paramétricos
-ya implementados; (2) el escaneo ZAP y las corridas Lighthouse completas (m1--m3,
+El siguiente ciclo de desarrollo abordará: (1) ampliar el contraste empírico
+caché caliente/fría (K10--K14, actualmente $n=5$ por corrida) hasta alcanzar
+poder estadístico suficiente para distinguir el efecto de la caché del ruido
+de red del plan gratuito de Render, dado que la diferencia observada
+($p=0.6015$) no fue significativa; (2) el escaneo ZAP y las corridas Lighthouse completas (m1--m3,
 d1--d3) sobre el despliegue de producción; (3) el rediseño de los formularios con
 mayor carga percibida para elevar la media SUS por encima de 70; y (4) la reducción
 de los riesgos SGBD mediante el uso completo de los stored procedures desde
