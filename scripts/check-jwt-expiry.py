@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 P1 -- El grep de secretos del Makefile/verify.sh solo mira
-application.properties y docker-compose.yml; nunca mira dataset/ ni
+application.properties y docker-compose.yml; nunca miraba dataset/ ni
 docs/, donde las exportaciones crudas de k6 y la evidencia de pruebas de
 seguridad (A02, A05) versionan JWT reales de admin@sgroas.com (usados
 como Authorization: Bearer para las peticiones autenticadas de la carga
@@ -17,6 +17,11 @@ de autenticidad de P2, que compara estos JSON byte a byte contra la
 estructura real de --summary-export) -- en vez de eso, decodifica el
 claim "exp" de cada JWT versionado y falla si alguno sigue vigente.
 
+Escanea TODO el arbol versionado por git (`git ls-files`), no una lista
+fija de carpetas -- una re-evaluacion senalo, con razon, que un token
+vigente puesto en k6/ (fuera de dataset/ y docs/, la lista fija
+anterior) hubiera pasado sin que nada lo viera.
+
 Uso:
   python3 scripts/check-jwt-expiry.py
 """
@@ -26,14 +31,16 @@ import base64
 import json
 import os
 import re
+import subprocess
 import sys
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Directorios con evidencia versionada que puede contener JWT reales.
-SCAN_DIRS = ["dataset", "docs"]
-SKIP_EXT = {".png", ".jpg", ".jpeg", ".pdf", ".gif"}
+SKIP_EXT = {
+    ".png", ".jpg", ".jpeg", ".pdf", ".gif", ".ico", ".woff", ".woff2",
+    ".ttf", ".eot", ".jar", ".class", ".zip", ".gz",
+}
 JWT_RE = re.compile(
     r"eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}"
 )
@@ -56,15 +63,18 @@ def decode_exp(token):
 
 
 def find_files():
-    for base in SCAN_DIRS:
-        base_path = os.path.join(ROOT, base)
-        if not os.path.isdir(base_path):
+    out = subprocess.run(
+        ["git", "ls-files"], cwd=ROOT, stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL, check=True,
+    ).stdout.decode("utf-8", "replace")
+    for rel in out.splitlines():
+        if not rel:
             continue
-        for dirpath, _dirs, files in os.walk(base_path):
-            for name in sorted(files):
-                if os.path.splitext(name)[1].lower() in SKIP_EXT:
-                    continue
-                yield os.path.join(dirpath, name)
+        if os.path.splitext(rel)[1].lower() in SKIP_EXT:
+            continue
+        path = os.path.join(ROOT, rel.replace("/", os.sep))
+        if os.path.isfile(path):
+            yield path
 
 
 def main():
@@ -103,7 +113,7 @@ def main():
             print("    %s -- %s" % (rel, reason))
         return 1
 
-    print("  OK - todos los JWT versionados en dataset/ y docs/ estan expirados")
+    print("  OK - todos los JWT versionados en el repositorio estan expirados")
     return 0
 
 

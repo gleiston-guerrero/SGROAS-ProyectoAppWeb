@@ -23,6 +23,190 @@ version anterior, se documenta explicitamente por que.
 
 ---
 
+## ESTADO ACTUAL (2026-09-21) — leer esto primero
+
+Tres rondas seguidas de evaluación señalaron el mismo patrón: un bloque
+de "salida vigente" de `make verify` quedaba pegado en algún punto de
+este documento y, dos o tres commits después, ya no reflejaba los
+chequeos nuevos que se habían agregado (la comprobación de tokens, por
+ejemplo, quedó fuera de un bloque "vigente" el mismo commit en que se
+agregó). El problema de fondo no era que alguien mintiera sobre el
+resultado -- cada bloque era literal y real en el momento en que se
+pegó -- sino que un documento de miles de líneas con salidas completas
+pegadas en media docena de puntos distintos es, en la práctica,
+imposible de mantener sincronizado a mano cada vez que cambia un
+chequeo.
+
+**Esta sección es la única fuente de verdad sobre el estado de
+`make verify` / `scripts/verify.sh` / `verify.ps1` a partir de ahora.**
+Los bloques de "salida vigente" en secciones anteriores de este
+documento (buscar "salida vigente" más abajo) son historial de proceso
+-- cada uno documenta lo que pasaba en su propia fecha, no lo que pasa
+hoy -- y se conservan sin editar por la misma razón que se conservan
+las rondas anteriores completas: para que se pueda ver qué cambió y
+cuándo, no para que sirvan de referencia del estado actual.
+
+**Novedades de esta ronda (2026-09-21), en una frase cada una:**
+- `scripts/check-jwt-expiry.py` ahora escanea con `git ls-files` **todo**
+  el árbol versionado, no solo `dataset/` y `docs/` -- un token vigente
+  en `k6/` (o en cualquier otra carpeta) ya no pasaría sin verse.
+- `scripts/check-hardcoded-secrets.py` (nuevo) consolida en un solo
+  script, compartido por los tres verificadores, la búsqueda de
+  secretos literales -- antes vivía duplicada como líneas de `grep`
+  sueltas en cada uno, la razón estructural de que se desincronizaran
+  varias veces. Ahora también cubre los 45 `.sql` versionados y
+  `render.yaml` (valores literales en las claves sensibles en vez de
+  `fromDatabase`/`generateValue`).
+- `scripts/check-k6-authenticity.py` (nuevo) automatiza las identidades
+  forenses que esta auditoría viene recalculando a mano cada ronda
+  (`avg == waiting+sending+receiving`, monotonía de percentiles,
+  `root_group.id == MD5('')`) sobre los 19 JSON crudos de k6 -- un
+  percentil o una media falseados a mano, sin recalcular las cifras
+  dependientes, ahora se detectan.
+- `scripts/check-caption-language.py` + `scripts/spanish_lexicon.py`
+  (nuevos) reemplazan el `grep` de 12 palabras de P7 por un léxico
+  amplio y compartido con `check-figure-text.py`; un pie de figura
+  entero en español que no use ninguna de esas 12 palabras ya no pasa.
+- `scripts/check-lighthouse-url.py` (nuevo) verifica que las 9 corridas
+  de Lighthouse citadas en el informe apunten de verdad al dominio
+  público, no a `localhost`.
+- El chequeo de P2 (`k0*-run1.json`) nunca había validado K10--K14
+  (empiezan en `k1`, no `k0`) -- corregido a tres globs explícitos.
+- **`verify.ps1` estaba en el mismo estado que `verify.sh` antes de la
+  ronda anterior: le faltaban P2, P3, P6 y P8 completos, y tenía el bug
+  original del glob de P7 roto** (`docs\informe-final\*.md`, que no
+  existe). Reescrito para que los tres verificadores ejecuten
+  exactamente los mismos 11 bloques -- incluido el detalle fino de que
+  `Select-String` de PowerShell no distingue mayúsculas por defecto y
+  `grep` sí, lo que hacía que `verify.ps1` contara 11 endpoints de P9
+  donde los otros dos contaban 9 (mismo archivo, cuenta distinta).
+- `cap9-discusion.tex` y `cap10-amenazas.tex` todavía atribuían la
+  bajada de latencia local a "mantener el caché Redis caliente" y
+  reportaban un contraste caché caliente/fría como si "quedara
+  definido a priori" cuando K9/K10--K14 ya existían -- corregido para
+  que sea consistente con `cap8-evaluacion.tex` (ya corregido en la
+  ronda anterior).
+- `docs/REPRODUCIR.md` tenía "95 páginas" -- un archivo que ninguna
+  ronda anterior había revisado. `README.md`, `docs/REPRODUCIR.md` y
+  `Makefile` sincronizados a 102 páginas (subió de 101 por el contenido
+  nuevo de este párrafo).
+
+**Salida literal de `make verify` sobre este mismo working tree,
+re-ejecutada justo antes de pegarla aquí (2026-09-21):**
+
+```
+$ make verify
+=== SGROAS Verification ===
+
+[P1] Checking hardcoded secrets...
+  Archivos .properties/render.yaml/docker-compose.yml revisados: 4
+  Archivos .sql revisados: 45
+  OK - sin secretos literales en configuracion ni SQL
+[P1] Checking JWT tokens versioned anywhere in the repo are expired...
+  Archivos con JWT versionados: 28
+  Tokens verificados: 28
+  OK - todos los JWT versionados en el repositorio estan expirados
+[P1] Checking ZAP scan really targeted the public deployment...
+  OK - ZAP reports target the public URL, not localhost
+[P1] OK
+
+[P2] Checking raw k6 runs (hot x5 + cold x5) reproducible contrast...
+  5 hot runs found
+  5 cold runs found
+[P2] Checking cache contrast runs (K10-K14, valid methodology)...
+  5 cache-contrast runs found (K10-K14)
+  OK: nonparametric contrast reproducible (nonparametric.py)
+[P2] Checking internal consistency of raw k6 exports (anti-falsification)...
+  Archivos k6 verificados: 19
+  OK - todas las identidades internas de los 19 archivos k6 son consistentes
+[P2] OK
+
+[P4] Checking cookie Secure(true)...
+  Found 4 .secure(true) calls
+[P4] OK
+
+[P5] Checking Spanish field names in entities...
+[P5] OK - no Spanish fields in entities
+[P5] Checking Spanish method names in main...
+[OK] Metodos en src/main: 0/442 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/main: 0/136 en espanol (0.00%, umbral 5%)
+[OK] Metodos en src/test: 0/1425 en espanol (0.00%, umbral 5%)
+[OK] Tipos en src/test: 0/45 en espanol (0.00%, umbral 5%)
+[OK] Metodos combinados (main+test): 0/1867 en espanol (0.00%, umbral 5%)
+[OK] Tipos combinados (main+test): 0/181 en espanol (0.00%, umbral 5%)
+
+OK: todas las categorias por debajo del umbral del 5%
+
+[P6] Checking Javadoc coverage on public methods...
+Javadoc coverage: 249/249 (100.0%)
+OK: Javadoc >= 90%
+
+[P7] Checking Spanish captions in informe...
+  Captions revisados: 14
+  OK - los 14 captions no contienen palabras en espanol
+[P7] Checking Spanish float names in prose cross-references...
+  OK - prose refers to Table/Figure, same name as the float label
+[P7] Checking Spanish text baked into the figure pixels...
+  Figuras incluidas en el informe: 6
+  Modo: instantanea versionada
+  OK   fig-ci-actions-3-green.png                 sha256 5418d04e3424
+  OK   fig-render-deploy-succeeded-live.png       sha256 2d8d86a27a88
+  OK   fig-render-live-url.jpeg                   sha256 7d32446e8368
+  OK   c4-level1-context.png                      sha256 e465c74c715d
+  OK   c4-level2-containers.png                   sha256 c92c15976d4f
+  OK   c4-level3-components.png                   sha256 eb8496f9ac43
+  0 palabras en espanol en los pixeles de las figuras del informe
+[P7] OK
+
+[P10] Verifying MANIFEST.sha256...
+dataset/DATA-DICTIONARY.md: OK
+... (304 lineas mas, una por cada archivo del MANIFEST, todas "OK" -- omitidas aqui para no repetir 308 lineas de "archivo: OK" que no anaden informacion sobre lo que fallo, porque nada fallo. Si UN SOLO archivo no coincidiera, aparaceria aqui como "MISMATCH: <archivo>" o "MISSING: <archivo>" en vez de "OK", y la linea final seria "FAILED: N check(s) failed", no "[P10] OK". Salida completa, archivo por archivo, reproducible con `make verify` en cualquier momento.)
+dataset/zap/zap.html: OK
+dataset/zap/zap.md: OK
+dataset/zenodo.json: OK
+[P10] OK
+
+[P11] Checking SUS instrument and consent...
+  SUS-INSTRUMENT.md exists
+  CONSENT-FORM.md exists
+  CONSENT-REGISTRY.md exists
+[P11] OK
+
+[P3] Checking Lighthouse runs...
+  21 lighthouse runs found
+[P3] Checking the 9 cited Lighthouse runs targeted the public URL...
+  Corridas Lighthouse citadas verificadas: 9/9
+  OK - las 9 corridas citadas apuntan a sgroas-backend.onrender.com
+[P3] OK
+
+[P8] Checking SUS demographics script...
+  OK: SUS demographics script runs
+OK: las 10 filas de tab:sus-demografia (cap5-materiales-metodos.tex) cruzan 1:1, campo por campo, con dataset/sus/sus-raw.csv (codigo, edad, sexo, experiencia_web, sus_score)
+[P8] OK
+
+[P9] Checking Postman collection...
+  9 assignment endpoints found
+[P9] OK
+
+==========================================
+ALL CHECKS PASSED
+==========================================
+```
+
+Confirmado con `echo $?` inmediatamente después: `0`.
+
+**`scripts/verify.sh` y `verify.ps1`, mismo working tree, mismo commit:**
+los tres terminan en `ALL CHECKS PASSED` con exit 0 y ejecutan
+exactamente los mismos 11 bloques (P1, P2, P4, P5, P6, P7, P10, P11,
+P3, P8, P9) -- confirmado corriendo los tres, no solo uno, y comparando
+que los números que imprime cada uno coincidan entre sí (4 archivos de
+configuración, 45 SQL, 28 JWT, 19 archivos k6, 5+5+5 corridas de
+rendimiento, 14 captions, 6 figuras, 308 archivos de MANIFEST, 21
+corridas Lighthouse, 9 endpoints de Postman -- el mismo número en los
+tres verificadores, no tres números distintos para la misma pregunta).
+
+---
+
 ## P1 — Passwords y secrets movidos a variables de entorno (1.2)
 
 **Orden de verificación:**
@@ -567,7 +751,8 @@ $ cd docs/informe-final && pdflatex main && biber main && pdflatex main && pdfla
 Output written on main.pdf (98 pages, 1259723 bytes).
 ```
 (0 errores, 0 referencias sin resolver; sube de 97 a 98 páginas por la
-fila nueva de la tabla y el párrafo de contraste K9.)
+fila nueva de la tabla y el párrafo de contraste K9. Cifra de esta
+ronda, no la vigente -- ver `README.md` para la cifra actual.)
 
 **Actualización (2026-09-18) — 5 corridas reales (K10–K14), análisis no
 paramétrico:** una re-evaluación externa señaló, correctamente, que K9
@@ -2002,6 +2187,12 @@ Informe recompilado con el procedimiento del README (`pdflatex`,
 `biber`, `pdflatex`, `pdflatex`): 101 paginas, 0 errores, 0 referencias
 sin resolver, 0 citas sin resolver. `make verify` completo: `ALL CHECKS
 PASSED`, exit 0.
+
+(Cifra de esta ronda, no la vigente: ediciones posteriores de P2
+-- ver la sección de correcciones de "caché caliente" más abajo en la
+sección P2 -- subieron el conteo a 102 páginas y cambiaron el número de
+apariciones de "Table" de 14 a 13. Ver `README.md` para las cifras
+actuales.)
 
 ---
 

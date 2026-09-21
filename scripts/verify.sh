@@ -12,19 +12,14 @@ echo "=== SGROAS Verification ==="
 echo
 
 echo "[P1] Checking hardcoded secrets..."
-p1_bad=0
-grep -E "SPRING_DATASOURCE_PASSWORD=[^\$][^[:space:]]*" src/main/resources/application.properties >/dev/null 2>&1 && p1_bad=1
-grep -E "JWT_SECRET=[^\$][^[:space:]]*" src/main/resources/application.properties >/dev/null 2>&1 && p1_bad=1
-grep -E "spring\.datasource\.password=[^\$][^[:space:]]*" src/main/resources/application.properties src/test/resources/application-test.properties >/dev/null 2>&1 && p1_bad=1
-grep -rn "CHANGE_ME\|password123\|secret_key" src/test/resources/application-test.properties render.yaml 2>/dev/null | grep -v "CHANGE_ME" >/dev/null 2>&1 && p1_bad=1
-if [ "$p1_bad" -eq 1 ]; then
-  echo "  FAIL: hardcoded secrets found in application*.properties / render.yaml"
-  failed=$((failed+1))
+if "${PYTHON:-python3}" scripts/check-hardcoded-secrets.py; then
+  :
 else
-  echo "  OK"
+  echo "  FAIL: hardcoded secrets found"
+  failed=$((failed+1))
 fi
 
-echo "[P1] Checking JWT tokens versioned in dataset/ and docs/ are expired..."
+echo "[P1] Checking JWT tokens versioned anywhere in the repo are expired..."
 if "${PYTHON:-python3}" scripts/check-jwt-expiry.py; then
   :
 else
@@ -45,6 +40,13 @@ else
     echo "  OK: nonparametric contrast reproducible (nonparametric.py)"
   else
     echo "  FAIL: nonparametric contrast script did not run cleanly"
+    failed=$((failed+1))
+  fi
+  echo "[P2] Checking internal consistency of raw k6 exports (anti-falsification)..."
+  if "${PYTHON:-python3}" scripts/check-k6-authenticity.py; then
+    :
+  else
+    echo "  FAIL: an internal consistency identity is broken in a k6 export"
     failed=$((failed+1))
   fi
 fi
@@ -89,16 +91,11 @@ else
 fi
 
 echo "[P7] Checking Spanish captions in informe..."
-# Antes este check apuntaba a docs/informe-final/*.md, que no existe: el glob
-# no expandia, grep no encontraba nada y el check no podia fallar nunca.
-# Ahora mira las fuentes reales (.tex) y ademas el texto horneado en las
-# imagenes, que es donde estaba el defecto que senalo la evaluacion.
-if grep -rn --include=*.tex "caption{" docs/informe-final/ 2>/dev/null \
-     | grep -E "Tabla|Figura|Listado|Resumen|Resultados|Distribución|Síntesis|Desglose|trazados|comparación|puntaje|prioridad" >/dev/null 2>&1; then
+if "${PYTHON:-python3}" scripts/check-caption-language.py; then
+  :
+else
   echo "  FAIL: Spanish captions found"
   failed=$((failed+1))
-else
-  echo "  OK - all figure/table captions in English"
 fi
 
 echo "[P7] Checking Spanish float names in prose cross-references..."
@@ -147,6 +144,13 @@ if [ "$lh" -lt 9 ]; then
   failed=$((failed+1))
 else
   echo "  $lh lighthouse runs found"
+fi
+echo "[P3] Checking the 9 cited Lighthouse runs targeted the public URL..."
+if "${PYTHON:-python3}" scripts/check-lighthouse-url.py; then
+  :
+else
+  echo "  FAIL: a cited Lighthouse run does not target the public URL"
+  failed=$((failed+1))
 fi
 
 echo "[P8] Checking SUS demographics script..."

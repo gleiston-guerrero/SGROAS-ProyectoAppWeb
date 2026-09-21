@@ -74,7 +74,7 @@ pdf:
 	cd docs/informe-final && biber main
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
 	cd docs/informe-final && pdflatex -interaction=nonstopmode main.tex
-	@echo "PDF generado en docs/informe-final/main.pdf (101 paginas)."
+	@echo "PDF generado en docs/informe-final/main.pdf (102 paginas)."
 
 docs: versions
 	$(PYTHON) scripts/gen-figuras.py
@@ -91,10 +91,8 @@ verify:
 	@echo "=== SGROAS Verification ==="
 	@echo ""
 	@echo "[P1] Checking hardcoded secrets..."
-	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties src/test/resources/application-test.properties docker-compose.yml render.yaml 2>/dev/null | grep -v "CHANGE_ME"
-	@! grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml 2>/dev/null | grep -v '\$$'
-	@! grep -En "spring\.datasource\.password=([^$$][^[:space:]]*)" src/main/resources/application.properties src/test/resources/application-test.properties 2>/dev/null
-	@echo "[P1] Checking JWT tokens versioned in dataset/ and docs/ are expired..."
+	@$(PYTHON) scripts/check-hardcoded-secrets.py
+	@echo "[P1] Checking JWT tokens versioned anywhere in the repo are expired..."
 	@$(PYTHON) scripts/check-jwt-expiry.py
 	@echo "[P1] Checking ZAP scan really targeted the public deployment..."
 	@grep -q "sgroas-backend.onrender.com" dataset/zap/zap.html dataset/zap/zap-baseline-2026-09-06.html
@@ -108,6 +106,8 @@ verify:
 	@echo "[P2] Checking cache contrast runs (K10-K14, valid methodology)..."
 	@test $$(ls dataset/perf/k1[0-4]-cache-contrast.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k1[0-4]-cache-contrast.json 2>/dev/null | wc -l) cache-contrast runs found (K10-K14)"
 	@$(PYTHON) scripts/perf/recalcular-contraste.py > /dev/null 2>&1 && echo "  OK: nonparametric contrast reproducible (nonparametric.py)"
+	@echo "[P2] Checking internal consistency of raw k6 exports (anti-falsification)..."
+	@$(PYTHON) scripts/check-k6-authenticity.py
 	@echo "[P2] OK"
 	@echo ""
 	@echo "[P4] Checking cookie Secure(true)..."
@@ -126,8 +126,7 @@ verify:
 	@$(PYTHON) scripts/check-javadoc.py
 	@echo ""
 	@echo "[P7] Checking Spanish captions in informe..."
-	@! grep -rn "caption{" docs/informe-final/ 2>/dev/null | grep -E "Tabla|Figura|Listado|Resumen|Resultados|Distribución|Síntesis|Desglose|trazados|comparación|puntaje|prioridad"
-	@echo "  OK - all figure/table captions in English"
+	@$(PYTHON) scripts/check-caption-language.py
 	@echo "[P7] Checking Spanish float names in prose cross-references..."
 	@! grep -rn --include=*.tex -E "\\b(la|La|las|Las) Tabla\\b|\\b(la|La|las|Las) Figura\\b" docs/informe-final/ 2>/dev/null
 	@echo "  OK - prose refers to Table/Figure, same name as the float label"
@@ -147,7 +146,10 @@ verify:
 	@echo ""
 	@echo "[P3] Checking Lighthouse runs..."
 	@ls dataset/lighthouse/lh-*.json 2>/dev/null | wc -l | xargs -I{} echo "  {} lighthouse runs found"
-	@test $$(ls dataset/lighthouse/lh-*.json 2>/dev/null | wc -l) -ge 9 && echo "[P3] OK"
+	@test $$(ls dataset/lighthouse/lh-*.json 2>/dev/null | wc -l) -ge 9
+	@echo "[P3] Checking the 9 cited Lighthouse runs targeted the public URL..."
+	@$(PYTHON) scripts/check-lighthouse-url.py
+	@echo "[P3] OK"
 	@echo ""
 	@echo "[P8] Checking SUS demographics script..."
 	@$(PYTHON) scripts/generate-sus-demographics.py dataset/sus/sus-raw.csv > /dev/null 2>&1 && echo "  OK: SUS demographics script runs"

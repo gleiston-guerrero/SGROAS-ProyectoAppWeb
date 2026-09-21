@@ -280,6 +280,9 @@ que el JSON de la corrida no versiona ningún secreto (el JWT de sesión
 que traía `setup_data.token` se eliminó antes de comitear). Detalle
 completo en `VERIFICACION.md`, sección P2.
 
+(Cifra de esta ronda, no la vigente: el conteo final del informe subió
+después. Ver `README.md` para la cifra actual.)
+
 ---
 
 **Actualización (2026-09-18) — 5 corridas reales (K10-K14), analizadas
@@ -1356,7 +1359,8 @@ git log --oneline v1.1.2 -1
 (`docs/informe-final/portada.tex` sigue citando el commit `f7b9b72` de la
 entrega final original): esa portada documenta la entrega final del curso,
 un hito distinto de esta ronda de correcciones del examen suspenso, y
-regenerar un PDF de 98 páginas no era necesario para corregir los defectos
+regenerar un PDF de 98 páginas (cifra vigente en ese momento, no la
+actual -- ver `README.md`) no era necesario para corregir los defectos
 señalados por la guía (que son de código, scripts y expedientes, no de
 contenido del informe). Si el evaluador requiere que la portada del informe
 también cite `v1.1.2`, es un paso pendiente adicional, no incluido en esta
@@ -1538,6 +1542,83 @@ cableado a `make verify` y `scripts/verify.sh`, sección P1 — que falla
 si alguna vez aparece un JWT vigente en `dataset/` o `docs/`. Probado
 con una mutación real: se agregó un JWT con `exp` en el futuro en un
 archivo de prueba y el check falló; revertida.
+
+**Actualización (2026-09-21) — el alcance seguía siendo una lista fija
+de carpetas, y una re-evaluación lo señaló:** `check-jwt-expiry.py`
+ahora escanea con `git ls-files` todo el árbol versionado (no solo
+`dataset/` y `docs/`); un JWT vigente puesto en `k6/` u otra carpeta
+cualquiera ya no pasaría. Probado con la misma mutación, esta vez
+dentro de `k6/`: detectado.
+
+## Ronda final (2026-09-21) — cierre de lo que quedó "Parcial"
+
+**Cerrado por: Luis Tejada**
+
+Resumen; el detalle completo, con cada prueba de mutación, está en
+`VERIFICACION.md`, sección "ESTADO ACTUAL (2026-09-21)":
+
+1. **P2 — "caché caliente" (quedaban 3 sitios de 7):** `cap9-discusion.tex`
+   atribuía la bajada de p95 local a "arranque del cache Redis" y
+   recomendaba "mantener el cache Redis caliente" con números de la
+   serie pre-fix; `cap10-amenazas.tex` describía el contraste caché
+   caliente/fría como si "quedara definido a priori" cuando K9/K10--K14
+   ya existían. Los tres corregidos para ser consistentes con
+   `cap8-evaluacion.tex` (cerrado en la ronda anterior).
+2. **P1 — tokens versionados (alcance ampliado a todo el repo):** ver
+   arriba.
+3. **"98/95 páginas" sin nota:** las dos menciones restantes en este
+   archivo y una en `VERIFICACION.md` recibieron la misma nota que las
+   demás; además apareció una nueva, no revisada antes, en
+   `docs/REPRODUCIR.md` ("95 páginas") — corregida directamente, sin
+   nota, porque es una guía de uso vigente, no un registro histórico.
+   `README.md`, `docs/REPRODUCIR.md` y `Makefile` sincronizados a 102
+   páginas (subió de 101 por el contenido nuevo del punto 1).
+4. **Calidad del verificador (10/12 mutaciones sobrevivían):** cerradas
+   7 de las 10 con scripts nuevos, compartidos por `make`, `verify.sh`
+   y `verify.ps1` (antes solo cubiertas, cuando lo estaban, por líneas
+   de `grep` sueltas y no siempre iguales entre los tres):
+   - Contraseña literal en SQL de semilla / `spring.datasource.password`
+     literal / contraseña literal en `render.yaml` →
+     `scripts/check-hardcoded-secrets.py` (nuevo).
+   - Token vigente fuera de `dataset/`/`docs/` (probado en `k6/`) →
+     `scripts/check-jwt-expiry.py` (reescrito, todo el repo).
+   - URL de Lighthouse a `localhost` → `scripts/check-lighthouse-url.py`
+     (nuevo).
+   - Percentil falseado con conclusión invertida / media y percentil de
+     otra corrida falseados → `scripts/check-k6-authenticity.py`
+     (nuevo): codifica las identidades forenses que esta auditoría
+     recalcula a mano cada ronda.
+   - Pie de figura entero en español sin palabras vigiladas →
+     `scripts/check-caption-language.py` + `scripts/spanish_lexicon.py`
+     (nuevos): léxico amplio compartido con `check-figure-text.py`, no
+     una lista de 12 palabras.
+
+   Quedan 2 sin cerrar, y se documentan como lo que son, sin
+   maquillarlas: **método nuevo con nombre en español** fuera del
+   léxico curado de `check-spanish-methods.py` (requeriría el mismo
+   tipo de léxico amplio que P7, no incluido en esta ronda), y
+   **falsificación de un JSON de k6 recalculando también las cifras
+   dependientes** (`check-k6-authenticity.py` detecta una falsificación
+   ingenua -- un número cambiado sin tocar los demás -- pero no puede
+   detectar una reconstrucción completa y consistente sin re-ejecutar
+   la prueba real, que está fuera del alcance de un chequeo estático).
+5. **`verify.ps1` no estaba en la lista de "Parcial" de la evaluación,
+   pero tenía el mismo problema que tuvo `verify.sh` antes de la ronda
+   anterior** (le faltaban P2, P3, P6, P8 completos, el bug del glob
+   roto de P7, sin el umbral de P4, sin los chequeos nuevos de P1) —
+   se encontró al revisar por qué el docente decía que "no aumentó
+   nada": era el tercer verificador que el examen menciona por nombre
+   y nadie había mirado en ninguna ronda anterior. Reescrito para
+   ejecutar los mismos 11 bloques que `make` y `verify.sh`, con el
+   mismo cuidado de que `Select-String` de PowerShell no distinga
+   mayúsculas por defecto (a diferencia de `grep`), que hacía que
+   contara números distintos para la misma pregunta.
+
+`make verify`, `scripts/verify.sh` y `verify.ps1` corridos los tres,
+sobre el mismo commit: `ALL CHECKS PASSED`, exit 0, con los mismos
+números en los tres. Informe recompilado (`pdflatex`, `biber`,
+`pdflatex`, `pdflatex`): 102 páginas, 0 errores, 0 referencias sin
+resolver.
 
 ## Firmas
 

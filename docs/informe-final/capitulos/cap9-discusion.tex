@@ -69,7 +69,11 @@ por debajo del umbral de 80, en línea con SPA modernos bien configurados.
 
 1. La primera corrida k6 concentra el p95 más alto (173.13\,ms) mientras las dos
    posteriores estabilizan p95 por debajo de 40\,ms; interpretado como arranque del
-   cache Redis y de HikariCP, no como regresión.
+   proceso y del pool de conexiones HikariCP, no como regresión. Esta serie
+   (K1--K3, 2026-07-29) es anterior a la implementación real de
+   \texttt{@Cacheable} en este endpoint (commit \texttt{3f78036},
+   2026-09-17), así que la bajada no puede atribuirse al caché de Redis
+   -- ver \S\ref{sec:perf}.
 2. El SEO de Lighthouse (90) quedó al límite pese a un frontend SPA sencillo; la
    causa es la ausencia de metadatos \emph{meta tags} completos en el \texttt{index.html}.
 3. La cobertura final (99.7\,\% líneas) resultó muy superior al umbral inicial
@@ -79,7 +83,12 @@ por debajo del umbral de 80, en línea con SPA modernos bien configurados.
 
 - Para la operación real en cooperativas, el punto de mejora inmediato es la
   usabilidad (SUS 63,0): simplificar los formularios de alta/edición.
-- Para el operador de plataforma, mantener el cache Redis caliente reduce el p95
-  de 173 a $<$40\,ms; la política TTL debe dimensionarse a la carga esperada.
+- Para el operador de plataforma, la bajada de p95 de 173 a $<$40\,ms entre la
+  primera corrida local y las dos siguientes es arranque de proceso/conexión,
+  no caché (ver el hallazgo anterior); el efecto real del caché de Redis
+  (K9, K10--K14) es de apenas 15--35\,ms por corrida y no alcanza
+  significancia estadística con $n=5$ (\S\ref{sec:perf}), así que
+  dimensionar la política TTL a partir de esta evidencia sería prematuro --
+  hace falta ampliar el número de corridas antes de recomendar un valor.
 - La reproducibilidad del artefacto (FAIR) simplifica la lectura y replicación del
   estudio, según exigen los estándares empíricos \cite{ralph2021,prisma2021}.

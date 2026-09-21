@@ -66,7 +66,7 @@ certutil -hashfile <archivo> SHA256                 # Windows
 ## 6. Informe (K5)
 
 `docs/informe-final/main.tex` compila con `pdflatex` + `biber` (tres pasadas
-de `pdflatex` + una de `biber`, 95 páginas). Desde un clon limpio:
+de `pdflatex` + una de `biber`, 102 páginas). Desde un clon limpio:
 
 ```sh
 cd docs/informe-final

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
+r"""
 P7 — Comprueba que NO quede texto en espanol DENTRO de los pixeles de las
 figuras del informe final.
 
@@ -34,39 +34,20 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import unicodedata
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from spanish_lexicon import SPANISH_LEXICON_OCR as SPANISH_LEXICON  # noqa: E402
+from spanish_lexicon import deaccent  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEX_DIR = os.path.join(ROOT, "docs", "informe-final")
 OCR_DIR = os.path.join(TEX_DIR, "figuras", "ocr")
 
-# Palabras que no existen en ingles. Se buscan como palabra completa, sin
-# distinguir mayusculas ni tildes. Se excluyen a proposito los falsos amigos
+# El lexico vive en scripts/spanish_lexicon.py, compartido con
+# check-caption-language.py -- se excluyen a proposito los falsos amigos
 # frecuentes en la UI de GitHub/Render (real, version, manual, total, error,
-# final, son, era, sin, mas) para que el check no falle por ruido de OCR.
-SPANISH_LEXICON = [
-    "con", "para", "una", "unos", "unas", "los", "las", "del", "por", "que",
-    "como", "pero", "este", "esta", "estos", "estas", "donde", "cuando",
-    "porque", "sobre", "entre", "hasta", "desde", "muy", "tambien", "solo",
-    "sola", "solamente", "fue", "tiene", "tienen", "hacer", "hace",
-    "corrige", "corregir", "corrida", "corridas", "recaptura", "recapturar",
-    "espanol", "horneado", "horneados", "revierte", "revertir", "cobertura",
-    "parcial", "correr", "incluyo", "permite", "despliegue", "despliegues",
-    "anterior", "conecta", "paginacion", "servicios", "auditoria",
-    "encontro", "fallar", "archivo", "archivos", "captura", "capturas",
-    "informe", "tabla", "tablas", "figura", "figuras", "listado", "listados",
-    "cambios", "mensaje", "mensajes", "prueba", "pruebas", "datos",
-    "verificacion", "agrega", "agregar", "ajusta", "ajustar", "actualiza",
-    "actualizar", "elimina", "eliminar", "correccion", "afirmacion",
-    "reales", "nuevas", "nuevos", "nueva", "nuevo", "mismo", "misma",
-]
-
-
-def deaccent(text):
-    return "".join(
-        c for c in unicodedata.normalize("NFD", text)
-        if unicodedata.category(c) != "Mn"
-    )
+# final, son, era, sin, mas) y las palabras funcionales muy cortas (el, la,
+# de, un...), que en OCR ruidoso producen falsos positivos con facilidad.
 
 
 def sha256_of(path):
