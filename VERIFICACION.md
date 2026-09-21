@@ -695,6 +695,67 @@ $ pdftotext docs/informe-final/main.pdf - | grep -c '\*\*'
 Markdown sueltos. `docs/informe-final.pdf` (la copia que enlaza el
 `README.md`) recompilado igual, con el mismo resultado.
 
+**Corrección de fondo (2026-09-21) — el chequeo de "raw k6 runs" de
+`make verify` nunca miró K10--K14, señalado desde la primera ronda de
+este examen y nunca cerrado:** el patrón `dataset/perf/k0*-run1.json`
+solo casa nombres que empiecen literalmente en `k0` y terminen en
+`-run1.json`. Eso cuenta `k04`--`k08-run1.json` (5 archivos) pero **no**
+`k02-run2.json` ni `k03-run3.json` (sufijo distinto) ni, sobre todo,
+ninguno de `k10`--`k14-cache-contrast.json` (empiezan en `k1`, no `k0`).
+El check pasaba con "6 hot runs found" por una coincidencia de nombres
+sin relación con lo que dice comprobar, y **nunca** validó que existieran
+las cinco corridas K10--K14 que son la evidencia vigente del contraste
+caché caliente/fría. Corregido a tres globs explícitos y no ambiguos:
+
+```
+$ ls dataset/perf/k0[4-8]-run1.json | wc -l   # 5, Render con carga
+$ ls dataset/perf/k0[4-8]-cold.json | wc -l   # 5, Render en frío
+$ ls dataset/perf/k1[0-4]-cache-contrast.json | wc -l   # 5, K10-K14
+```
+
+Prueba de mutación (revertida): se movió `k12-cache-contrast.json` fuera
+de `dataset/perf/` temporalmente -- el chequeo anterior seguía en verde
+("6 hot runs found", sin mencionar K10--K14 nunca); el nuevo falla con
+`cache-contrast=4 (expected >= 5 each)`. Detectado. Archivo restaurado.
+
+**`scripts/verify.sh` le faltaban P2, P3, P6 y P8 por completo,** pese a
+que su propio encabezado dice ser el "equivalente POSIX" de `make
+verify`: ejecutaba 7 de los 11 bloques y terminaba en `ALL CHECKS
+PASSED` sin haber corrido el 36\,\% de las comprobaciones. Agregados los
+cuatro que faltaban, traducidos del `Makefile` línea por línea
+(incluido el mismo arreglo del glob de arriba). Ahora `make verify` y
+`scripts/verify.sh` corren exactamente los mismos 11 bloques.
+
+**Ampliado el alcance de secretos de P1:** el grep original solo miraba
+`application.properties` y `docker-compose.yml`. `src/test/resources/
+application-test.properties` y `render.yaml` no se buscaban, y el
+patrón de `spring.datasource.password` literal solo cubría
+`docker-compose.yml`, no los `.properties`. Se amplió a los cuatro
+archivos. Prueba de mutación (revertida): se agregó
+`spring.datasource.password=hunter2` a un archivo `.properties` de
+prueba -- detectado, `exit=0` (coincidencia) donde antes no había
+ningún archivo mirándolo.
+
+**Nuevo: verificación de que el escaneo ZAP apunta a la URL pública, no
+a `localhost`** (P1). Nada comprobaba antes que `dataset/zap/*.html`
+citara de verdad `sgroas-backend.onrender.com` y no un
+`requestedUrl` local -- la evidencia actual sí es genuina (59
+apariciones del dominio público, 0 de `localhost` en ambos reportes),
+pero nada lo hacía cumplir automáticamente. Ahora sí:
+
+```
+$ grep -c "sgroas-backend.onrender.com" dataset/zap/zap.html dataset/zap/zap-baseline-2026-09-06.html
+dataset/zap/zap.html:59
+dataset/zap/zap-baseline-2026-09-06.html:59
+$ grep -ci "localhost\|127.0.0.1" dataset/zap/zap.html dataset/zap/zap-baseline-2026-09-06.html
+0
+```
+
+**Salida completa re-ejecutada (2026-09-21) en `make verify` y
+`scripts/verify.sh`, ambos sobre un clon limpio en la etiqueta
+`v1.1.0`:** `ALL CHECKS PASSED`, exit 0 en los dos, con los cuatro
+bloques nuevos incluidos.
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (1.0)

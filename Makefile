@@ -91,15 +91,22 @@ verify:
 	@echo "=== SGROAS Verification ==="
 	@echo ""
 	@echo "[P1] Checking hardcoded secrets..."
-	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties docker-compose.yml 2>/dev/null | grep -v "CHANGE_ME"
+	@! grep -rn "CHANGE_ME\|password123\|secret_key" src/main/resources/application.properties src/test/resources/application-test.properties docker-compose.yml render.yaml 2>/dev/null | grep -v "CHANGE_ME"
 	@! grep -n "SPRING_DATASOURCE_PASSWORD=.\{3,\}" docker-compose.yml 2>/dev/null | grep -v '\$$'
+	@! grep -En "spring\.datasource\.password=([^$$][^[:space:]]*)" src/main/resources/application.properties src/test/resources/application-test.properties 2>/dev/null
 	@echo "[P1] Checking JWT tokens versioned in dataset/ and docs/ are expired..."
 	@$(PYTHON) scripts/check-jwt-expiry.py
+	@echo "[P1] Checking ZAP scan really targeted the public deployment..."
+	@grep -q "sgroas-backend.onrender.com" dataset/zap/zap.html dataset/zap/zap-baseline-2026-09-06.html
+	@! grep -qi "localhost\|127.0.0.1" dataset/zap/zap.html dataset/zap/zap-baseline-2026-09-06.html
+	@echo "  OK - ZAP reports target the public URL, not localhost"
 	@echo "[P1] OK"
 	@echo ""
 	@echo "[P2] Checking raw k6 runs (hot x5 + cold x5) reproducible contrast..."
-	@test $$(ls dataset/perf/k0*-run1.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0*-run1.json 2>/dev/null | wc -l) hot runs found"
-	@test $$(ls dataset/perf/k0*-cold.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0*-cold.json 2>/dev/null | wc -l) cold runs found"
+	@test $$(ls dataset/perf/k0[4-8]-run1.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0[4-8]-run1.json 2>/dev/null | wc -l) hot runs found"
+	@test $$(ls dataset/perf/k0[4-8]-cold.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k0[4-8]-cold.json 2>/dev/null | wc -l) cold runs found"
+	@echo "[P2] Checking cache contrast runs (K10-K14, valid methodology)..."
+	@test $$(ls dataset/perf/k1[0-4]-cache-contrast.json 2>/dev/null | wc -l) -ge 5 && echo "  $$(ls dataset/perf/k1[0-4]-cache-contrast.json 2>/dev/null | wc -l) cache-contrast runs found (K10-K14)"
 	@$(PYTHON) scripts/perf/recalcular-contraste.py > /dev/null 2>&1 && echo "  OK: nonparametric contrast reproducible (nonparametric.py)"
 	@echo "[P2] OK"
 	@echo ""

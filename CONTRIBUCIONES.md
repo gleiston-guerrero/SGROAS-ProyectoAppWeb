@@ -363,6 +363,27 @@ Markdown dentro de LaTeX salía como asteriscos literales en el PDF en
 vez de negrita. Detalle completo, con el error de compilación real que
 se encontró y corrigió de paso, en `VERIFICACION.md`, sección P2.
 
+**Corrección de fondo (2026-09-21) — el chequeo de "raw k6 runs" nunca
+miró K10--K14, señalado desde la primera ronda y nunca cerrado:** el
+patrón `k0*-run1.json` de `make verify` no casa con `k10`--
+`k14-cache-contrast.json` (empiezan en `k1`) ni con `k02-run2.json`/
+`k03-run3.json` (sufijo distinto) -- pasaba en verde por una
+coincidencia de nombres sin relación con lo que dice comprobar, sin
+haber validado nunca la existencia de las cinco corridas K10--K14 que
+son la evidencia vigente del contraste. Corregido a tres globs
+explícitos (Render caliente, Render frío, K10--K14). Además,
+`scripts/verify.sh` -- que dice ser el "equivalente POSIX" de `make
+verify` -- le faltaban P2, P3, P6 y P8 completos: corría 7 de 11
+bloques y terminaba en `ALL CHECKS PASSED` sin haber comprobado el 36\%
+del examen. Agregados los cuatro. También se amplió el alcance de
+secretos de P1 (antes solo miraba `application.properties` y
+`docker-compose.yml`; ahora también `application-test.properties` y
+`render.yaml`) y se agregó un chequeo nuevo de que el escaneo ZAP
+apunta de verdad a la URL pública y no a `localhost` -- nada lo
+comprobaba antes, aunque la evidencia real siempre fue genuina.
+Detalle completo, con las pruebas de mutación, en `VERIFICACION.md`,
+sección P2.
+
 ---
 
 ## P3 — Lighthouse corridas versionadas (commit 1a07dc7 y otros)
